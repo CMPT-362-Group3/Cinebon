@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cinebon">
         <activity
+            android:name=".login.LoginActivity"
+            android:exported="false"
+            android:label="@string/title_activity_login"
+            android:theme="@style/Theme.Cinebon" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Cinebon">
