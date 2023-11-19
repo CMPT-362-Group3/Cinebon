@@ -12,11 +12,14 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,6 +63,11 @@ fun SignupScreen(modifier: Modifier = Modifier) {
     var phone by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val infiniteTransition = rememberInfiniteTransition(label = "signup_inf_transition")
+    val offsetAnimation by infiniteTransition.animateValue(
+        initialValue = (-15).dp, targetValue = 0.dp, typeConverter = Dp.VectorConverter, animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = EaseInOutSine), repeatMode = RepeatMode.Reverse
+        ), label = "login_logo_bounce"
+    )
 
     Surface(
         modifier = Modifier
@@ -67,6 +75,14 @@ fun SignupScreen(modifier: Modifier = Modifier) {
             .fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            Image(
+                painter = painterResource(id = R.drawable.cinebon),
+                contentDescription = "App logo",
+                modifier = Modifier
+                    .offset(y = offsetAnimation)
+                    .size(175.dp)
+            )
+
             OutlinedTextField(
                 value = fName,
                 label = { Text("First Name") },
@@ -131,10 +147,36 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Go),
                 keyboardActions = KeyboardActions(onGo = {
-                    // TODO: firebase
+                    // TODO: firebase stuff?
                 }),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+
+                Button(
+                    onClick = {
+
+                    },
+                    modifier.padding(32.dp)
+                ) {
+                    Text("Sign Up", modifier.padding(8.dp))
+                }
+
+                Button(
+                    onClick = {
+
+                    },
+                    modifier.padding(32.dp)
+                ) {
+                    Text("Cancel", modifier.padding(8.dp))
+                }
+            }
         }
     }
 }
