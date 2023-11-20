@@ -8,6 +8,6 @@ import com.cmpt362.cinebon.destinations.ProfileScreenDestination
 
 enum class DashboardNavItems(val icon: Int, val destination: DirectionDestination) {
     Movies(R.drawable.movie, MoviesScreenDestination),
-    Lists(R.drawable.list_alt_add, ListsScreenDestination),
-    Profile(R.drawable.person, ProfileScreenDestination)
+    Lists(R.drawable.lists, ListsScreenDestination),
+    Profile(R.drawable.profile, ProfileScreenDestination)
 }
