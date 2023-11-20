@@ -41,16 +41,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.destinations.DashboardNavDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 @RootNavGraph(
     start = true
 )
 @Destination
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
 
     val scrollState = rememberScrollState()
     var username by rememberSaveable { mutableStateOf("") }
@@ -100,7 +103,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Go),
                 keyboardActions = KeyboardActions(onGo = {
-                    // TODO: Implement a function for actual Firebase login
+                    navigator.navigate(DashboardNavDestination)
                 }),
                 modifier = Modifier.padding(16.dp)
             )
@@ -121,6 +124,6 @@ fun LoginScreen(modifier: Modifier = Modifier) {
 @Composable
 fun LoginPreview() {
     CinebonTheme {
-        LoginScreen()
+        LoginScreen(EmptyDestinationsNavigator)
     }
 }
