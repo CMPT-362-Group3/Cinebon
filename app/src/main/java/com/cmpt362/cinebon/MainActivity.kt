@@ -6,9 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.cmpt362.cinebon.login.LoginScreen
-//import com.cmpt362.cinebon.login.NavGraphs
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +25,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainPreview() {
     CinebonTheme {
-        LoginScreen()
+        LoginScreen(EmptyDestinationsNavigator)
     }
 }
