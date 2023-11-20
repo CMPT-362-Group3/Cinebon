@@ -7,5 +7,6 @@ data class MovieEntity(
     val ageRating: String,
     val review: Int,
     val description: String,
-    val releaseDate: String
+    val releaseDate: String,
+    val image: Int
 )
