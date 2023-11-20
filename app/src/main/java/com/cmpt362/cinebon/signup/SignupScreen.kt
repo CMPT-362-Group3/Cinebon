@@ -108,17 +108,6 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-//            OutlinedTextField(
-//                value = username,
-//                label = { Text("Username") },
-//                onValueChange = {
-//                    username = it.trim()
-//                },
-//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
-//                keyboardActions = KeyboardActions.Default,
-//                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-//            )
-
             OutlinedTextField(
                 value = email,
                 label = { Text("Email") },
@@ -129,17 +118,6 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 keyboardActions = KeyboardActions.Default,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-            
-//            OutlinedTextField(
-//                value = phone,
-//                label = { Text("Phone Number") },
-//                onValueChange = {
-//                    phone = it.trim()
-//                },
-//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
-//                keyboardActions = KeyboardActions.Default,
-//                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-//            )
 
             OutlinedTextField(
                 value = password,
