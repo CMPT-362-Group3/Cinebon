@@ -58,9 +58,9 @@ fun SignupScreen(modifier: Modifier = Modifier) {
     val scrollState = rememberScrollState()
     var fName by rememberSaveable { mutableStateOf("") }
     var lName by rememberSaveable { mutableStateOf("") }
-    var username by rememberSaveable { mutableStateOf("") }
+//    var username by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
-    var phone by rememberSaveable { mutableStateOf("") }
+//    var phone by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val infiniteTransition = rememberInfiniteTransition(label = "signup_inf_transition")
     val offsetAnimation by infiniteTransition.animateValue(
@@ -80,7 +80,7 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 contentDescription = "App logo",
                 modifier = Modifier
                     .offset(y = offsetAnimation)
-                    .size(175.dp)
+                    .size(150.dp)
             )
 
             OutlinedTextField(
@@ -105,16 +105,16 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            OutlinedTextField(
-                value = username,
-                label = { Text("Username") },
-                onValueChange = {
-                    username = it.trim()
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions.Default,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+//            OutlinedTextField(
+//                value = username,
+//                label = { Text("Username") },
+//                onValueChange = {
+//                    username = it.trim()
+//                },
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
+//                keyboardActions = KeyboardActions.Default,
+//                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+//            )
 
             OutlinedTextField(
                 value = email,
@@ -127,16 +127,16 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
-            OutlinedTextField(
-                value = phone,
-                label = { Text("Phone Number") },
-                onValueChange = {
-                    phone = it.trim()
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions.Default,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+//            OutlinedTextField(
+//                value = phone,
+//                label = { Text("Phone Number") },
+//                onValueChange = {
+//                    phone = it.trim()
+//                },
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+//                keyboardActions = KeyboardActions.Default,
+//                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+//            )
 
             OutlinedTextField(
                 value = password,
