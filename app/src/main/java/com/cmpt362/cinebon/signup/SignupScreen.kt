@@ -13,10 +13,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -58,9 +56,7 @@ fun SignupScreen(modifier: Modifier = Modifier) {
     val scrollState = rememberScrollState()
     var fName by rememberSaveable { mutableStateOf("") }
     var lName by rememberSaveable { mutableStateOf("") }
-//    var username by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
-//    var phone by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val infiniteTransition = rememberInfiniteTransition(label = "signup_inf_transition")
     val offsetAnimation by infiniteTransition.animateValue(
@@ -80,7 +76,14 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 contentDescription = "App logo",
                 modifier = Modifier
                     .offset(y = offsetAnimation)
-                    .size(150.dp)
+                    .size(64.dp)
+            )
+
+            Text(
+                stringResource(R.string.signup_title),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 64.dp)
             )
 
             OutlinedTextField(
@@ -126,7 +129,7 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                 keyboardActions = KeyboardActions.Default,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-
+            
 //            OutlinedTextField(
 //                value = phone,
 //                label = { Text("Phone Number") },
@@ -155,7 +158,6 @@ fun SignupScreen(modifier: Modifier = Modifier) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
 
@@ -163,7 +165,14 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                     onClick = {
 
                     },
-                    modifier.padding(32.dp)
+                    colors = ButtonDefaults.buttonColors
+                        (
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = modifier
+                        .padding(vertical = 32.dp)
+                        .padding(start = 16.dp, end = 8.dp)
                 ) {
                     Text("Sign Up", modifier.padding(8.dp))
                 }
@@ -172,7 +181,14 @@ fun SignupScreen(modifier: Modifier = Modifier) {
                     onClick = {
 
                     },
-                    modifier.padding(32.dp)
+                    colors = ButtonDefaults.buttonColors
+                        (
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    modifier = modifier
+                        .padding(vertical = 32.dp)
+                        .padding(start = 8.dp, end = 16.dp)
                 ) {
                     Text("Cancel", modifier.padding(8.dp))
                 }
