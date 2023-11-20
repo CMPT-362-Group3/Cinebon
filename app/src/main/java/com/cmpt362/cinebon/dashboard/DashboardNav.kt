@@ -35,6 +35,7 @@ import com.cmpt362.cinebon.utils.AppLogo
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.NavGraph
+import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.spec.DestinationSpec
 import com.ramcosta.composedestinations.utils.startDestination
 
@@ -42,9 +43,11 @@ val sections = listOf(
     DashboardNavItems.Movies, DashboardNavItems.Lists, DashboardNavItems.Profile
 )
 
+@RootNavGraph
 @Destination
 @Composable
 fun DashboardNav() {
+
     val navController = rememberNavController()
 
     Surface(
@@ -60,7 +63,21 @@ fun DashboardNav() {
 }
 
 @Composable
+fun shouldHideBottomBar(navController: NavController): Boolean {
+    return !sections.map { it.destination.route }.contains(
+        navController.appCurrentDestinationAsState().value?.route ?: DashboardNavItems.Movies.destination.route
+    )
+}
+
+@Composable
+fun shouldHideTopBar(navController: NavController): Boolean {
+    return shouldHideBottomBar(navController = navController)
+}
+
+@Composable
 private fun BottomBar(navController: NavController) {
+
+    if (shouldHideBottomBar(navController)) return
 
     var navigationIndex by rememberSaveable {
         mutableIntStateOf(0)
@@ -87,6 +104,9 @@ private fun BottomBar(navController: NavController) {
 
 @Composable
 private fun TopBar(navController: NavController) {
+
+    if (shouldHideTopBar(navController)) return
+
     Surface(color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -103,7 +123,8 @@ private fun TopBar(navController: NavController) {
                         DashboardNavItems.Lists.destination.route -> R.string.lists
                         DashboardNavItems.Profile.destination.route -> R.string.profile
                         else -> R.string.app_name
-                    }),
+                    }
+                ),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier

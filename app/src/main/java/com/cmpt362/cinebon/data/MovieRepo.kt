@@ -4,8 +4,7 @@ import com.cmpt362.cinebon.R
 
 object DummyMovieData {
 
-    val newMovies: List<MovieEntity>
-        get() = listOf(
+    val newMovies = listOf(
             MovieEntity(
                 title = "THE HUNGER GAMES: THE BALLAD OF SONGBIRDS & SNAKES",
                 length = "2h 37m",
@@ -68,8 +67,7 @@ object DummyMovieData {
             )
         )
 
-    val popularMovies: List<MovieEntity>
-        get() = listOf(
+    val popularMovies = listOf(
             MovieEntity(
                 title = "PARASITE",
                 length = "2h 12m",
@@ -132,8 +130,7 @@ object DummyMovieData {
             )
         )
 
-    val upcomingMovies: List<MovieEntity>
-        get() = listOf(
+    val upcomingMovies = listOf(
             MovieEntity(
                 title = "NAPOLEON",
                 length = "2h 38m",
@@ -195,4 +192,13 @@ object DummyMovieData {
                 image = R.drawable.monster
             )
         )
+
+    fun getListByIndex(index: Int): List<MovieEntity> {
+        return when (index) {
+            0 -> newMovies
+            1 -> popularMovies
+            2 -> upcomingMovies
+            else -> newMovies
+        }
+    }
 }
