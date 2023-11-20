@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.destinations.DashboardNavDestination
 import com.cmpt362.cinebon.destinations.LoginScreenDestination
+import com.cmpt362.cinebon.destinations.SignupScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.utils.AppLogo
 import com.cmpt362.cinebon.utils.SetStatusBarColor
@@ -118,6 +120,17 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
                 modifier.padding(32.dp)
             ) {
                 Text("Login", modifier.padding(8.dp))
+            }
+
+            TextButton(
+                onClick = {
+                    navigator.navigate(SignupScreenDestination) {
+                        popUpTo(LoginScreenDestination) { inclusive = true }
+                    }
+                },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Don't have an account? Sign Up")
             }
         }
     }
