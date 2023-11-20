@@ -7,7 +7,6 @@ import androidx.compose.animation.core.animateValue
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,10 +45,13 @@ import com.cmpt362.cinebon.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.destinations.SignupScreenDestination
 import com.cmpt362.cinebon.signup.SignupScreen
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.utils.AppLogo
+import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
+import com.ramcosta.composedestinations.navigation.popUpTo
 
 @RootNavGraph(
     start = true
@@ -69,15 +70,15 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
         ), label = "login_logo_bounce"
     )
 
+    SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surface)
+
     Surface(
         modifier = Modifier
             .scrollable(scrollState, Orientation.Vertical)
             .fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Image(
-                painter = painterResource(id = R.drawable.cinebon), contentDescription = "App logo", modifier = Modifier.offset(y = offsetAnimation)
-            )
+            AppLogo(modifier = Modifier.offset(y = offsetAnimation))
             Text(
                 stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
@@ -107,14 +108,15 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Go),
                 keyboardActions = KeyboardActions(onGo = {
-                    navigator.navigate(DashboardNavDestination)
                 }),
                 modifier = Modifier.padding(16.dp)
             )
 
             Button(
                 onClick = {
-
+                    navigator.navigate(DashboardNavDestination) {
+                        popUpTo(LoginScreenDestination) { inclusive = true }
+                    }
                 },
                 modifier.padding(32.dp)
             ) {
