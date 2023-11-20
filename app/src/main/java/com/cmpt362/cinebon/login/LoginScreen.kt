@@ -43,7 +43,6 @@ import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.destinations.DashboardNavDestination
 import com.cmpt362.cinebon.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.destinations.SignupScreenDestination
-import com.cmpt362.cinebon.signup.SignupScreen
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.utils.AppLogo
 import com.cmpt362.cinebon.utils.SetStatusBarColor
@@ -125,7 +124,9 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
 
             TextButton(
                 onClick = {
-                    navigator.navigate(SignupScreenDestination)
+                    navigator.navigate(SignupScreenDestination) {
+                        popUpTo(LoginScreenDestination) { inclusive = true }
+                    }
                 },
                 modifier = Modifier.padding(16.dp)
             ) {
