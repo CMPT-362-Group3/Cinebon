@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Cinébon</string>
     <string name="title_activity_login">Login</string>
+    <string name="signup_title">Create an account</string>
 </resources>
