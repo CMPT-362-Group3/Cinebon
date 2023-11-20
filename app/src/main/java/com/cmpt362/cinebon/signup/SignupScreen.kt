@@ -42,16 +42,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 @RootNavGraph(
     start = false
 )
 @Destination
 @Composable
-fun SignupScreen(modifier: Modifier = Modifier) {
+fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
 
     val scrollState = rememberScrollState()
     var fName by rememberSaveable { mutableStateOf("") }
@@ -157,7 +160,7 @@ fun SignupScreen(modifier: Modifier = Modifier) {
 
                 Button(
                     onClick = {
-
+                        navigator.navigate(LoginScreenDestination)
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -179,6 +182,6 @@ fun SignupScreen(modifier: Modifier = Modifier) {
 @Composable
 fun SignupPreview() {
     CinebonTheme {
-        SignupScreen()
+        SignupScreen(EmptyDestinationsNavigator)
     }
 }
