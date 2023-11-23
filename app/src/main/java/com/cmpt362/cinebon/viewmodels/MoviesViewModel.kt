@@ -11,18 +11,38 @@ import kotlinx.coroutines.withContext
 
 class MoviesViewModel : ViewModel() {
 
-    private val repo = MoviesRepository()
+    private val repo = MoviesRepository.instance
 
-    val nowPlayingMovies = MutableStateFlow(EmptyMoviesResult)
+    val nowPlayingMovies = MutableStateFlow(EmptyMoviesResult.results)
+    val popularMovies = MutableStateFlow(EmptyMoviesResult.results)
+    val upcomingMovies = MutableStateFlow(EmptyMoviesResult.results)
 
     init {
-        fetchNowPlayingMovies()
+        getNowPlayingMovies()
+        getPopularMovies()
+        getUpcomingMovies()
     }
 
-    private fun fetchNowPlayingMovies() {
+    private fun getNowPlayingMovies() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                nowPlayingMovies.value = repo.getNowPlayingMovies()
+                nowPlayingMovies.value = repo.getNowPlayingMovies().value
+            }
+        }
+    }
+
+    private fun getUpcomingMovies() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                upcomingMovies.value = repo.getUpcomingMovies().value
+            }
+        }
+    }
+
+    private fun getPopularMovies() {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                popularMovies.value = repo.getPopularMovies().value
             }
         }
     }

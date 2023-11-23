@@ -23,7 +23,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,27 +39,37 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.data.entity.MovieEntity
-import com.cmpt362.cinebon.data.repo.DummyMovieData.getListByIndex
+import com.cmpt362.cinebon.data.api.posterUrl
+import com.cmpt362.cinebon.data.api.response.Movie
+import com.cmpt362.cinebon.data.api.toPGString
+import com.cmpt362.cinebon.data.api.toRuntimeString
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.utils.shimmerBrush
+import com.cmpt362.cinebon.viewmodels.MovieInfoViewModel
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlin.math.roundToInt
 
 @DashboardNavGraph
 @Destination
 @Composable
-fun MovieInfoScreen(listIndex: Int = 0, movieIndex: Int = 0) {
+fun MovieInfoScreen(movieId: Int) {
+
+    val movieInfoViewModel = viewModel<MovieInfoViewModel>()
+
+    val movieInfo = movieInfoViewModel.movieInfo.collectAsStateWithLifecycle()
+
+    // TODO: Somehow fetch movie from movie ID - requires cache implementation
+    movieInfoViewModel.getMovieInfo(movieId)
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surface)
 
-    val movie = getListByIndex(listIndex)[movieIndex]
-
     Box {
         AsyncImage(
-            model = movie.image,
-            contentDescription = movie.title,
+            model = movieInfo.value.poster.posterUrl(),
+            contentDescription = movieInfo.value.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
@@ -82,11 +91,11 @@ fun MovieInfoScreen(listIndex: Int = 0, movieIndex: Int = 0) {
                 .align(alignment = Alignment.BottomCenter)
         )
 
-        MovieBookmarkIcon(movie = movie, modifier = Modifier.align(alignment = Alignment.TopEnd))
+        MovieBookmarkIcon(movie = movieInfo.value, modifier = Modifier.align(alignment = Alignment.TopEnd))
 
         Column(modifier = Modifier.align(alignment = Alignment.BottomCenter)) {
             Text(
-                movie.title,
+                movieInfo.value.title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Black,
                 color = Color.White,
@@ -101,19 +110,19 @@ fun MovieInfoScreen(listIndex: Int = 0, movieIndex: Int = 0) {
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 2.dp)
             ) {
                 Text(
-                    "${movie.releaseDate} • ${movie.length} • ${movie.language}",
+                    "${movieInfo.value.releaseDate} • ${movieInfo.value.runtime.toRuntimeString()} • ${movieInfo.value.originalLanguage}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White
                 )
                 OutlinedCard(
                     modifier = Modifier.padding(0.dp),
                     shape = MaterialTheme.shapes.extraSmall,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.inverseSurface)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Text(
-                        movie.ageRating,
+                        movieInfo.value.adult.toPGString(),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -130,16 +139,23 @@ fun MovieInfoScreen(listIndex: Int = 0, movieIndex: Int = 0) {
                     Image(
                         painter = rememberVectorPainter(Icons.Filled.Star),
                         contentDescription = "Star",
-                        colorFilter = ColorFilter.tint(if (star <= movie.review) Color(0xFFE6BF41) else Color.Gray),
+                        colorFilter = ColorFilter.tint(if (star <= (movieInfo.value.voteAverage / 2).roundToInt()) Color(0xFFE6BF41) else Color.Gray),
                         modifier = Modifier
                             .width(24.dp)
                             .height(24.dp)
                     )
                 }
+
+                Text(
+                    "(${movieInfo.value.voteCount} votes)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
             }
 
             Text(
-                movie.description,
+                movieInfo.value.overview,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = Color.White,
@@ -150,10 +166,10 @@ fun MovieInfoScreen(listIndex: Int = 0, movieIndex: Int = 0) {
 }
 
 @Composable
-fun MovieImage(movie: MovieEntity, onClick: () -> Unit = {}) {
+fun MovieImage(movie: Movie, onClick: () -> Unit = {}) {
     val showShimmer = remember { mutableStateOf(true) }
     AsyncImage(
-        model = movie.image,
+        model = movie.poster.posterUrl(),
         contentDescription = movie.title,
         contentScale = ContentScale.FillWidth,
         onSuccess = { showShimmer.value = false },
@@ -168,9 +184,9 @@ fun MovieImage(movie: MovieEntity, onClick: () -> Unit = {}) {
 }
 
 @Composable
-fun MovieBookmarkIcon(movie: MovieEntity, modifier: Modifier) {
+fun MovieBookmarkIcon(movie: Movie, modifier: Modifier) {
 
-    val isBookmarked by movie.bookmarked.collectAsStateWithLifecycle()
+    val isBookmarked = movie.bookmarked
     val rememberVectorDrawablePainter = rememberVectorPainter(
         if (isBookmarked)
             ImageVector.vectorResource(id = R.drawable.bookmarked)
@@ -186,7 +202,7 @@ fun MovieBookmarkIcon(movie: MovieEntity, modifier: Modifier) {
     ) {
         IconButton(
             onClick = {
-                movie.bookmarked.value = !isBookmarked
+//                movie.bookmarked = !isBookmarked
             },
         ) {
             Image(
@@ -204,5 +220,5 @@ fun MovieBookmarkIcon(movie: MovieEntity, modifier: Modifier) {
 @Preview
 @Composable
 fun MovieInfoScreenPreview() {
-    MovieInfoScreen(0, 2)
+    MovieInfoScreen(movieId = -1)
 }
