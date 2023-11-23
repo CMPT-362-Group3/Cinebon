@@ -1,4 +1,4 @@
-package com.cmpt362.cinebon.profile
+package com.cmpt362.cinebon.ui.dashboard
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.Orientation
@@ -26,7 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
 
