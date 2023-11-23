@@ -1,4 +1,4 @@
-package com.cmpt362.cinebon.data
+package com.cmpt362.cinebon.data.entity
 
 import kotlinx.coroutines.flow.MutableStateFlow
 

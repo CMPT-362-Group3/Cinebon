@@ -23,7 +23,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,10 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.data.DummyMovieData.getListByIndex
-import com.cmpt362.cinebon.data.MovieEntity
+import com.cmpt362.cinebon.data.entity.MovieEntity
+import com.cmpt362.cinebon.data.repo.DummyMovieData.getListByIndex
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.utils.shimmerBrush
 import com.ramcosta.composedestinations.annotation.Destination
@@ -110,7 +110,12 @@ fun MovieInfoScreen(listIndex: Int = 0, movieIndex: Int = 0) {
                     shape = MaterialTheme.shapes.extraSmall,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.inverseSurface)
                 ) {
-                    Text(movie.ageRating, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(8.dp))
+                    Text(
+                        movie.ageRating,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             }
 
@@ -165,7 +170,7 @@ fun MovieImage(movie: MovieEntity, onClick: () -> Unit = {}) {
 @Composable
 fun MovieBookmarkIcon(movie: MovieEntity, modifier: Modifier) {
 
-    val isBookmarked by movie.bookmarked.collectAsState()
+    val isBookmarked by movie.bookmarked.collectAsStateWithLifecycle()
     val rememberVectorDrawablePainter = rememberVectorPainter(
         if (isBookmarked)
             ImageVector.vectorResource(id = R.drawable.bookmarked)

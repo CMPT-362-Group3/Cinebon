@@ -1,10 +1,10 @@
 package com.cmpt362.cinebon.data.enums
 
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.destinations.DirectionDestination
-import com.cmpt362.cinebon.destinations.ListsScreenDestination
-import com.cmpt362.cinebon.destinations.MoviesScreenDestination
-import com.cmpt362.cinebon.destinations.ProfileScreenDestination
+import com.cmpt362.cinebon.ui.destinations.DirectionDestination
+import com.cmpt362.cinebon.ui.destinations.ListsScreenDestination
+import com.cmpt362.cinebon.ui.destinations.MoviesScreenDestination
+import com.cmpt362.cinebon.ui.destinations.ProfileScreenDestination
 
 enum class DashboardNavItems(val icon: Int, val destination: DirectionDestination) {
     Movies(R.drawable.movie, MoviesScreenDestination),

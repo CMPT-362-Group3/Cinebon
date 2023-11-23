@@ -1,6 +1,7 @@
-package com.cmpt362.cinebon.data
+package com.cmpt362.cinebon.data.repo
 
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.data.entity.MovieEntity
 
 object DummyMovieData {
 

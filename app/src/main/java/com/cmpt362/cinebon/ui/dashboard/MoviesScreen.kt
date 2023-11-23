@@ -29,10 +29,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.cmpt362.cinebon.data.DummyMovieData.getListByIndex
-import com.cmpt362.cinebon.data.MovieEntity
-import com.cmpt362.cinebon.destinations.MovieInfoScreenDestination
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cmpt362.cinebon.data.entity.MovieEntity
+import com.cmpt362.cinebon.data.repo.DummyMovieData.getListByIndex
+import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
+import com.cmpt362.cinebon.viewmodels.MoviesViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -51,6 +54,13 @@ fun MoviesScreen(navigator: DestinationsNavigator) {
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
+    val moviesViewModel = viewModel<MoviesViewModel>()
+
+    val movieList = moviesViewModel.nowPlayingMovies.collectAsStateWithLifecycle()
+
+    println("MoviesScreen recomposed")
+    println("movieList: ${movieList.value}")
+
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
 

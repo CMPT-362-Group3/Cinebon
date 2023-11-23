@@ -27,10 +27,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.cmpt362.cinebon.NavGraphs
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.appCurrentDestinationAsState
 import com.cmpt362.cinebon.data.enums.DashboardNavItems
+import com.cmpt362.cinebon.ui.NavGraphs
+import com.cmpt362.cinebon.ui.appCurrentDestinationAsState
 import com.cmpt362.cinebon.utils.AppLogo
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
@@ -53,10 +53,7 @@ fun DashboardNav() {
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
-        Scaffold(
-            bottomBar = { BottomBar(navController = navController) },
-            topBar = { TopBar(navController) }
-        ) { innerPadding ->
+        Scaffold(bottomBar = { BottomBar(navController = navController) }, topBar = { TopBar(navController) }) { innerPadding ->
             DestinationsNavHost(navController = navController, navGraph = NavGraphs.dashboard, modifier = Modifier.padding(innerPadding))
         }
     }
@@ -87,17 +84,12 @@ private fun BottomBar(navController: NavController) {
 
     NavigationBar {
         sections.forEachIndexed { index, section ->
-            NavigationBarItem(
-                icon = { Icon(ImageVector.vectorResource(id = section.icon), contentDescription = section.name) },
-                onClick = {
-                    navigationIndex = index
-                    navController.navigate(section.destination.route) {
-                        launchSingleTop = true
-                    }
-                },
-                selected = currentDestination == section.destination,
-                label = { Text(section.name) }
-            )
+            NavigationBarItem(icon = { Icon(ImageVector.vectorResource(id = section.icon), contentDescription = section.name) }, onClick = {
+                navigationIndex = index
+                navController.navigate(section.destination.route) {
+                    launchSingleTop = true
+                }
+            }, selected = currentDestination == section.destination, label = { Text(section.name) })
         }
     }
 }
@@ -109,8 +101,7 @@ private fun TopBar(navController: NavController) {
 
     Surface(color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+            verticalAlignment = Alignment.CenterVertically, modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
