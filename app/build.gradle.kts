@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -20,6 +22,13 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Get the API keys from local.properties in root
+        val localProps = gradleLocalProperties(rootDir)
+
+        // Set API keys in BuildConfig
+        buildConfigField("String", "TMDB_API_KEY", "\"${localProps.getProperty("API_KEY_NAME")}\"")
+
     }
 
     buildTypes {
@@ -66,6 +75,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
 
     implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
