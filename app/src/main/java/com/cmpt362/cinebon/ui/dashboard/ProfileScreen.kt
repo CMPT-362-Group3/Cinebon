@@ -1,6 +1,5 @@
-package com.cmpt362.cinebon.profile
+package com.cmpt362.cinebon.ui.dashboard
 
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,16 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootNavGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 @DashboardNavGraph
 @Destination
@@ -43,7 +36,6 @@ fun ProfileScreen() {
 
     val scrollState = rememberScrollState()
     // TODO: insert variables here
-    val infiniteTransition = rememberInfiniteTransition(label = "login_inf_transition")
 
     Surface(
         modifier = Modifier
@@ -57,7 +49,7 @@ fun ProfileScreen() {
                 painter = painterResource(id = R.drawable.defaultphoto),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
-                .size(175.dp)
+                    .size(175.dp)
             )
 
             Text(
@@ -137,7 +129,7 @@ fun ProfileScreen() {
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)){
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Friends",
                         style = MaterialTheme.typography.headlineMedium,
@@ -161,7 +153,7 @@ fun ProfileScreen() {
 
                 Spacer(modifier = Modifier.width(32.dp))
 
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)){
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Watched",
                         style = MaterialTheme.typography.headlineMedium,
@@ -184,7 +176,7 @@ fun ProfileScreen() {
                 }
             }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center){
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text(
                     text = "Last Watched = Barbie",
                     style = MaterialTheme.typography.headlineMedium,
@@ -213,7 +205,7 @@ fun ProfileScreen() {
                 modifier = Modifier
                     .padding(vertical = 64.dp)
             ) {
-                    Text("John's Movie List")
+                Text("John's Movie List")
             }
         }
     }

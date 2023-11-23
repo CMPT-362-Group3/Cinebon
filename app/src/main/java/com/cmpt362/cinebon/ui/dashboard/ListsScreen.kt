@@ -1,4 +1,4 @@
-package com.cmpt362.cinebon.dashboard
+package com.cmpt362.cinebon.ui.dashboard
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
