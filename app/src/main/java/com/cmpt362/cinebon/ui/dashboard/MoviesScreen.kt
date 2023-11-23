@@ -29,10 +29,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.cmpt362.cinebon.data.DummyMovieData.getListByIndex
-import com.cmpt362.cinebon.data.MovieEntity
-import com.cmpt362.cinebon.destinations.MovieInfoScreenDestination
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cmpt362.cinebon.data.api.response.Movie
+import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
+import com.cmpt362.cinebon.viewmodels.MoviesViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -51,6 +53,7 @@ fun MoviesScreen(navigator: DestinationsNavigator) {
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val scope = rememberCoroutineScope()
+    val moviesViewModel = viewModel<MoviesViewModel>()
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
 
@@ -88,15 +91,20 @@ fun MoviesScreen(navigator: DestinationsNavigator) {
         }
 
         HorizontalPager(state = pagerState, Modifier.fillMaxSize(), verticalAlignment = Alignment.Top) { index ->
-            MoviesGrid(sourceIndex = index, navigator)
+            MoviesGrid(
+                source = when (index) {
+                    0 -> moviesViewModel.nowPlayingMovies.collectAsStateWithLifecycle().value
+                    1 -> moviesViewModel.popularMovies.collectAsStateWithLifecycle().value
+                    2 -> moviesViewModel.upcomingMovies.collectAsStateWithLifecycle().value
+                    else -> emptyList()
+                }, navigator
+            )
         }
     }
 }
 
 @Composable
-fun MoviesGrid(sourceIndex: Int, navigator: DestinationsNavigator) {
-
-    val source = getListByIndex(sourceIndex)
+fun MoviesGrid(source: List<Movie>, navigator: DestinationsNavigator) {
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
@@ -108,8 +116,7 @@ fun MoviesGrid(sourceIndex: Int, navigator: DestinationsNavigator) {
                 MovieCard(movie = source[it], onClick = {
                     navigator.navigate(
                         MovieInfoScreenDestination(
-                            listIndex = sourceIndex,
-                            movieIndex = it
+                            movieId = source[it].id,
                         )
                     )
                 })
@@ -118,7 +125,7 @@ fun MoviesGrid(sourceIndex: Int, navigator: DestinationsNavigator) {
 }
 
 @Composable
-fun MovieCard(movie: MovieEntity, onClick: () -> Unit) {
+fun MovieCard(movie: Movie, onClick: () -> Unit) {
     Card(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize()) {
             MovieImage(movie, onClick)
