@@ -1,5 +1,6 @@
 package com.cmpt362.cinebon.ui.signup
 
+import android.content.SharedPreferences
 import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.VectorConverter
@@ -33,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -41,10 +43,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.ui.destinations.SignupScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.ObserveLifecycleEvents
+import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -57,6 +62,7 @@ import com.ramcosta.composedestinations.navigation.popUpTo
 @Destination
 @Composable
 fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
+    val userAuthViewModel = viewModel<UserAuthViewModel>()
 
     val scrollState = rememberScrollState()
     var fName by rememberSaveable { mutableStateOf("") }
@@ -146,6 +152,7 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
 
                 Button(
                     onClick = {
+                        userAuthViewModel.signUp(email, password, fName, lName)
 
                     },
                     colors = ButtonDefaults.buttonColors
@@ -180,6 +187,9 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
             }
         }
     }
+
+    userAuthViewModel.ObserveLifecycleEvents(LocalLifecycleOwner.current.lifecycle)
+
 }
 
 @Preview(showBackground = true)
@@ -187,5 +197,13 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
 fun SignupPreview() {
     CinebonTheme {
         SignupScreen(EmptyDestinationsNavigator)
+    }
+}
+
+@Composable
+fun ListenForIdToken(userAuthViewModel: UserAuthViewModel) {
+    val idToken = userAuthViewModel.idToken.value
+    if (idToken != null) {
+
     }
 }
