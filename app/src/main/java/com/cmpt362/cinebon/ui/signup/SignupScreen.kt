@@ -158,7 +158,16 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                         imeAction = ImeAction.Go
                     ),
                     keyboardActions = KeyboardActions(onGo = {
-                        // TODO: firebase stuff?
+                        invalidPassword = password.length < 6
+                        if (!invalidPassword)
+                            userAuthViewModel.signUp(email, password, fName, lName, onResult = {
+                                if (it != null)
+                                    error = true
+                                else
+                                    navigator.navigate(DashboardNavDestination) {
+                                        popUpTo(SignupScreenDestination) { inclusive = true }
+                                    }
+                            })
                     }),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )

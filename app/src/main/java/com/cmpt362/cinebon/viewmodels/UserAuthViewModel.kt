@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 interface AccountService {
     fun signUp(email: String, password: String, fName: String, lName: String, onResult: (Throwable?) -> Unit)
     fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit)
+    fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
 }
 
 class UserAuthViewModel: ViewModel(), AccountService {
@@ -45,6 +46,19 @@ class UserAuthViewModel: ViewModel(), AccountService {
                     onResult(null)
                 } else {
                     Log.d("AccountService", "User creation failed")
+                    onResult(task.exception)
+                }
+            }
+    }
+
+    override fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit) {
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("AccountService", "Reset password email sent successfully")
+                    onResult(null)
+                } else {
+                    Log.d("AccountService", "Reset password email failed to send")
                     onResult(task.exception)
                 }
             }

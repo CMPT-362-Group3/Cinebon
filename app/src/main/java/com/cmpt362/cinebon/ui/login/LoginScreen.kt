@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.destinations.DashboardNavDestination
+import com.cmpt362.cinebon.ui.destinations.ForgotPasswordScreenDestination
 import com.cmpt362.cinebon.ui.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.ui.destinations.SignupScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
@@ -62,7 +63,7 @@ import com.ramcosta.composedestinations.navigation.popUpTo
 fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
     val userAuthViewModel = viewModel<UserAuthViewModel>()
     val scrollState = rememberScrollState()
-    var username by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf(false) }
     val infiniteTransition = rememberInfiniteTransition(label = "login_inf_transition")
@@ -99,10 +100,10 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
                 Spacer(modifier = Modifier.height(48.dp))
 
                 OutlinedTextField(
-                    value = username,
+                    value = email,
                     label = { Text("Email") },
                     onValueChange = {
-                        username = it.trim()
+                        email = it.trim()
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -124,6 +125,17 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
                         imeAction = ImeAction.Go
                     ),
                     keyboardActions = KeyboardActions(onGo = {
+                        if (email != "" && password.length >= 6) {
+                            userAuthViewModel.signIn(email, password, onResult = {
+                                if (it != null) {
+                                    error = true
+                                } else {
+                                    navigator.navigate(DashboardNavDestination) {
+                                        popUpTo(LoginScreenDestination) { inclusive = true }
+                                    }
+                                }
+                            })
+                        }
                     }),
                     modifier = Modifier.padding(16.dp)
                 )
@@ -139,15 +151,17 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
 
                 Button(
                     onClick = {
-                        userAuthViewModel.signIn(username, password, onResult = {
-                            if (it != null) {
-                                error = true
-                            } else {
-                                navigator.navigate(DashboardNavDestination) {
-                                    popUpTo(LoginScreenDestination) { inclusive = true }
+                        if (email != "" && password.length >= 6) {
+                            userAuthViewModel.signIn(email, password, onResult = {
+                                if (it != null) {
+                                    error = true
+                                } else {
+                                    navigator.navigate(DashboardNavDestination) {
+                                        popUpTo(LoginScreenDestination) { inclusive = true }
+                                    }
                                 }
-                            }
-                        })
+                            })
+                        }
                     },
                     modifier.padding(32.dp)
                 ) {
@@ -156,11 +170,22 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
 
                 TextButton(
                     onClick = {
+                        navigator.navigate(ForgotPasswordScreenDestination) {
+                            popUpTo(LoginScreenDestination) { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.padding(16.dp, 16.dp, 16.dp, 2.dp)
+                ) {
+                    Text("Forgot Password?")
+                }
+
+                TextButton(
+                    onClick = {
                         navigator.navigate(SignupScreenDestination) {
                             popUpTo(LoginScreenDestination) { inclusive = true }
                         }
                     },
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp, 2.dp, 16.dp, 16.dp)
                 ) {
                     Text("Don't have an account? Sign Up")
                 }
