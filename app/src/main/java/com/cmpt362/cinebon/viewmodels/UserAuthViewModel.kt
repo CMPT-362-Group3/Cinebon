@@ -13,7 +13,7 @@ interface AccountService {
 class UserAuthViewModel: ViewModel(), AccountService {
     private val auth = FirebaseAuth.getInstance()
 
-    fun IsSignedIn(): Boolean {
+    fun isSignedIn(): Boolean {
         val currentUser = auth.currentUser
         return if (currentUser != null) {
             Log.d("UserAuthViewModel", "User is signed in")

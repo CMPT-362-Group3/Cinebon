@@ -75,7 +75,7 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
         ), label = "login_logo_bounce"
     )
 
-    if (userAuthViewModel.IsSignedIn()) {
+    if (userAuthViewModel.isSignedIn()) {
         navigator.navigate(DashboardNavDestination) {
             popUpTo(SignupScreenDestination) { inclusive = true }
         }

@@ -74,7 +74,7 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surface)
 
-    if (userAuthViewModel.IsSignedIn()) {
+    if (userAuthViewModel.isSignedIn()) {
         navigator.navigate(DashboardNavDestination) {
             popUpTo(LoginScreenDestination) { inclusive = true }
         }
