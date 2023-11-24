@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.destinations.DashboardNavDestination
 import com.cmpt362.cinebon.ui.destinations.LoginScreenDestination
@@ -46,6 +47,7 @@ import com.cmpt362.cinebon.ui.destinations.SignupScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.utils.AppLogo
 import com.cmpt362.cinebon.utils.SetStatusBarColor
+import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -58,10 +60,11 @@ import com.ramcosta.composedestinations.navigation.popUpTo
 @Destination
 @Composable
 fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
-
+    val userAuthViewModel = viewModel<UserAuthViewModel>()
     val scrollState = rememberScrollState()
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var error by rememberSaveable { mutableStateOf(false) }
     val infiniteTransition = rememberInfiniteTransition(label = "login_inf_transition")
     val offsetAnimation by infiniteTransition.animateValue(
         initialValue = (-15).dp, targetValue = 0.dp, typeConverter = Dp.VectorConverter, animationSpec = infiniteRepeatable(
@@ -71,66 +74,96 @@ fun LoginScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier)
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surface)
 
-    Surface(
-        modifier = Modifier
-            .scrollable(scrollState, Orientation.Vertical)
-            .fillMaxSize(), color = MaterialTheme.colorScheme.background
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            AppLogo(modifier = Modifier.offset(y = offsetAnimation))
-            Text(
-                stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier
-                    .padding(16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            OutlinedTextField(
-                value = username,
-                label = { Text("Email") },
-                onValueChange = {
-                    username = it.trim()
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
-                keyboardActions = KeyboardActions.Default,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = password,
-                label = { Text("Password") },
-                onValueChange = {
-                    password = it
-                },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Go),
-                keyboardActions = KeyboardActions(onGo = {
-                }),
-                modifier = Modifier.padding(16.dp)
-            )
-
-            Button(
-                onClick = {
-                    navigator.navigate(DashboardNavDestination) {
-                        popUpTo(LoginScreenDestination) { inclusive = true }
-                    }
-                },
-                modifier.padding(32.dp)
+    if (userAuthViewModel.IsSignedIn()) {
+        navigator.navigate(DashboardNavDestination) {
+            popUpTo(LoginScreenDestination) { inclusive = true }
+        }
+    } else {
+        Surface(
+            modifier = Modifier
+                .scrollable(scrollState, Orientation.Vertical)
+                .fillMaxSize(), color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text("Login", modifier.padding(8.dp))
-            }
+                AppLogo(modifier = Modifier.offset(y = offsetAnimation))
+                Text(
+                    stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
 
-            TextButton(
-                onClick = {
-                    navigator.navigate(SignupScreenDestination) {
-                        popUpTo(LoginScreenDestination) { inclusive = true }
-                    }
-                },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Don't have an account? Sign Up")
+                Spacer(modifier = Modifier.height(48.dp))
+
+                OutlinedTextField(
+                    value = username,
+                    label = { Text("Email") },
+                    onValueChange = {
+                        username = it.trim()
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions.Default,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    label = { Text("Password") },
+                    onValueChange = {
+                        password = it
+                    },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Go
+                    ),
+                    keyboardActions = KeyboardActions(onGo = {
+                    }),
+                    modifier = Modifier.padding(16.dp)
+                )
+
+
+                if (error)
+                    Text(
+                        text = "There was an error signing in. Please try again.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.error
+                    )
+
+                Button(
+                    onClick = {
+                        userAuthViewModel.signIn(username, password, onResult = {
+                            if (it != null) {
+                                error = true
+                            } else {
+                                navigator.navigate(DashboardNavDestination) {
+                                    popUpTo(LoginScreenDestination) { inclusive = true }
+                                }
+                            }
+                        })
+                    },
+                    modifier.padding(32.dp)
+                ) {
+                    Text("Login", modifier.padding(8.dp))
+                }
+
+                TextButton(
+                    onClick = {
+                        navigator.navigate(SignupScreenDestination) {
+                            popUpTo(LoginScreenDestination) { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text("Don't have an account? Sign Up")
+                }
             }
         }
     }
