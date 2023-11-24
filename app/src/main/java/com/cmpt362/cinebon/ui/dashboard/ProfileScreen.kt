@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,13 +17,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
@@ -51,79 +55,29 @@ fun ProfileScreen() {
                 modifier = Modifier
                     .size(175.dp)
             )
-
-            Text(
-                text = "John Doe",
-                style = MaterialTheme.typography.displaySmall,
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-            )
-
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
-            ) {
-                Button(
-                    onClick = {
-
-                    },
-                    colors = ButtonDefaults.buttonColors
-                        (
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
+            ){
+                Text(
+                    text = "John Doe",
+                    style = MaterialTheme.typography.displaySmall,
                     modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .padding(end = 4.dp)
-                        .weight(1f)
-                ) {
-                    Text("Message", Modifier.padding(8.dp))
-                }
+                        .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                )
 
-                Button(
-                    onClick = {
-
-                    },
-                    colors = ButtonDefaults.buttonColors
-                        (
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.edit_icon),
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .padding(start = 4.dp, end = 4.dp)
-                        .weight(1f)
-                ) {
-//                    Text("Schedule Event", Modifier.padding(8.dp))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                        Text("Schedule")
-                        Text("Event")
-                    }
-                }
+                        .size(54.dp)
+                        .padding(top = 8.dp)
 
-                Button(
-                    onClick = {
+                )
 
-                    },
-                    colors = ButtonDefaults.buttonColors
-                        (
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .padding(start = 4.dp)
-                        .weight(1f)
-                ) {
-//                    Text("Remove Friend", Modifier.padding(8.dp))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                        Text("Remove")
-                        Text("Friend")
-                    }
-                }
             }
-
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -208,6 +162,7 @@ fun ProfileScreen() {
                 Text("John's Movie List")
             }
         }
+
     }
 }
 
