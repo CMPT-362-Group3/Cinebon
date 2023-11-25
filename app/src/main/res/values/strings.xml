@@ -2,6 +2,7 @@
     <string name="app_name">Cinébon</string>
     <string name="title_activity_login">Login</string>
     <string name="signup_title">Create an account</string>
+    <string name="schedule_title">Schedule Your Next Movie</string>
     <string name="lists">Lists</string>
     <string name="profile">Profile</string>
     <string name="discover">Discover</string>
