@@ -83,9 +83,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                     modifier = Modifier
                         .size(54.dp)
                         .padding(top = 8.dp)
-                        .clickable {
-                            navigator.navigate(SettingsScreenDestination)
-                        }
+                        .clickable { navigator.navigate(SettingsScreenDestination) }
 
                 )
 
