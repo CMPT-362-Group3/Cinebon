@@ -62,6 +62,7 @@ import com.ramcosta.composedestinations.navigation.popUpTo
 fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
     val userAuthViewModel = viewModel<UserAuthViewModel>()
     val scrollState = rememberScrollState()
+    var username by rememberSaveable { mutableStateOf("") }
     var fName by rememberSaveable { mutableStateOf("") }
     var lName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -103,6 +104,21 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 64.dp)
                 )
+
+                OutlinedTextField(
+                    value = username,
+                    label = { Text("Username") },
+                    onValueChange = {
+                        username = it.trim()
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions.Default,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
 
                 OutlinedTextField(
                     value = fName,
@@ -160,7 +176,8 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                     keyboardActions = KeyboardActions(onGo = {
                         invalidPassword = password.length < 6
                         if (!invalidPassword)
-                            userAuthViewModel.signUp(email, password, fName, lName, onResult = {
+                            userAuthViewModel.signUp(email, password, fName, lName,username,
+                                onResult = {
                                 if (it != null)
                                     error = true
                                 else
@@ -198,7 +215,8 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                         onClick = {
                             invalidPassword = password.length < 6
                             if (!invalidPassword)
-                                userAuthViewModel.signUp(email, password, fName, lName, onResult = {
+                                userAuthViewModel.signUp(email, password, fName, lName, username,
+                                    onResult = {
                                     if (it != null)
                                         error = true
                                     else
