@@ -29,12 +29,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.ui.destinations.ProfileScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
+@DashboardNavGraph
 @Destination
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(navigator: DestinationsNavigator) {
     val scrollState = rememberScrollState()
 
     // TODO: user thing here
@@ -149,7 +154,7 @@ fun SettingsScreen() {
 
                 Button(
                     onClick = {
-
+                        navigator.navigate(ProfileScreenDestination)
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -171,7 +176,7 @@ fun SettingsScreen() {
 @Composable
 fun SettingsScreenPreview() {
     CinebonTheme {
-        SettingsScreen()
+        SettingsScreen(EmptyDestinationsNavigator)
     }
 }
 

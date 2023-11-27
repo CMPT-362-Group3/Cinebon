@@ -98,7 +98,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Friends",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                     )
@@ -122,7 +122,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Watched",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                     )
@@ -144,8 +144,8 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
 
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text(
-                    text = "Last Watched = $lastWatched",
-                    style = MaterialTheme.typography.headlineMedium,
+                    text = "Last Watched: $lastWatched",
+                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
                 )
