@@ -1,13 +1,13 @@
 package com.cmpt362.cinebon.ui.dashboard
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,16 +30,25 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.ui.destinations.SettingsScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 @DashboardNavGraph
 @Destination
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navigator: DestinationsNavigator) {
 
     val scrollState = rememberScrollState()
     // TODO: insert variables here
+    val profilePicture = R.drawable.defaultphoto
+    val username = "JohnDoe"
+    val friendsCount = 20
+    val moviesWatched = 100
+    val lastWatched = "Barbie"
+    val firstName = "John"
 
     Surface(
         modifier = Modifier
@@ -50,7 +59,7 @@ fun ProfileScreen() {
 
             // TODO: this is all fake data, fix in the future
             Image(
-                painter = painterResource(id = R.drawable.defaultphoto),
+                painter = painterResource(id = profilePicture),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(175.dp)
@@ -61,7 +70,7 @@ fun ProfileScreen() {
                     .padding(horizontal = 8.dp)
             ){
                 Text(
-                    text = "John Doe",
+                    text = username,
                     style = MaterialTheme.typography.displaySmall,
                     modifier = Modifier
                         .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
@@ -74,6 +83,7 @@ fun ProfileScreen() {
                     modifier = Modifier
                         .size(54.dp)
                         .padding(top = 8.dp)
+                        .clickable { navigator.navigate(SettingsScreenDestination) }
 
                 )
 
@@ -86,7 +96,7 @@ fun ProfileScreen() {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Friends",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                     )
@@ -100,7 +110,7 @@ fun ProfileScreen() {
                     )
 
                     Text(
-                        text = "20",
+                        text = friendsCount.toString(),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -110,7 +120,7 @@ fun ProfileScreen() {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Watched",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                     )
@@ -124,7 +134,7 @@ fun ProfileScreen() {
                     )
 
                     Text(
-                        text = "100",
+                        text = moviesWatched.toString(),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -132,8 +142,8 @@ fun ProfileScreen() {
 
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text(
-                    text = "Last Watched = Barbie",
-                    style = MaterialTheme.typography.headlineMedium,
+                    text = "Last Watched: $lastWatched",
+                    style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier
                         .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
                 )
@@ -159,7 +169,7 @@ fun ProfileScreen() {
                 modifier = Modifier
                     .padding(vertical = 64.dp)
             ) {
-                Text("John's Movie List")
+                Text("$firstName's Movie List")
             }
         }
 
@@ -170,6 +180,6 @@ fun ProfileScreen() {
 @Composable
 fun ProfilePreview() {
     CinebonTheme {
-        ProfileScreen()
+        ProfileScreen(EmptyDestinationsNavigator)
     }
 }
