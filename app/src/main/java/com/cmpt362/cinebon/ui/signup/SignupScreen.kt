@@ -33,6 +33,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -60,8 +63,12 @@ import com.ramcosta.composedestinations.navigation.popUpTo
 @Destination
 @Composable
 fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier) {
+    val defaultImage = ImageBitmap.imageResource(R.drawable.defaultphoto).asAndroidBitmap()
+    // I don't know if the above line is correct, but it's what I think it should be
+
     val userAuthViewModel = viewModel<UserAuthViewModel>()
     val scrollState = rememberScrollState()
+    var username by rememberSaveable { mutableStateOf("") }
     var fName by rememberSaveable { mutableStateOf("") }
     var lName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -103,6 +110,21 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                     modifier = Modifier
                         .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 64.dp)
                 )
+
+                OutlinedTextField(
+                    value = username,
+                    label = { Text("Username") },
+                    onValueChange = {
+                        username = it.trim()
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions.Default,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
 
                 OutlinedTextField(
                     value = fName,
@@ -160,14 +182,15 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                     keyboardActions = KeyboardActions(onGo = {
                         invalidPassword = password.length < 6
                         if (!invalidPassword)
-                            userAuthViewModel.signUp(email, password, fName, lName, onResult = {
+                            userAuthViewModel.signUp(email, password, fName, lName,username,
+                                defaultImage) {
                                 if (it != null)
                                     error = true
                                 else
                                     navigator.navigate(DashboardNavDestination) {
                                         popUpTo(SignupScreenDestination) { inclusive = true }
                                     }
-                            })
+                            }
                     }),
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
@@ -198,14 +221,15 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                         onClick = {
                             invalidPassword = password.length < 6
                             if (!invalidPassword)
-                                userAuthViewModel.signUp(email, password, fName, lName, onResult = {
+                                userAuthViewModel.signUp(email, password, fName, lName,
+                                    username, defaultImage) {
                                     if (it != null)
                                         error = true
                                     else
                                         navigator.navigate(DashboardNavDestination) {
                                             popUpTo(SignupScreenDestination) { inclusive = true }
                                         }
-                                })
+                                }
                         },
                         colors = ButtonDefaults.buttonColors
                             (
