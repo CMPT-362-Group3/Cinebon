@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.lang.Exception
@@ -18,6 +19,7 @@ interface AccountService {
     fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit)
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
     fun getSignedInUser(onResult: (User?) -> Unit)
+    fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit)
 }
 
 class UserAuthViewModel(private val userRepository: UserRepository = UserRepository()): ViewModel(),
@@ -142,6 +144,38 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
             }
         } catch (e: Exception) {
             Log.d("UserViewModel", "Failed to get signed in user")
+        }
+    }
+
+    override fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit) {
+        val user = FirebaseAuth.getInstance().currentUser
+
+        if (user != null)
+        {
+            val profileUpdates = UserProfileChangeRequest.Builder()
+                .setDisplayName(username)
+                .build()
+
+            user.updateProfile(profileUpdates)
+                .addOnCompleteListener{ task ->
+                    if (task.isSuccessful)
+                    {
+                        viewModelScope.launch {
+                            userRepository.updateUserData(
+                                user.uid,
+                                username,
+                                firstName,
+                                lastName,
+                                email
+                            )
+                        }
+                        onResult(null)
+                    } else {
+                        onResult(task.exception)
+                    }
+                }
+        } else {
+            onResult(Throwable("user not authenticated"))
         }
     }
 }

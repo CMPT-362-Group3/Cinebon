@@ -97,6 +97,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 label = { Text("Username") },
                 onValueChange = {
                     // TODO: insert functionality
+                                newUsername -> username = newUsername
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -113,6 +114,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 label = { Text("First Name") },
                 onValueChange = {
                     // TODO: insert functionality
+                                newFirstName -> firstName = newFirstName
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -129,6 +131,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 label = { Text("Last Name") },
                 onValueChange = {
                     // TODO: insert functionality
+                                newLastName -> lastName = newLastName
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -145,6 +148,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 label = { Text("Email Address") },
                 onValueChange = {
                     // TODO: insert functionality
+                                newEmail -> email = newEmail
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
