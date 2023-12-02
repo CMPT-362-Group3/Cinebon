@@ -85,6 +85,25 @@ class UserRepository {
         }
     }
 
+    suspend fun updateUserData(userId: String, username: String, firstName: String, lastName: String, email: String) {
+        withContext(IO) {
+            database.collection(USER_COLLECTION).document(userId)
+                .update(
+                    "username", username,
+                    "fname", firstName,
+                    "lname", lastName,
+                    "email", email
+                )
+                .addOnSuccessListener {
+                    Log.d("UserRepository", "user data updated successfully")
+                }
+                .addOnFailureListener{ e ->
+                    Log.w("UserRepository", "error updating user data", e)
+                    throw e
+                }
+        }
+    }
+
     fun resetUserCreatedResult() {
         _userCreatedResult.value = Result.success(false)
     }
