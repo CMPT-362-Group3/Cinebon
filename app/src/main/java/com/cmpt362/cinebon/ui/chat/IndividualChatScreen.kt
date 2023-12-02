@@ -2,7 +2,6 @@ package com.cmpt362.cinebon.ui.chat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,14 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -154,6 +151,7 @@ fun ChatScreen(messages:List<Message>){
 }
 @Composable
 fun MessageItem(message: Message) {
+    //Align current user messages to the end
     val alignment = if (message.sentByCurrentUser) {
         Alignment.End
     } else {
@@ -174,7 +172,7 @@ fun MessageItem(message: Message) {
         Color.Black
     }
 
-    // Display each message in a card
+    // Display each message in a box
     Box(
         modifier = Modifier
             .fillMaxWidth()
