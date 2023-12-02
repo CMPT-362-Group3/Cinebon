@@ -60,9 +60,9 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
     val defaultImage = ImageBitmap.imageResource(R.drawable.defaultphoto).asAndroidBitmap()
     var profilePicture by rememberSaveable { mutableStateOf(defaultImage)}
     var username by rememberSaveable { mutableStateOf("") }
-    var friendsCount by rememberSaveable { mutableIntStateOf(20) }
-    var moviesWatched by rememberSaveable { mutableIntStateOf(100) }
-    var lastWatched by rememberSaveable { mutableStateOf("Barbie") }
+    var friendsCount by rememberSaveable { mutableIntStateOf(0) }
+    var moviesWatched by rememberSaveable { mutableIntStateOf(0) }
+    var lastWatched by rememberSaveable { mutableStateOf("") }
     var firstName by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
 

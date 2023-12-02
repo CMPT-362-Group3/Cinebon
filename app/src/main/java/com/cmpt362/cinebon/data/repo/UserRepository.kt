@@ -18,12 +18,14 @@ private const val USER_COLLECTION = "users"
 class UserRepository {
     private val database = Firebase.firestore
     private val storage = Firebase.storage
+
     // Success.false means initial state
     // Success.true means user created
     // Failure means userdata not created
     private val _userCreatedResult = MutableStateFlow(Result.success(false))
     val userCreatedResult: StateFlow<Result<Boolean>>
         get() = _userCreatedResult
+
     suspend fun createUserData(user: User) {
         withContext(IO) {
             /*val bitmap = user.profilePicture
