@@ -22,16 +22,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.destinations.SettingsScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
@@ -40,15 +51,29 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Destination
 @Composable
 fun ProfileScreen(navigator: DestinationsNavigator) {
+    val userViewModel = viewModel<UserAuthViewModel>()
 
     val scrollState = rememberScrollState()
     // TODO: insert variables here
-    val profilePicture = R.drawable.defaultphoto
-    val username = "JohnDoe"
-    val friendsCount = 20
-    val moviesWatched = 100
-    val lastWatched = "Barbie"
-    val firstName = "John"
+
+    val defaultImage = ImageBitmap.imageResource(R.drawable.defaultphoto).asAndroidBitmap()
+    var profilePicture by rememberSaveable { mutableStateOf(defaultImage)}
+    var username by rememberSaveable { mutableStateOf("") }
+    var friendsCount by rememberSaveable { mutableIntStateOf(0) }
+    var moviesWatched by rememberSaveable { mutableIntStateOf(0) }
+    var lastWatched by rememberSaveable { mutableStateOf("") }
+    var firstName by rememberSaveable { mutableStateOf("") }
+    var lastName by rememberSaveable { mutableStateOf("") }
+
+    userViewModel.getSignedInUser {
+        if (it != null) {
+            username = it.username
+            firstName = it.fname
+            lastName = it.lname
+            profilePicture = it.profilePicture
+        }
+    }
+
 
     Surface(
         modifier = Modifier
@@ -84,7 +109,6 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                         .size(54.dp)
                         .padding(top = 8.dp)
                         .clickable { navigator.navigate(SettingsScreenDestination) }
-
                 )
 
             }
