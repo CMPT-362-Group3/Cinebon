@@ -1,5 +1,7 @@
 package com.cmpt362.cinebon.ui.dashboard
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -29,22 +31,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.ui.destinations.LoginScreenDestination
-import com.cmpt362.cinebon.ui.destinations.ProfileScreenDestination
 import com.cmpt362.cinebon.ui.destinations.SettingsScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 
 @DashboardNavGraph
 @Destination
@@ -64,9 +65,9 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
     userAuthViewModel.getSignedInUser {}
 
     if (userInfo.value == null) {
-        navigator.navigate(LoginScreenDestination) {
-            popUpTo(ProfileScreenDestination) { inclusive = true }
-        }
+        LocalContext.current.startActivity(Intent(LocalContext.current, MainActivity::class.java))
+        val context = LocalContext.current as Activity
+        context.finish()
     } else {
 
         Surface(
@@ -78,21 +79,22 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Row (horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = { userAuthViewModel.signOut() },
+                        colors = ButtonDefaults.buttonColors
+                            (
+                            contentColor = MaterialTheme.colorScheme.onError,
+                            containerColor = MaterialTheme.colorScheme.error
+                        ),
+                        modifier = Modifier
+                            .padding(vertical = 12.dp, horizontal = 12.dp)
+                    ) {
+                        Text(text = "Sign Out")
+                    }
 
-                Button(
-                    onClick = { userAuthViewModel.signOut() },
-                    colors = ButtonDefaults.buttonColors
-                        (
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ),
-                    modifier = Modifier
-                        .padding(vertical = 64.dp)
-                ) {
-                    Text(text = "Sign Out")
                 }
 
-                // TODO: this is all fake data, fix in the future
                 Image(
                     painter = painterResource(id = R.drawable.defaultphoto),
                     contentDescription = "Profile Picture",
