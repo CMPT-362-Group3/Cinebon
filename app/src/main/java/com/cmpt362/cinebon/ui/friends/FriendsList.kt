@@ -59,7 +59,6 @@ fun FriendsListScreen() {
         ) {
 
         }
-
     }
 }
 @Preview(showBackground = true)
