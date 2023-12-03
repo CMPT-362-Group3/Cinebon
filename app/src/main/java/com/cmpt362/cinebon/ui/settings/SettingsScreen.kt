@@ -22,6 +22,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +56,12 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     val userInfo = userAuthViewModel.userFlow.collectAsStateWithLifecycle()
 
     userAuthViewModel.getSignedInUser {}
+
+    var username by rememberSaveable { mutableStateOf(userInfo.value?.username?: "") }
+    var firstName by rememberSaveable { mutableStateOf(userInfo.value?.fname?: "") }
+    var lastName by rememberSaveable { mutableStateOf(userInfo.value?.lname?: "") }
+    var email by rememberSaveable { mutableStateOf(userInfo.value?.email?: "") }
+
 
     val context = LocalContext.current
 
