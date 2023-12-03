@@ -29,12 +29,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,10 +50,8 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
     val userViewModel = viewModel<UserAuthViewModel>()
 
     val scrollState = rememberScrollState()
-    // TODO: insert variables here
 
-    val defaultImage = ImageBitmap.imageResource(R.drawable.defaultphoto).asAndroidBitmap()
-    var profilePicture by rememberSaveable { mutableStateOf(defaultImage)}
+    val profilePicture = R.drawable.defaultphoto
     var username by rememberSaveable { mutableStateOf("") }
     var friendsCount by rememberSaveable { mutableIntStateOf(0) }
     var moviesWatched by rememberSaveable { mutableIntStateOf(0) }
@@ -70,7 +64,6 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
             username = it.username
             firstName = it.fname
             lastName = it.lname
-            profilePicture = it.profilePicture
         }
     }
 
@@ -84,7 +77,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
 
             // TODO: this is all fake data, fix in the future
             Image(
-                painter = painterResource(id = profilePicture),
+                painter = painterResource(profilePicture),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(175.dp)
