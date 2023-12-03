@@ -100,7 +100,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = username,
                 label = { Text("Username") },
                 onValueChange = {
-                    // TODO: insert functionality
                                 newUsername -> username = newUsername
                 },
                 keyboardOptions = KeyboardOptions(
@@ -117,7 +116,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = firstName,
                 label = { Text("First Name") },
                 onValueChange = {
-                    // TODO: insert functionality
                                 newFirstName -> firstName = newFirstName
                 },
                 keyboardOptions = KeyboardOptions(
@@ -134,7 +132,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = lastName,
                 label = { Text("Last Name") },
                 onValueChange = {
-                    // TODO: insert functionality
                                 newLastName -> lastName = newLastName
                 },
                 keyboardOptions = KeyboardOptions(
@@ -151,7 +148,6 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = email,
                 label = { Text("Email Address") },
                 onValueChange = {
-                    // TODO: insert functionality
                                 newEmail -> email = newEmail
                 },
                 keyboardOptions = KeyboardOptions(
@@ -172,6 +168,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                 Button(
                     onClick = {
+                        // calls updateUserProfile from userAuthViewModel, which calls updateUserData in user repo
                               userAuthViewModel.updateUserProfile(
                                   username,
                                   firstName,
@@ -179,11 +176,11 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                   email
                               ) { result ->
                                   if (result == null) {
-                                      // success
+                                      // success, toast and exit
                                       Toast.makeText(context, "Successfully updated profile", Toast.LENGTH_SHORT).show()
                                       navigator.navigate(ProfileScreenDestination)
                                   } else {
-                                      // fail
+                                      // fail, inform that it failed
                                       Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
                                   }
                               }

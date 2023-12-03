@@ -148,8 +148,10 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     }
 
     override fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit) {
+        // get current user
         val user = FirebaseAuth.getInstance().currentUser
 
+        // if current user exist, launch updateUserData from userRepo to update user data
         if (user != null)
         {
             val profileUpdates = UserProfileChangeRequest.Builder()
