@@ -163,7 +163,6 @@ class UserRepository private constructor() {
         Log.d("UserRepository", "Chat refs: $chatRefs")
         val chats = mutableListOf<ChatEntity>()
 
-        // TODO: Use flow instead of assigning after every chat loop
         flow {
             for (chatRef in chatRefs) {
                 chatRef.get().await().toObject<ChatEntity>()?.let { emit(it) }
