@@ -1,6 +1,7 @@
 package com.cmpt362.cinebon.ui.settings
 
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,6 +65,8 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     var firstName  by rememberSaveable { mutableStateOf("") }
     var lastName  by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
+    
+    val context = LocalContext.current
 
     userAuthViewModel.getSignedInUser { user ->
         if (user != null) {
@@ -168,7 +172,20 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                 Button(
                     onClick = {
-
+                              userAuthViewModel.updateUserProfile(
+                                  username,
+                                  firstName,
+                                  lastName,
+                                  email
+                              ) { result ->
+                                  if (result == null) {
+                                      // success
+                                      Toast.makeText(context, "Successfully updated profile", Toast.LENGTH_SHORT).show()
+                                  } else {
+                                      // fail
+                                      Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                                  }
+                              }
                     },
                     colors = ButtonDefaults.buttonColors
                         (
