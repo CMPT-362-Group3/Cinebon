@@ -2,8 +2,12 @@ package com.cmpt362.cinebon.data.repo
 
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.ChatEntity
 import com.cmpt362.cinebon.data.entity.UserEntity
+import com.cmpt362.cinebon.data.objects.User
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
@@ -13,9 +17,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
-private const val USER_COLLECTION = "users"
 
-class UserRepository {
+class UserRepository private constructor() {
+
+    companion object {
+        const val USER_COLLECTION = "users"
+
+        fun getInstance(): UserRepository {
+            return UserRepository()
+        }
+    }
+
     private val database = Firebase.firestore
     private val storage = Firebase.storage
 
@@ -25,6 +37,8 @@ class UserRepository {
     private val _userCreatedResult = MutableStateFlow(Result.success(false))
     val userCreatedResult: StateFlow<Result<Boolean>>
         get() = _userCreatedResult
+
+    private val _userInfo = MutableStateFlow<User?>(null)
 
     suspend fun createUserData(user: User) {
         withContext(IO) {
@@ -59,20 +73,30 @@ class UserRepository {
         }
     }
 
+    private fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
+
     fun getUserData(userId: String, onResult: (User?) -> Unit) {
-        val docRef = database.collection(USER_COLLECTION).document(userId)
+        val docRef = getUserRef(userId)
+
         Log.d("UserRepository", "Getting user data")
+
         docRef.get().addOnSuccessListener {
+
             Log.d("UserRepository", "User data successfully retrieved")
+
             val user = it.toObject<UserEntity>()
             if (user != null) {
                 val userObj = user.toUser()
+                Log.d("UserRepository", "User data successfully converted: ${user.chats}")
+
                 storage.reference.child("users/$userId/profilePhoto.jpg")
                     .getBytes(Long.MAX_VALUE).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             userObj.profilePicture = BitmapFactory
                                 .decodeStream(task.result.inputStream())
 
+                            _userInfo.value = userObj
+                            Log.d("UserRepository", "Successfully tracking user info: ${_userInfo.value?.username}")
                             onResult(userObj)
                         } else {
                             Log.d("UserRepository", "Failed to get profile picture")
@@ -81,6 +105,54 @@ class UserRepository {
                     }
             } else {
                 onResult(null)
+            }
+        }
+    }
+
+    fun attachUserRefListener(listener: EventListener<DocumentSnapshot>) {
+        getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+            .addSnapshotListener(listener)
+    }
+
+    private val _userChats = MutableStateFlow<List<ChatEntity>>(emptyList())
+    val userChats: StateFlow<List<ChatEntity>>
+        get() = _userChats
+
+    // Get chats from last known user info, or fetch user and then get chats
+    fun getUserChats() {
+        if (_userInfo.value != null) return getUserChats(_userInfo.value!!)
+
+        Log.d("UserRepository", "Getting user chats fresh")
+        getUserData(FirebaseAuth.getInstance().currentUser!!.uid) { user ->
+            getUserChats(user)
+        }
+    }
+
+    // Sub-function to get chats from user object
+    private fun getUserChats(user: User?) {
+        if (user == null) _userChats.value = emptyList()
+
+        Log.d("UserRepository", "Getting user chats from user object")
+        val chatRefs = user!!.chats
+        Log.d("UserRepository", "Chat refs: $chatRefs")
+        val chats = mutableListOf<ChatEntity>()
+
+        // TODO: Use flow instead of assigning after every chat loop
+        for (chatRef in chatRefs) {
+            chatRef.get().addOnSuccessListener { chat ->
+
+                Log.d("UserRepository", "Chat gotten")
+
+                val chatObj = chat.toObject<ChatEntity>()
+                if (chatObj != null) {
+                    Log.d("UserRepository", "Chat object: ${chatObj}")
+
+                    chats.add(chatObj)
+                    _userChats.value = chats
+                    Log.d("UserRepository", "User chats flow updated: ${_userChats.value}")
+                }
+            }.addOnFailureListener { e ->
+                Log.d("UserRepository", "Failed to get chat: $e")
             }
         }
     }

@@ -20,7 +20,7 @@ interface AccountService {
     fun getSignedInUser(onResult: (User?) -> Unit)
 }
 
-class UserAuthViewModel(private val userRepository: UserRepository = UserRepository()): ViewModel(),
+class UserAuthViewModel(private val userRepository: UserRepository = UserRepository.getInstance()): ViewModel(),
     AccountService {
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
