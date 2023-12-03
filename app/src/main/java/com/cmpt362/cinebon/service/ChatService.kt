@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.data.repo.ChatRepository
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
@@ -29,6 +30,7 @@ class ChatService : Service() {
     }
 
     private val userRepository = UserRepository.getInstance()
+    private val chatRepository = ChatRepository.getInstance()
     private val serviceScope = CoroutineScope(Default)
 
     override fun onBind(p0: Intent?): IBinder {
@@ -43,20 +45,23 @@ class ChatService : Service() {
 
         // Start the chat listener worker coroutine to listen for chat updates
         startChatWorker()
+
+        // Trigger a user data update manually to ensure that the user data is up to date
+        serviceScope.launch { userRepository.updateCurrentUserData() }
     }
 
     private fun startChatWorker() {
         serviceScope.launch {
-            userRepository.userChats.collect {
-                Log.d("ChatService", "User chats updated: $it")
-                for (chat in it) {
-                    println("ChatService: $chat")
-                }
-            }
+            userRepository.attachUserRefListener(userRefListener)
         }
 
         serviceScope.launch {
-            userRepository.attachUserRefListener(userRefListener)
+            chatRepository.startChatRefreshWorker()
+        }
+
+        serviceScope.launch {
+            Log.d("ChatService", "Starting chat worker")
+            chatRepository.attachChatRefsWorker()
         }
     }
 
@@ -68,8 +73,10 @@ class ChatService : Service() {
             return@EventListener
         }
 
-        Log.w("ChatService", "User ref snapshot updated")
-        serviceScope.launch { userRepository.updateUserChats() }
+        Log.w("ChatService", "User ref snapshot updated: $snapshot")
+        serviceScope.launch {
+            userRepository.updateCurrentUserData()
+        }
     }
 
     private fun showForegroundNotification() {

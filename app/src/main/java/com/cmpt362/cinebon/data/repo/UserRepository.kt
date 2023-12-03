@@ -1,7 +1,6 @@
 package com.cmpt362.cinebon.data.repo
 
 import android.util.Log
-import com.cmpt362.cinebon.data.entity.ChatEntity
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -10,13 +9,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -26,8 +20,10 @@ class UserRepository private constructor() {
     companion object {
         const val USER_COLLECTION = "users"
 
+        private val instance = UserRepository()
+
         fun getInstance(): UserRepository {
-            return UserRepository()
+            return instance
         }
     }
 
@@ -63,25 +59,37 @@ class UserRepository private constructor() {
 
     private fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
 
-    fun getUserData(userId: String) {
-        val docRef = getUserRef(userId)
+    suspend fun updateCurrentUserData() {
+        val docRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
 
-        Log.d("UserRepository", "Getting user data")
+        val snapShot = docRef.get().await()
 
-        docRef.get().addOnSuccessListener {
-
+        if (snapShot.exists()) {
             Log.d("UserRepository", "User data successfully retrieved")
-            val user = it.toObject<User>()
-            if (user != null) {
-                _userInfo.value = user
-            } else {
-                _userInfo.value = null
-            }
+            _userInfo.value = snapShot.toObject<User>()
         }
+
+        Log.d("UserRepository", "Error getting user data")
     }
 
-    suspend fun updateUserData(userId: String, username: String, firstName: String,
-                               lastName: String, email: String, onResult: (Throwable?) -> Unit) {
+    suspend fun getUserData(userId: String): User? {
+        val docRef = getUserRef(userId)
+
+        val snapShot = docRef.get().await()
+
+        if (snapShot.exists()) {
+            Log.d("UserRepository", "User data successfully retrieved")
+            return snapShot.toObject<User>()
+        }
+
+        Log.d("UserRepository", "Error getting user data")
+        return null
+    }
+
+    suspend fun updateUserData(
+        userId: String, username: String, firstName: String,
+        lastName: String, email: String, onResult: (Throwable?) -> Unit
+    ) {
         withContext(IO) {
             database.collection(USER_COLLECTION).document(userId)
                 .update(
@@ -94,7 +102,7 @@ class UserRepository private constructor() {
                     Log.d("UserRepository", "user data updated successfully")
                     onResult(null)
                 }
-                .addOnFailureListener{ e ->
+                .addOnFailureListener { e ->
                     Log.w("UserRepository", "error updating user data", e)
                     onResult(e)
                 }
@@ -104,57 +112,6 @@ class UserRepository private constructor() {
     fun attachUserRefListener(listener: EventListener<DocumentSnapshot>) {
         getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
             .addSnapshotListener(listener)
-    }
-
-    private val _userChats = MutableStateFlow<List<ChatEntity>>(emptyList())
-    val userChats: StateFlow<List<ChatEntity>>
-        get() = _userChats
-
-    // Get chats from last known user info, or fetch user and then get chats
-    private var chatJob: Job? = null
-    suspend fun updateUserChats() {
-        // If we're already waiting for a chat update, don't trigger another.
-        if (chatJob != null) return
-
-        // If there's no chat update but we already have user info
-        if (_userInfo.value != null) return updateUserChats(_userInfo.value!!)
-
-        // We don't have user info, and we're not waiting for a chat update
-        // Listen to the user info stateflow and update chats when it changes
-        // Track it in a job and cancel once non-null and complete.
-        // We don't request a user data fetch because if we didn't already trigger it earlier,
-        // we have bigger issues than not having chats.
-        Log.d("UserRepository", "Getting user chats fresh")
-        coroutineScope {
-            chatJob = launch {
-                _userInfo.collect {
-                    if (it != null) {
-                        updateUserChats(it)
-                        chatJob?.cancel()
-                    }
-                }
-            }
-        }
-    }
-
-    // Sub-function to get chats from user object
-    private suspend fun updateUserChats(user: User?) {
-        if (user == null) _userChats.value = emptyList()
-
-        Log.d("UserRepository", "Getting user chats from user object")
-        val chatRefs = user!!.chats
-        Log.d("UserRepository", "Chat refs: $chatRefs")
-        val chats = mutableListOf<ChatEntity>()
-
-        flow {
-            for (chatRef in chatRefs) {
-                chatRef.get().await().toObject<ChatEntity>()?.let { emit(it) }
-            }
-        }.onCompletion {
-            _userChats.value = chats
-        }.collect {
-            chats.add(it)
-        }
     }
 
     fun resetUserCreatedResult() {

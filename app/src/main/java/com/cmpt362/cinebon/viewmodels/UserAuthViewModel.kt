@@ -11,7 +11,6 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 
 interface AccountService {
@@ -139,11 +138,12 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
         if (userFlow.value != null) {
             return
         }
+
         try {
-            val authUser = auth.currentUser ?: throw Exception("User is not signed in")
+            auth.currentUser ?: throw Exception("User is not signed in")
 
             Log.d("UserViewModel", "User is signed in")
-            userRepository.getUserData(authUser.uid)
+            viewModelScope.launch { userRepository.updateCurrentUserData() }
         } catch (e: Exception) {
             Log.d("UserViewModel", "Failed to get signed in user")
         }
