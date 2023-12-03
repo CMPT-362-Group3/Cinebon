@@ -32,14 +32,11 @@ class ChatService : Service() {
     private val serviceScope = CoroutineScope(Default)
 
     override fun onBind(p0: Intent?): IBinder {
-        Log.d("ChatService", "Chat service bound")
         return Binder()
     }
 
     override fun onCreate() {
         super.onCreate()
-
-        Log.d("ChatService", "Chat service created")
 
         // Create a notification and start the service as a foreground service
         showForegroundNotification()
@@ -72,7 +69,7 @@ class ChatService : Service() {
         }
 
         Log.w("ChatService", "User ref snapshot updated")
-        userRepository.getUserChats()
+        serviceScope.launch { userRepository.updateUserChats() }
     }
 
     private fun showForegroundNotification() {
