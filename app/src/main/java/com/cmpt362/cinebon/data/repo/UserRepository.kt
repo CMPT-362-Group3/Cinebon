@@ -1,9 +1,7 @@
 package com.cmpt362.cinebon.data.repo
 
-import android.graphics.BitmapFactory
 import android.util.Log
 import com.cmpt362.cinebon.data.entity.ChatEntity
-import com.cmpt362.cinebon.data.entity.UserEntity
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -11,7 +9,6 @@ import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -35,7 +32,6 @@ class UserRepository private constructor() {
     }
 
     private val database = Firebase.firestore
-    private val storage = Firebase.storage
 
     // Success.false means initial state
     // Success.true means user created
@@ -50,26 +46,8 @@ class UserRepository private constructor() {
 
     suspend fun createUserData(user: User) {
         withContext(IO) {
-            /*val bitmap = user.profilePicture
-            val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-            storage.reference.child("users/${user.userId}/profilePhoto.jpg")
-                .putBytes(baos.toByteArray())
-                .addOnSuccessListener {
-                    Log.d("UserRepository", "Profile picture uploaded")
-                }
-                .addOnFailureListener { e ->
-                    Log.d("UserRepository", "Profile picture upload failed")
-                }*/
-            // ^ This was my attempt to upload the profile picture to firebase storage
-            // I was unable to get it to work, so I commented it out
-            // I also commented out the code in UserAuthViewModel.kt that calls this function
-            // https://firebase.google.com/docs/storage/android/upload-files
-            // Check this link for more info on how to upload files to firebase storage
-
-
             database.collection(USER_COLLECTION).document(user.userId)
-                .set(user.toEntity())
+                .set(user)
                 .addOnSuccessListener {
                     Log.d("UserRepository", "User data successfully written")
                     _userCreatedResult.value = Result.success(true)
@@ -93,28 +71,33 @@ class UserRepository private constructor() {
         docRef.get().addOnSuccessListener {
 
             Log.d("UserRepository", "User data successfully retrieved")
-
-            val user = it.toObject<UserEntity>()
+            val user = it.toObject<User>()
             if (user != null) {
-                val userObj = user.toUser()
-                Log.d("UserRepository", "User data successfully converted: ${user.chats}")
-
-                storage.reference.child("users/$userId/profilePhoto.jpg")
-                    .getBytes(Long.MAX_VALUE).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            userObj.profilePicture = BitmapFactory
-                                .decodeStream(task.result.inputStream())
-
-                            _userInfo.value = userObj
-                            Log.d("UserRepository", "Successfully tracking user info: ${_userInfo.value?.username}")
-                        } else {
-                            Log.d("UserRepository", "Failed to get profile picture")
-                            _userInfo.value = null
-                        }
-                    }
+                _userInfo.value = user
             } else {
                 _userInfo.value = null
             }
+        }
+    }
+
+    suspend fun updateUserData(userId: String, username: String, firstName: String,
+                               lastName: String, email: String, onResult: (Throwable?) -> Unit) {
+        withContext(IO) {
+            database.collection(USER_COLLECTION).document(userId)
+                .update(
+                    "username", username,
+                    "fname", firstName,
+                    "lname", lastName,
+                    "email", email
+                )
+                .addOnSuccessListener {
+                    Log.d("UserRepository", "user data updated successfully")
+                    onResult(null)
+                }
+                .addOnFailureListener{ e ->
+                    Log.w("UserRepository", "error updating user data", e)
+                    onResult(e)
+                }
         }
     }
 

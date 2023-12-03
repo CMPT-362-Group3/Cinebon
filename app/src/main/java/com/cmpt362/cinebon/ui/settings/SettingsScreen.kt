@@ -1,6 +1,7 @@
 package com.cmpt362.cinebon.ui.settings
 
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -24,12 +24,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,12 +49,11 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     val userAuthViewModel = viewModel<UserAuthViewModel>()
     val scrollState = rememberScrollState()
 
-    // TODO: user thing here
-
-    val defaultImage = ImageBitmap.imageResource(R.drawable.defaultphoto).asAndroidBitmap()
     val userInfo = userAuthViewModel.userFlow.collectAsStateWithLifecycle()
 
     userAuthViewModel.getSignedInUser {}
+
+    val context = LocalContext.current
 
     Surface(
         modifier = Modifier
@@ -69,11 +65,10 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                bitmap = userInfo.value?.profilePicture?.asImageBitmap() ?: defaultImage.asImageBitmap(),
+                painter = painterResource(id = R.drawable.defaultphoto),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(175.dp)
-                    .clip(CircleShape)
             )
             // TODO: spacing here TBD later
 
@@ -81,7 +76,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = userInfo.value?.username ?: "",
                 label = { Text("Username") },
                 onValueChange = {
-                    // TODO: insert functionality
+                                newUsername -> username = newUsername
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -97,7 +92,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = userInfo.value?.fname ?: "",
                 label = { Text("First Name") },
                 onValueChange = {
-                    // TODO: insert functionality
+                                newFirstName -> firstName = newFirstName
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -113,7 +108,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = userInfo.value?.lname ?: "",
                 label = { Text("Last Name") },
                 onValueChange = {
-                    // TODO: insert functionality
+                                newLastName -> lastName = newLastName
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -129,7 +124,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                 value = userInfo.value?.email ?: "",
                 label = { Text("Email Address") },
                 onValueChange = {
-                    // TODO: insert functionality
+                                newEmail -> email = newEmail
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -149,7 +144,22 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
                 Button(
                     onClick = {
-
+                        // calls updateUserProfile from userAuthViewModel, which calls updateUserData in user repo
+                              userAuthViewModel.updateUserProfile(
+                                  username,
+                                  firstName,
+                                  lastName,
+                                  email
+                              ) { result ->
+                                  if (result == null) {
+                                      // success, toast and exit
+                                      Toast.makeText(context, "Successfully updated profile", Toast.LENGTH_SHORT).show()
+                                      navigator.navigate(ProfileScreenDestination)
+                                  } else {
+                                      // fail, inform that it failed
+                                      Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                                  }
+                              }
                     },
                     colors = ButtonDefaults.buttonColors
                         (
