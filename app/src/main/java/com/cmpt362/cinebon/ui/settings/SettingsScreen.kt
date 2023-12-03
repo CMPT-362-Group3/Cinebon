@@ -65,7 +65,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     var firstName  by rememberSaveable { mutableStateOf("") }
     var lastName  by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
-    
+
     val context = LocalContext.current
 
     userAuthViewModel.getSignedInUser { user ->
@@ -181,6 +181,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
                                   if (result == null) {
                                       // success
                                       Toast.makeText(context, "Successfully updated profile", Toast.LENGTH_SHORT).show()
+                                      navigator.navigate(ProfileScreenDestination)
                                   } else {
                                       // fail
                                       Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
