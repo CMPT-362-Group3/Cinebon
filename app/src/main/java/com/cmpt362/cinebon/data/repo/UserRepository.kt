@@ -61,6 +61,13 @@ class UserRepository private constructor() {
         }
     }
 
+    suspend fun signOut() {
+        withContext(IO) {
+            FirebaseAuth.getInstance().signOut()
+            _userInfo.value = null
+        }
+    }
+
     private fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
 
     fun getUserData(userId: String) {

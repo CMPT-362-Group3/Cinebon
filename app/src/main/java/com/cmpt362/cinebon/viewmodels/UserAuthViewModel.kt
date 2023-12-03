@@ -8,6 +8,7 @@ import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,6 +22,7 @@ interface AccountService {
     )
 
     fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit)
+    fun signOut()
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
     fun getSignedInUser(onResult: (User?) -> Unit)
     fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit)
@@ -41,6 +43,12 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
         } else {
             Log.d("UserAuthViewModel", "User is not signed in")
             false
+        }
+    }
+
+    override fun signOut() {
+        CoroutineScope(viewModelScope.coroutineContext).launch {
+            userRepository.signOut()
         }
     }
 
