@@ -8,23 +8,27 @@ import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 
 interface AccountService {
-    fun signUp(email: String, password: String, fName: String, lName: String, username: String,
-               profilePhoto: Bitmap, onResult: (Throwable?) -> Unit)
+    fun signUp(
+        email: String, password: String, fName: String, lName: String, username: String,
+        profilePhoto: Bitmap, onResult: (Throwable?) -> Unit
+    )
+
     fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit)
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
     fun getSignedInUser(onResult: (User?) -> Unit)
 }
 
-class UserAuthViewModel(private val userRepository: UserRepository = UserRepository.getInstance()): ViewModel(),
+class UserAuthViewModel(private val userRepository: UserRepository = UserRepository.getInstance()) : ViewModel(),
     AccountService {
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
-    private var _user: User? = null
+    val userFlow: StateFlow<User?>
+        get() = userRepository.userInfo
 
     fun isSignedIn(): Boolean {
         val currentUser = auth.currentUser
@@ -50,8 +54,10 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
             }
     }
 
-    override fun signUp(email: String, password: String, fName: String, lName: String,
-                        username: String, profilePhoto: Bitmap, onResult: (Throwable?) -> Unit) {
+    override fun signUp(
+        email: String, password: String, fName: String, lName: String,
+        username: String, profilePhoto: Bitmap, onResult: (Throwable?) -> Unit
+    ) {
         FirebaseAuth
             .getInstance()
             .createUserWithEmailAndPassword(email, password)
@@ -72,9 +78,8 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
                         newUser.username = username
 //                        newUser.profilePicture = profilePhoto
 
-                        _user = newUser
                         userRepository
-                            .createUserData( newUser )
+                            .createUserData(newUser)
                     }
 
                     // Send verification email
@@ -94,19 +99,20 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
             }
     }
 
-    private fun startSignUpListener(onResult: (Throwable?) -> Unit){
+    private fun startSignUpListener(onResult: (Throwable?) -> Unit) {
         signUpJob = viewModelScope.launch {
             userRepository.userCreatedResult.collect {
                 if (it.isSuccess && it.getOrNull() == true) {
                     Log.d("AccountService", "User created successfully")
                     onResult(null) // Continue to next step
-                } else if(it.isFailure) {
+                } else if (it.isFailure) {
                     Log.d("AccountService", "User creation failed")
                     onResult(Throwable()) // Show error
                 }
 
-                if((it.isSuccess && it.getOrNull() == true) ||
-                    it.isFailure) {
+                if ((it.isSuccess && it.getOrNull() == true) ||
+                    it.isFailure
+                ) {
                     userRepository.resetUserCreatedResult()
                     signUpJob?.cancel()
                 }
@@ -128,18 +134,14 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     }
 
     override fun getSignedInUser(onResult: (User?) -> Unit) {
-        if(_user != null) {
-            onResult(_user)
+        if (userFlow.value != null) {
             return
         }
         try {
             val authUser = auth.currentUser ?: throw Exception("User is not signed in")
             Log.d("UserViewModel", "User is signed in")
 //            userRepository.getUserData(authUser.uid, authUser.photoUrl ?: Uri.EMPTY, onResult)
-            userRepository.getUserData(authUser.uid) {
-                _user = it
-                onResult(it)
-            }
+            userRepository.getUserData(authUser.uid)
         } catch (e: Exception) {
             Log.d("UserViewModel", "Failed to get signed in user")
         }

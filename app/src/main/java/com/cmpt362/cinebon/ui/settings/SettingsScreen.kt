@@ -22,10 +22,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +34,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
@@ -58,21 +55,9 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     // TODO: user thing here
 
     val defaultImage = ImageBitmap.imageResource(R.drawable.defaultphoto).asAndroidBitmap()
-    var profilePicture by rememberSaveable { mutableStateOf(defaultImage)}
-    var username  by rememberSaveable { mutableStateOf("") }
-    var firstName  by rememberSaveable { mutableStateOf("") }
-    var lastName  by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
+    val userInfo = userAuthViewModel.userFlow.collectAsStateWithLifecycle()
 
-    userAuthViewModel.getSignedInUser { user ->
-        if (user != null) {
-            username = user.username
-            firstName = user.fname
-            lastName = user.lname
-            email = user.email
-            profilePicture = user.profilePicture
-        }
-    }
+    userAuthViewModel.getSignedInUser {}
 
     Surface(
         modifier = Modifier
@@ -84,7 +69,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                bitmap = profilePicture.asImageBitmap(),
+                bitmap = userInfo.value?.profilePicture?.asImageBitmap() ?: defaultImage.asImageBitmap(),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(175.dp)
@@ -93,7 +78,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             // TODO: spacing here TBD later
 
             TextField(
-                value = username,
+                value = userInfo.value?.username ?: "",
                 label = { Text("Username") },
                 onValueChange = {
                     // TODO: insert functionality
@@ -109,7 +94,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
 
             TextField(
-                value = firstName,
+                value = userInfo.value?.fname ?: "",
                 label = { Text("First Name") },
                 onValueChange = {
                     // TODO: insert functionality
@@ -125,7 +110,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
 
             TextField(
-                value = lastName,
+                value = userInfo.value?.lname ?: "",
                 label = { Text("Last Name") },
                 onValueChange = {
                     // TODO: insert functionality
@@ -141,7 +126,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
 
             TextField(
-                value = email,
+                value = userInfo.value?.email ?: "",
                 label = { Text("Email Address") },
                 onValueChange = {
                     // TODO: insert functionality
