@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
@@ -52,23 +53,17 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
     val userAuthViewModel = viewModel<UserAuthViewModel>()
     val scrollState = rememberScrollState()
 
-    // TODO: user thing here
+    val userInfo = userAuthViewModel.userFlow.collectAsStateWithLifecycle()
 
-    var username  by rememberSaveable { mutableStateOf("") }
-    var firstName  by rememberSaveable { mutableStateOf("") }
-    var lastName  by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
+    userAuthViewModel.getSignedInUser {}
+
+    var username by rememberSaveable { mutableStateOf(userInfo.value?.username?: "") }
+    var firstName by rememberSaveable { mutableStateOf(userInfo.value?.fname?: "") }
+    var lastName by rememberSaveable { mutableStateOf(userInfo.value?.lname?: "") }
+    var email by rememberSaveable { mutableStateOf(userInfo.value?.email?: "") }
+
 
     val context = LocalContext.current
-
-    userAuthViewModel.getSignedInUser { user ->
-        if (user != null) {
-            username = user.username
-            firstName = user.fname
-            lastName = user.lname
-            email = user.email
-        }
-    }
 
     Surface(
         modifier = Modifier
@@ -88,7 +83,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             // TODO: spacing here TBD later
 
             TextField(
-                value = username,
+                value = userInfo.value?.username ?: "",
                 label = { Text("Username") },
                 onValueChange = {
                                 newUsername -> username = newUsername
@@ -104,7 +99,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
 
             TextField(
-                value = firstName,
+                value = userInfo.value?.fname ?: "",
                 label = { Text("First Name") },
                 onValueChange = {
                                 newFirstName -> firstName = newFirstName
@@ -120,7 +115,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
 
             TextField(
-                value = lastName,
+                value = userInfo.value?.lname ?: "",
                 label = { Text("Last Name") },
                 onValueChange = {
                                 newLastName -> lastName = newLastName
@@ -136,7 +131,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
             )
 
             TextField(
-                value = email,
+                value = userInfo.value?.email ?: "",
                 label = { Text("Email Address") },
                 onValueChange = {
                                 newEmail -> email = newEmail
