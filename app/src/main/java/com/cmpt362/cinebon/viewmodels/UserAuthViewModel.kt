@@ -40,7 +40,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     }
 
     override fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit) {
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+        auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("AccountService", "User signed in successfully")
@@ -54,9 +54,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
 
     override fun signUp(email: String, password: String, fName: String, lName: String,
                         username: String, profilePhoto: Bitmap, onResult: (Throwable?) -> Unit) {
-        FirebaseAuth
-            .getInstance()
-            .createUserWithEmailAndPassword(email, password)
+        auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener {
                 // User create in auth
                 val user = auth.currentUser
@@ -72,7 +70,6 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
                         newUser.fname = fName
                         newUser.lname = lName
                         newUser.username = username
-//                        newUser.profilePicture = profilePhoto
 
                         _user = newUser
                         userRepository
@@ -117,7 +114,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     }
 
     override fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit) {
-        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+        auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("AccountService", "Reset password email sent successfully")
@@ -137,7 +134,6 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
         try {
             val authUser = auth.currentUser ?: throw Exception("User is not signed in")
             Log.d("UserViewModel", "User is signed in")
-//            userRepository.getUserData(authUser.uid, authUser.photoUrl ?: Uri.EMPTY, onResult)
             userRepository.getUserData(authUser.uid) {
                 _user = it
                 onResult(it)
@@ -149,29 +145,39 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
 
     override fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit) {
         // get current user
-        val user = FirebaseAuth.getInstance().currentUser
+        val user = auth.currentUser
 
         // if current user exist, launch updateUserData from userRepo to update user data
-        if (user != null)
-        {
+        if (user != null) {
+            if (user.email != email) {
+                user.updateEmail(email)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("UserAuthViewModel", "User email address updated.")
+                        } else {
+                            Log.d("UserAuthViewModel", "Failed to update user email address.")
+                            onResult(task.exception)
+                        }
+                    }
+            }
+
             val profileUpdates = UserProfileChangeRequest.Builder()
                 .setDisplayName(username)
                 .build()
 
             user.updateProfile(profileUpdates)
-                .addOnCompleteListener{ task ->
-                    if (task.isSuccessful)
-                    {
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
                         viewModelScope.launch {
                             userRepository.updateUserData(
                                 user.uid,
                                 username,
                                 firstName,
                                 lastName,
-                                email
+                                email,
+                                onResult
                             )
                         }
-                        onResult(null)
                     } else {
                         onResult(task.exception)
                     }
