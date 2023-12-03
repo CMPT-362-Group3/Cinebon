@@ -40,7 +40,7 @@ import com.ramcosta.composedestinations.spec.DestinationSpec
 import com.ramcosta.composedestinations.utils.startDestination
 
 val sections = listOf(
-    DashboardNavItems.Movies, DashboardNavItems.Lists, DashboardNavItems.Profile
+    DashboardNavItems.Movies, DashboardNavItems.Lists, DashboardNavItems.Socials
 )
 
 @RootNavGraph
@@ -112,7 +112,7 @@ private fun TopBar(navController: NavController) {
                     when (navController.appCurrentDestinationAsState().value?.route) {
                         DashboardNavItems.Movies.destination.route -> R.string.discover
                         DashboardNavItems.Lists.destination.route -> R.string.lists
-                        DashboardNavItems.Profile.destination.route -> R.string.profile
+                        DashboardNavItems.Socials.destination.route -> R.string.socials
                         else -> R.string.app_name
                     }
                 ),
