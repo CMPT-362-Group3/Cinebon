@@ -12,7 +12,8 @@ class ListEntity {
 }
 
 data class ResolvedListEntity (
+    val listId: String,
     val owner: User,
-    val listName: String,
+    val name: String,
     val movies: MutableList<Movie>
 )
