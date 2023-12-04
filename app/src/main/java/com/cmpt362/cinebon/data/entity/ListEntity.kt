@@ -5,6 +5,11 @@ import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.firestore.DocumentReference
 
 class ListEntity {
+
+    companion object {
+        const val LIST_COLLECTION = "lists"
+    }
+
     lateinit var listId: String
     lateinit var owner: DocumentReference
     lateinit var name: String
