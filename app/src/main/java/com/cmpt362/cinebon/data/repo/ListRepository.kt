@@ -5,9 +5,9 @@ import com.cmpt362.cinebon.data.entity.ListEntity
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +35,7 @@ class ListRepository private constructor() {
 
     private val _listCreatedResult = MutableStateFlow(Result.success(false))
     val listCreatedResult: StateFlow<Result<Boolean>>
-        get()= _listCreatedResult
+        get() = _listCreatedResult
 
     private val _listInfo = MutableStateFlow<ListEntity?>(null)
     val listInfo: StateFlow<ListEntity?>
@@ -81,8 +81,7 @@ class ListRepository private constructor() {
 
         val snapShot = docRef.get().await()
 
-        if (snapShot.exists())
-        {
+        if (snapShot.exists()) {
             Log.d("ListRepository", "List data successfully retrieved")
             return snapShot.toObject<ListEntity>()
         }
@@ -120,8 +119,7 @@ class ListRepository private constructor() {
         val lists = mutableListOf<ListEntity>()
 
         flow {
-            for (listRef in listRefs)
-            {
+            for (listRef in listRefs) {
                 listRef.get().await().apply {
                     toObject<ListEntity>()?.let {
                         it.listId = this.id
@@ -134,13 +132,6 @@ class ListRepository private constructor() {
             _userLists.value = lists
         }.collect {
             lists.add(it)
-
-            val resolvedList = ResolvedListEntity(
-                owner = user,
-                listName = it.listName,
-                movies = it.movies
-            )
-            _resolvedLists.value = _resolvedLists.value + resolvedList
         }
     }
 }
