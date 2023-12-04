@@ -2,6 +2,7 @@ package com.cmpt362.cinebon.data.repo
 
 import android.util.Log
 import com.cmpt362.cinebon.data.entity.ListEntity
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
@@ -23,6 +24,8 @@ class ListRepository private constructor() {
         }
     }
 
+    private val userRepo = UserRepository.getInstance()
+
     private val database = Firebase.firestore
 
     private val _listCreatedResult = MutableStateFlow(Result.success(false))
@@ -35,6 +38,9 @@ class ListRepository private constructor() {
 
     suspend fun createList(list: ListEntity) {
         withContext(IO) {
+
+            list.owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+
             database.collection(LIST_COLLECTION).add(list)
                 .addOnSuccessListener {
                     Log.d("ListRepository", "List data successfully written")
