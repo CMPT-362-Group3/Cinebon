@@ -26,6 +26,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,10 +38,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.chats.ChatUser
 import com.cmpt362.cinebon.data.enums.DashboardNavItems
+import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.SearchViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -62,6 +65,7 @@ fun SocialScreen(navigator: DestinationsNavigator) {
         mutableStateOf(false)
     }
     val searchViewModel = viewModel<SearchViewModel>()
+    val searchResults by searchViewModel.searchResults.collectAsStateWithLifecycle() //observe the search results
     Scaffold(
         topBar = {
             Surface(color = MaterialTheme.colorScheme.background){
@@ -76,12 +80,17 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                     },
-                    onQueryChange = { searchQuery = it },
+                    onQueryChange = {
+                        searchQuery = it
+                        println(searchQuery)
+                                    },
                     onActiveChange = {active = it},
                     active = active,
                     query = searchQuery,
                     content = {},
-                    onSearch = { active = false },
+                    onSearch = {
+                        active = false
+                        searchViewModel.searchUsers(searchQuery)},
                     trailingIcon = {
                         if(active){
                             Icon(
@@ -91,6 +100,7 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                                     }else{
                                         active = false
                                     }
+                                    searchViewModel.resetSearchResults()
                                 },
                                 imageVector = ImageVector.vectorResource(R.drawable.close_icon),
                                 contentDescription = "Exit search",
@@ -142,7 +152,15 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                     }
                 }
 
-            ChatList(dummyChatList(), onItemClick = { /*TODO*/ })
+            // Display search results when the query is not empty
+            if (searchQuery.isNotEmpty()) {
+                UserList(users = searchResults, onItemClick = { /* TODO */ })
+                println("results: $searchResults")
+            } else {
+                // Display regular chat list when the query is empty
+                ChatList(dummyChatList(), onItemClick = { /* TODO */ })
+            }
+
             FloatingActionButton(
                 onClick = { /*TODO*/ },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -161,6 +179,63 @@ fun SocialScreen(navigator: DestinationsNavigator) {
         }
     }
 
+}
+// Add a UserList composable to display search results
+@Composable
+fun UserList(users: List<User>, onItemClick: (User) -> Unit) {
+    LazyColumn {
+        items(users) { user ->
+            UserListItem(user = user, onItemClick = onItemClick)
+        }
+    }
+}
+
+// Add a UserListItem composable to display each user in the list
+@Composable
+fun UserListItem(user: User, onItemClick: (User) -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onItemClick(user) },
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Divider(
+            color = MaterialTheme.colorScheme.primary,
+            thickness = 0.5.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = user.username,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                }
+                Text(
+                    text = user.fname + " "+ user.lname,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+        }
+    }
 }
 private fun dummyChatList():List<ChatUser>{
     val dummyChatList = listOf(

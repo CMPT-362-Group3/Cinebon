@@ -131,6 +131,7 @@ class UserRepository private constructor() {
                 val users = querySnapshot.documents.mapNotNull { it.toObject<User>() }
 
                 _searchResults.value = users
+                Log.d("UserRepository", "$users")
 
             } catch (e: Exception) {
                 Log.w("UserRepository", "error searching for users", e)
@@ -138,6 +139,11 @@ class UserRepository private constructor() {
             }
         }
     }
+
+    fun resetUserSearchResults(){
+        _searchResults.value = emptyList()
+    }
+
     fun attachUserRefListener(listener: EventListener<DocumentSnapshot>) {
         getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
             .addSnapshotListener(listener)
