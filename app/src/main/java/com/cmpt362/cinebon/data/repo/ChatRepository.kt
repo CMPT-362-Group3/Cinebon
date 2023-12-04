@@ -41,15 +41,7 @@ class ChatRepository private constructor() {
     val resolvedChats: StateFlow<List<ResolvedChatEntity>>
         get() = _resolvedChats
 
-    private var isAttached = false
     suspend fun attachChatRefsWorker() {
-        if (isAttached) return
-
-        Log.d("ChatRepository", "Attaching chat refs listener")
-
-        // Set the isAttached flag to true to prevent further coroutine launches
-        isAttached = true
-
         // Start the chat refs worker
         userChats.collectLatest { chats ->
             resolveChats(chats)
