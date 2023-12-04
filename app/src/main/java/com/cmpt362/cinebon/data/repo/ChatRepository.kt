@@ -7,6 +7,7 @@ import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
 import com.cmpt362.cinebon.data.entity.messagePath
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
@@ -134,9 +135,25 @@ class ChatRepository private constructor() {
         }
     }
 
+    // Method to attach listeners to messages collection for a given chat
+    // All the registered listeners are tracked by the repository
+    // And can be requested to be removed.
+    private val _messageRefsListeners = mutableListOf<ListenerRegistration>()
     fun attachMessagesRefListener(chat: ChatEntity, listener: EventListener<QuerySnapshot>) {
         val messagesRef = database.collection(chat.messagePath())
-        messagesRef.addSnapshotListener(listener)
+
+        // Add the listener and track it
+        messagesRef.addSnapshotListener(listener).let {
+            _messageRefsListeners.add(it)
+        }
+    }
+
+    // This method will remove all the messages collection listeners that were registered
+    fun invalidateMessageRefsListeners() {
+        _messageRefsListeners.forEach {
+            it.remove()
+        }
+        _messageRefsListeners.clear()
     }
 
     suspend fun sendMessage(chat: ResolvedChatEntity, text: String) {
