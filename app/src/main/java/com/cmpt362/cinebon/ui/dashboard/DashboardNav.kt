@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cmpt362.cinebon.R
@@ -32,6 +33,7 @@ import com.cmpt362.cinebon.data.enums.DashboardNavItems
 import com.cmpt362.cinebon.ui.NavGraphs
 import com.cmpt362.cinebon.ui.appCurrentDestinationAsState
 import com.cmpt362.cinebon.utils.AppLogo
+import com.cmpt362.cinebon.viewmodels.DashBoardViewModel
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.NavGraph
@@ -49,6 +51,10 @@ val sections = listOf(
 fun DashboardNav() {
 
     val navController = rememberNavController()
+
+    // This creates a dashboard VM instance which starts the chat service
+    val dashboardVM = viewModel<DashBoardViewModel>()
+    dashboardVM.ensureRunningChatService()
 
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
