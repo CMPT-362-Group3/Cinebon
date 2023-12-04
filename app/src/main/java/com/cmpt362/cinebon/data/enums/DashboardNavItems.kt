@@ -11,5 +11,5 @@ enum class DashboardNavItems(val icon: Int, val destination: DirectionDestinatio
     Movies(R.drawable.movie, MoviesScreenDestination),
     Lists(R.drawable.lists, ListsScreenDestination),
     Socials(R.drawable.socials, SocialScreenDestination),
-    //Profile(R.drawable.profile, ProfileScreenDestination)
+    Profile(R.drawable.profile, ProfileScreenDestination)
 }

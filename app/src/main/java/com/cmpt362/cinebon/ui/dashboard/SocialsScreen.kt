@@ -13,13 +13,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,8 +34,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.chats.ChatUser
+import com.cmpt362.cinebon.data.enums.DashboardNavItems
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -49,21 +55,74 @@ fun SocialScreen(navigator: DestinationsNavigator) {
             .scrollable(scrollState, Orientation.Vertical)
             .fillMaxSize(), color = MaterialTheme.colorScheme.background
     ){
-        Row(
-            verticalAlignment = Alignment.CenterVertically, modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ){
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.defaultphoto),
-                    contentDescription = "profile",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
+        Column{
+            Row(
+                verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ){
+                IconButton(onClick = {navigator.navigate(DashboardNavItems.Profile.destination.route){
+                    launchSingleTop = true //if profile screen is already at the top of the stack it will be reused instead of creating another instance of it
+                } }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
+                        contentDescription = "profile",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(48.dp),
+
+                        )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.addchat_icon),
+                        contentDescription = "new chat",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(48.dp),
+
+                        )
+                }
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.search_icon),
+                        contentDescription = "search",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(48.dp)
+
+                        )
+                }
             }
+            Text(
+                text = "Chats",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(8.dp)
+            )
+            ChatList(dummyChatList(), onItemClick = {/*TODO*/})
         }
 
+
+    }
+}
+private fun dummyChatList():List<ChatUser>{
+    val dummyChatList = listOf(
+        ChatUser("1", "Maisha", "Is anyone alive? The chat function is killing me!!", "2023-11-25"),
+        ChatUser("2", "Tanish", "LGTM!", "2023-11-23"),
+        ChatUser("3", "Darrick", "I'm still sleeping.", "2023-11-22"),
+        ChatUser("3", "Shabbir", "SKILL ISSUE", "2023-11-20"),
+
+        )
+    return dummyChatList
+}
+@Composable
+fun ChatList(chatList: List<ChatUser>, onItemClick: (ChatUser) -> Unit) {
+    LazyColumn {
+        items(chatList) { user ->
+            ChatListItem(user = user, onItemClick = onItemClick)
+        }
     }
 }
 
@@ -72,32 +131,34 @@ fun ChatListItem(user: ChatUser, onItemClick: (ChatUser) -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick(user) }
-            .padding(16.dp), color = MaterialTheme.colorScheme.background
+            .clickable { onItemClick(user) },
+        color = MaterialTheme.colorScheme.background
     ) {
+        Divider(
+            color = MaterialTheme.colorScheme.primary,
+            thickness = 0.5.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = user.profilePicture),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape) //making the profile picture show as a circle
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
             Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = user.name, style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = user.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                     Text(
                         text = formatDate(user.lastDate),
                         style = MaterialTheme.typography.bodySmall,
