@@ -1,23 +1,33 @@
 package com.cmpt362.cinebon.data.repo
 
-import android.graphics.BitmapFactory
 import android.util.Log
 import com.cmpt362.cinebon.data.objects.User
-import com.cmpt362.cinebon.data.entity.UserEntity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-private const val USER_COLLECTION = "users"
 
-class UserRepository {
+class UserRepository private constructor() {
+
+    companion object {
+        const val USER_COLLECTION = "users"
+
+        private val instance = UserRepository()
+
+        fun getInstance(): UserRepository {
+            return instance
+        }
+    }
+
     private val database = Firebase.firestore
-    private val storage = Firebase.storage
 
     // Success.false means initial state
     // Success.true means user created
@@ -26,63 +36,89 @@ class UserRepository {
     val userCreatedResult: StateFlow<Result<Boolean>>
         get() = _userCreatedResult
 
+    private val _userInfo = MutableStateFlow<User?>(null)
+    val userInfo: StateFlow<User?>
+        get() = _userInfo
+
     suspend fun createUserData(user: User) {
         withContext(IO) {
-            /*val bitmap = user.profilePicture
-            val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-            storage.reference.child("users/${user.userId}/profilePhoto.jpg")
-                .putBytes(baos.toByteArray())
-                .addOnSuccessListener {
-                    Log.d("UserRepository", "Profile picture uploaded")
-                }
-                .addOnFailureListener { e ->
-                    Log.d("UserRepository", "Profile picture upload failed")
-                }*/
-            // ^ This was my attempt to upload the profile picture to firebase storage
-            // I was unable to get it to work, so I commented it out
-            // I also commented out the code in UserAuthViewModel.kt that calls this function
-            // https://firebase.google.com/docs/storage/android/upload-files
-            // Check this link for more info on how to upload files to firebase storage
-
-
             database.collection(USER_COLLECTION).document(user.userId)
-                .set(user.toEntity())
+                .set(user)
                 .addOnSuccessListener {
                     Log.d("UserRepository", "User data successfully written")
                     _userCreatedResult.value = Result.success(true)
+                    _userInfo.value = user
                 }
                 .addOnFailureListener { e ->
                     Log.w("UserRepository", "Error writing document", e)
                     _userCreatedResult.value = Result.failure(e)
+                    _userInfo.value = null
                 }
         }
     }
 
-    fun getUserData(userId: String, onResult: (User?) -> Unit) {
-        val docRef = database.collection(USER_COLLECTION).document(userId)
-        Log.d("UserRepository", "Getting user data")
-        docRef.get().addOnSuccessListener {
-            Log.d("UserRepository", "User data successfully retrieved")
-            val user = it.toObject<UserEntity>()
-            if (user != null) {
-                val userObj = user.toUser()
-                storage.reference.child("users/$userId/profilePhoto.jpg")
-                    .getBytes(Long.MAX_VALUE).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            userObj.profilePicture = BitmapFactory
-                                .decodeStream(task.result.inputStream())
-
-                            onResult(userObj)
-                        } else {
-                            Log.d("UserRepository", "Failed to get profile picture")
-                            onResult(null)
-                        }
-                    }
-            } else {
-                onResult(null)
-            }
+    suspend fun signOut() {
+        withContext(IO) {
+            FirebaseAuth.getInstance().signOut()
+            _userInfo.value = null
         }
+    }
+
+    private fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
+
+    suspend fun updateCurrentUserData() {
+        val docRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+
+        val snapShot = docRef.get().await()
+
+        if (snapShot.exists()) {
+            Log.d("UserRepository", "User data successfully retrieved")
+            _userInfo.value = snapShot.toObject<User>()
+        }
+
+        Log.d("UserRepository", "Error getting user data")
+    }
+
+    suspend fun getUserData(userId: String): User? {
+        val docRef = getUserRef(userId)
+
+        val snapShot = docRef.get().await()
+
+        if (snapShot.exists()) {
+            Log.d("UserRepository", "User data successfully retrieved")
+            return snapShot.toObject<User>()
+        }
+
+        Log.d("UserRepository", "Error getting user data")
+        return null
+    }
+
+    suspend fun updateUserData(
+        userId: String, username: String, firstName: String,
+        lastName: String, email: String, onResult: (Throwable?) -> Unit
+    ) {
+        withContext(IO) {
+            database.collection(USER_COLLECTION).document(userId)
+                .update(
+                    "username", username,
+                    "fname", firstName,
+                    "lname", lastName,
+                    "email", email
+                )
+                .addOnSuccessListener {
+                    Log.d("UserRepository", "user data updated successfully")
+                    onResult(null)
+                }
+                .addOnFailureListener { e ->
+                    Log.w("UserRepository", "error updating user data", e)
+                    onResult(e)
+                }
+        }
+    }
+
+    fun attachUserRefListener(listener: EventListener<DocumentSnapshot>) {
+        getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+            .addSnapshotListener(listener)
     }
 
     fun resetUserCreatedResult() {

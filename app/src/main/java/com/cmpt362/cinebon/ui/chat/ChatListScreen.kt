@@ -2,7 +2,15 @@ package com.cmpt362.cinebon.ui.chat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -15,29 +23,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
+import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.viewmodels.ChatListViewModel
+import com.ramcosta.composedestinations.annotation.Destination
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-data class ChatUser(val id: String, val name: String, val lastMessage: String, val profilePicture: Int, val lastDate:String)
+data class ChatUser(val id: String, val name: String, val lastMessage: String, val profilePicture: Int, val lastDate: String)
 
+@DashboardNavGraph
+@Destination
 @Composable
-fun ChatList(chatList: List<ChatUser>, onItemClick: (ChatUser) -> Unit) {
+fun ChatListScreen() {
+    val chatListVM = viewModel<ChatListViewModel>()
+    val chatList = chatListVM.resolvedChats.collectAsStateWithLifecycle().value
+
     LazyColumn {
-        items(chatList) { user ->
-            ChatListItem(user = user, onItemClick = onItemClick)
+        items(chatList) { chatItem ->
+            ChatListItem(chat = chatItem, onItemClick = {
+                // TODO: Navigate to individual chat screen
+            })
         }
     }
+
 }
 
 @Composable
-fun ChatListItem(user: ChatUser, onItemClick: (ChatUser) -> Unit) {
+fun ChatListItem(chat: ResolvedChatEntity, onItemClick: (ResolvedChatEntity) -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick(user) }
+            .clickable { onItemClick(chat) }
             .padding(16.dp), color = MaterialTheme.colorScheme.background
     ) {
         Row(
@@ -47,7 +68,7 @@ fun ChatListItem(user: ChatUser, onItemClick: (ChatUser) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = user.profilePicture),
+                painter = painterResource(id = R.drawable.defaultphoto),
                 contentDescription = null,
                 modifier = Modifier
                     .size(56.dp)
@@ -62,14 +83,17 @@ fun ChatListItem(user: ChatUser, onItemClick: (ChatUser) -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = user.name, style = MaterialTheme.typography.bodyMedium)
                     Text(
-                        text = formatDate(user.lastDate),
+                        text = chat.others.joinToString { it.fname },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "Replace date", // TODO: Replace with last message date
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
                 Text(
-                    text = "${user.lastMessage}",
+                    text = "{user.lastMessage}", // TODO: Replace with last message
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -80,20 +104,6 @@ fun ChatListItem(user: ChatUser, onItemClick: (ChatUser) -> Unit) {
     }
 }
 
-@Preview
-@Composable
-fun ChatListPreview() {
-    val dummyChatList = listOf(
-        ChatUser("1", "Maisha", "Is anyone alive? The chat function is killing me!!", R.drawable.defaultphoto, "2023-11-25"),
-        ChatUser("2", "Tanish", "LGTM!", R.drawable.defaultphoto, "2023-11-23"),
-        ChatUser("3", "Darrick", "I'm still sleeping.", R.drawable.defaultphoto, "2023-11-22"),
-        ChatUser("3", "Shabbir", "SKILL ISSUE", R.drawable.defaultphoto, "2023-11-20"),
-
-    )
-    ChatList(chatList = dummyChatList, onItemClick = { //todo })
-    })
-
-}
 private fun formatDate(dateString: String): String {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val date = dateFormat.parse(dateString)
