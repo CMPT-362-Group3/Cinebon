@@ -1,16 +1,15 @@
 package com.cmpt362.cinebon.ui.dashboard
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,22 +21,28 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.chats.ChatUser
 import com.cmpt362.cinebon.data.enums.DashboardNavItems
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.SearchViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
@@ -45,49 +50,76 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @DashboardNavGraph
 @Destination
 @Composable
 fun SocialScreen(navigator: DestinationsNavigator) {
     val scrollState = rememberScrollState()
-
-    Box(
-        modifier = Modifier
-            .scrollable(scrollState, Orientation.Vertical)
-            .fillMaxSize()
-    ) {
-        Column {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(8.dp),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    SearchBar(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp, end = 8.dp),
-                        shape = MaterialTheme.shapes.large,
-                        placeholder = { Text("Search") },
-                        leadingIcon = {
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var active by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val searchViewModel = viewModel<SearchViewModel>()
+    Scaffold(
+        topBar = {
+            Surface(color = MaterialTheme.colorScheme.background){
+                SearchBar(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large,
+                    placeholder = { Text("Search") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.search_icon),
+                            contentDescription = "Find Friends",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    onQueryChange = { searchQuery = it },
+                    onActiveChange = {active = it},
+                    active = active,
+                    query = searchQuery,
+                    content = {},
+                    onSearch = { active = false },
+                    trailingIcon = {
+                        if(active){
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.search_icon),
-                                contentDescription = "Search",
+                                modifier = Modifier.clickable{
+                                    if(searchQuery.isNotEmpty()){
+                                        searchQuery = ""
+                                    }else{
+                                        active = false
+                                    }
+                                },
+                                imageVector = ImageVector.vectorResource(R.drawable.close_icon),
+                                contentDescription = "Exit search",
                                 tint = MaterialTheme.colorScheme.primary
                             )
-                        },
-                        onQueryChange = { /* TODO*/ },
-                        onActiveChange = {/* TODO*/},
-                        active = true,
-                        query = "Search Friends",
-                        content = {/* TODO*/},
-                        onSearch = {/* TODO*/},
+                        }
+                    }
+                )
+            }
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .scrollable(scrollState, Orientation.Vertical)
+                .fillMaxSize()
+                .padding(top = 58.dp)
+        ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = "Chats",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(8.dp)
                     )
 
                     Spacer(Modifier.weight(1f))
@@ -95,7 +127,8 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                     IconButton(
                         onClick = {
                             navigator.navigate(DashboardNavItems.Profile.destination.route) {
-                                launchSingleTop = true //doesnt create new instance of profile screen if it already exists
+                                launchSingleTop =
+                                    true //doesnt create new instance of profile screen if it already exists
                             }
                         }
                     ) {
@@ -108,34 +141,26 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                         )
                     }
                 }
-            }
-
-            Text(
-                text = "Chats",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(8.dp)
-            )
 
             ChatList(dummyChatList(), onItemClick = { /*TODO*/ })
-        }
-
-        FloatingActionButton(
-            onClick = { /*TODO*/ },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier
-                .padding(8.dp)
-                .align(Alignment.BottomEnd)
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.addchat_icon),
-                contentDescription = "new chat",
-                tint = MaterialTheme.colorScheme.primary,
+            FloatingActionButton(
+                onClick = { /*TODO*/ },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
-                    .size(48.dp),
-            )
+                    .padding(8.dp)
+                    .align(Alignment.End)
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.addchat_icon),
+                    contentDescription = "new chat",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(48.dp),
+                )
+            }
         }
     }
+
 }
 private fun dummyChatList():List<ChatUser>{
     val dummyChatList = listOf(
