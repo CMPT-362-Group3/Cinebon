@@ -20,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.data.enums.DashboardNavItems
 import com.cmpt362.cinebon.ui.destinations.SettingsScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
@@ -75,31 +77,35 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                 .scrollable(scrollState, Orientation.Vertical)
                 .fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
+            Row (
+                horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()
+                    .padding(16.dp)
+            ){
+                IconButton(
+                    onClick = { navigator.navigate(DashboardNavItems.Socials.destination.route) {
+                    launchSingleTop = true //doesn't create new instance of social screen if it already exists
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.back_icon),
+                        contentDescription = "back",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(48.dp)
+                    )
+                }
+            }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Row (horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    Button(
-                        onClick = { userAuthViewModel.signOut() },
-                        colors = ButtonDefaults.buttonColors
-                            (
-                            contentColor = MaterialTheme.colorScheme.onError,
-                            containerColor = MaterialTheme.colorScheme.error
-                        ),
-                        modifier = Modifier
-                            .padding(vertical = 12.dp, horizontal = 12.dp)
-                    ) {
-                        Text(text = "Sign Out")
-                    }
-
-                }
-
-                Image(
-                    painter = painterResource(id = R.drawable.defaultphoto),
-                    contentDescription = "Profile Picture",
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
+                    contentDescription = "profile picture",
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .size(175.dp)
+                        .size(200.dp)
                 )
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -217,6 +223,22 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                         .padding(vertical = 64.dp)
                 ) {
                     Text("${userInfo.value?.fname}'s Movie List")
+                }
+
+                Row (horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = { userAuthViewModel.signOut() },
+                        colors = ButtonDefaults.buttonColors
+                            (
+                            contentColor = MaterialTheme.colorScheme.onError,
+                            containerColor = MaterialTheme.colorScheme.error
+                        ),
+                        modifier = Modifier
+                            .padding(vertical = 12.dp, horizontal = 12.dp)
+                    ) {
+                        Text(text = "Sign Out")
+                    }
+
                 }
             }
         }

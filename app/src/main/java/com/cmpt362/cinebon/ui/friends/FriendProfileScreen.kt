@@ -16,13 +16,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
@@ -37,16 +41,32 @@ fun FriendProfileScreen() {
             .scrollable(scrollState, Orientation.Vertical)
             .fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-
-            // TODO: currently using dummy data
-            Image(
-                painter = painterResource(id = R.drawable.defaultphoto),
-                contentDescription = "Profile Picture",
+        Row (
+            horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()
+                .padding(16.dp)
+        ){
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.back_icon),
+                    contentDescription = "back",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(48.dp)
+                    )
+            }
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
+                contentDescription = "profile picture",
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .size(175.dp)
+                    .size(200.dp)
             )
-
             Text(
                 text = "Jack Doe",
                 style = MaterialTheme.typography.displaySmall,
@@ -61,7 +81,7 @@ fun FriendProfileScreen() {
             ) {
                 Button(
                     onClick = {
-
+                        /*TODO*/
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -71,35 +91,12 @@ fun FriendProfileScreen() {
                     modifier = Modifier
                         .padding(vertical = 16.dp)
                         .padding(end = 4.dp)
-                        .weight(1f)
                 ) {
                     Text("Message", Modifier.padding(8.dp))
                 }
-
                 Button(
                     onClick = {
-
-                    },
-                    colors = ButtonDefaults.buttonColors
-                        (
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .padding(start = 4.dp, end = 4.dp)
-                        .weight(1f)
-                ) {
-//                    Text("Schedule Event", Modifier.padding(8.dp))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                        Text("Schedule")
-                        Text("Event")
-                    }
-                }
-
-                Button(
-                    onClick = {
-
+                            /*TODO*/
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -109,13 +106,8 @@ fun FriendProfileScreen() {
                     modifier = Modifier
                         .padding(vertical = 16.dp)
                         .padding(start = 4.dp)
-                        .weight(1f)
                 ) {
-//                    Text("Remove Friend", Modifier.padding(8.dp))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                        Text("Remove")
-                        Text("Friend")
-                    }
+                    Text("Add Friend", Modifier.padding(8.dp))
                 }
             }
 
