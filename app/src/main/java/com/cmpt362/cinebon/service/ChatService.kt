@@ -14,6 +14,7 @@ import androidx.core.app.ServiceCompat
 import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.repo.ChatRepository
+import com.cmpt362.cinebon.data.repo.ListRepository
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
@@ -31,6 +32,7 @@ class ChatService : Service() {
 
     private val userRepository = UserRepository.getInstance()
     private val chatRepository = ChatRepository.getInstance()
+    private val listRepository = ListRepository.getInstance()
     private val serviceScope = CoroutineScope(Default)
 
     override fun onBind(p0: Intent?): IBinder {
@@ -45,6 +47,9 @@ class ChatService : Service() {
 
         // Start the chat listener worker coroutine to listen for chat updates
         startChatWorker()
+
+        // Start teh list refresh worker coroutine to listen for list updates
+        startListWorker()
 
         // Trigger a user data update manually to ensure that the user data is up to date
         serviceScope.launch { userRepository.updateCurrentUserData() }
@@ -62,6 +67,12 @@ class ChatService : Service() {
         serviceScope.launch {
             Log.d("ChatService", "Starting chat worker")
             chatRepository.attachChatRefsWorker()
+        }
+    }
+
+    private fun startListWorker() {
+        serviceScope.launch {
+            listRepository.startListRefreshWorker()
         }
     }
 
