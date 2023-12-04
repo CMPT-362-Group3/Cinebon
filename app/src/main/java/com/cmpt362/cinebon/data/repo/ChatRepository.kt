@@ -107,13 +107,7 @@ class ChatRepository private constructor() {
     // Changes in user info may be due to added or removed chats.
     // This worker will listen to whenever there's a change in user info
     // And will update the user chats list accordingly.
-    private var isChatRefreshWorkerStarted = false
     suspend fun startChatRefreshWorker() {
-        // If we're already waiting for a chat update, don't trigger another.
-        if (isChatRefreshWorkerStarted) return
-
-        isChatRefreshWorkerStarted = true
-
         // Listen to updates in user info and repopulate user chats when it changes
         userRepo.userInfo.collectLatest {
             if (it == null) return@collectLatest

@@ -103,10 +103,7 @@ class ListRepository private constructor() {
         _listCreatedResult.value = Result.success(false)
     }
 
-    private var isListRefreshWorkerStarted = false
     suspend fun startListRefreshWorker() {
-        if (isListRefreshWorkerStarted) return
-
         userRepo.userInfo.collectLatest {
             if (it == null) return@collectLatest
 
