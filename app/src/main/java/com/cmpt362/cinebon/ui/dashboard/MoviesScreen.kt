@@ -97,14 +97,20 @@ fun MoviesScreen(navigator: DestinationsNavigator) {
                     1 -> moviesViewModel.popularMovies.collectAsStateWithLifecycle().value
                     2 -> moviesViewModel.upcomingMovies.collectAsStateWithLifecycle().value
                     else -> emptyList()
-                }, navigator
+                }, onClick = {
+                    navigator.navigate(
+                        MovieInfoScreenDestination(
+                            movieId = it.id,
+                        )
+                    )
+                }
             )
         }
     }
 }
 
 @Composable
-fun MoviesGrid(source: List<Movie>, navigator: DestinationsNavigator) {
+fun MoviesGrid(source: List<Movie>, onClick: (Movie) -> Unit) {
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
@@ -113,13 +119,7 @@ fun MoviesGrid(source: List<Movie>, navigator: DestinationsNavigator) {
         modifier = Modifier.padding(16.dp),
         content = {
             items(source.size) {
-                MovieCard(movie = source[it], onClick = {
-                    navigator.navigate(
-                        MovieInfoScreenDestination(
-                            movieId = source[it].id,
-                        )
-                    )
-                })
+                MovieCard(movie = source[it], onClick = { onClick(source[it]) })
             }
         })
 }
