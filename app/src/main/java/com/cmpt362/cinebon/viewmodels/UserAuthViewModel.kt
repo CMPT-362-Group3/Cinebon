@@ -26,6 +26,9 @@ interface AccountService {
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
     fun getSignedInUser(onResult: (User?) -> Unit)
     fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit)
+
+    fun getUserByID(userId: String)
+
 }
 
 class UserAuthViewModel(private val userRepository: UserRepository = UserRepository.getInstance()) : ViewModel(),
@@ -34,6 +37,9 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     private var signUpJob: Job? = null
     val userFlow: StateFlow<User?>
         get() = userRepository.userInfo
+
+    val otherUserFlow: StateFlow<User?>
+        get() = userRepository.otherUserInfo
 
     fun isSignedIn(): Boolean {
         val currentUser = auth.currentUser
@@ -155,6 +161,15 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
             viewModelScope.launch { userRepository.updateCurrentUserData() }
         } catch (e: Exception) {
             Log.d("UserViewModel", "Failed to get signed in user")
+        }
+    }
+
+    override fun getUserByID(userId: String) {
+        try {
+            viewModelScope.launch { userRepository.getOtherUserData(userId) }
+            Log.d("UserViewModel", "Successfully got user by their id")
+        } catch (e: Exception) {
+            Log.d("UserViewModel", "Failed to get user by their id", e)
         }
     }
 

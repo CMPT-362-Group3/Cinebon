@@ -40,6 +40,10 @@ class UserRepository private constructor() {
     val userInfo: StateFlow<User?>
         get() = _userInfo
 
+    private val _otherUserInfo = MutableStateFlow<User?>(null)
+    val otherUserInfo: StateFlow<User?>
+        get() = _otherUserInfo
+
     private val _searchResults = MutableStateFlow<List<User>>(emptyList())
     val searchResults: StateFlow<List<User>>
         get() = _searchResults
@@ -97,6 +101,18 @@ class UserRepository private constructor() {
         return null
     }
 
+    suspend fun getOtherUserData(userId: String) {
+        val docRef = getUserRef(userId)
+
+        val snapShot = docRef.get().await()
+
+        if (snapShot.exists()) {
+            Log.d("UserRepository", "User data successfully retrieved")
+            _otherUserInfo.value = snapShot.toObject<User>()
+        }
+
+        Log.d("UserRepository", "Error getting user data")
+    }
     suspend fun updateUserData(
         userId: String, username: String, firstName: String,
         lastName: String, email: String, onResult: (Throwable?) -> Unit
