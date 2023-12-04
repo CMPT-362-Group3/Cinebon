@@ -1,5 +1,6 @@
 package com.cmpt362.cinebon.data.entity
 
+import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.firestore.DocumentReference
 
@@ -13,5 +14,5 @@ class ListEntity {
 data class ResolvedListEntity (
     val owner: User,
     val listName: String,
-    val movies: MutableList<Int> = mutableListOf()
+    val movies: MutableList<Movie>
 )
