@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import com.cmpt362.cinebon.service.ChatService
+import com.cmpt362.cinebon.service.NetworkService
 
 class DashBoardViewModel(private val app: Application) : AndroidViewModel(app) {
 
@@ -18,7 +18,7 @@ class DashBoardViewModel(private val app: Application) : AndroidViewModel(app) {
         if (isRunning) return
 
         Log.d("DashBoardViewModel", "Starting chat service")
-        app.startForegroundService(Intent(app.applicationContext, ChatService::class.java))
+        app.startForegroundService(Intent(app.applicationContext, NetworkService::class.java))
         isRunning = true
     }
 }

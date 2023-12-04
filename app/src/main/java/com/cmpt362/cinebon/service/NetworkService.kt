@@ -25,7 +25,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class ChatService : Service() {
+class NetworkService : Service() {
 
     companion object {
         const val CHANNEL_ID = "Cinebon_chat"
