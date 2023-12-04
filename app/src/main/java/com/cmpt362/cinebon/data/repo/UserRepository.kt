@@ -72,7 +72,7 @@ class UserRepository private constructor() {
         val snapShot = docRef.get().await()
 
         if (snapShot.exists()) {
-            Log.d("UserRepository", "User data successfully retrieved")
+            Log.d("UserRepository", "Current user data successfully retrieved")
             _userInfo.value = snapShot.toObject<User>()
         }
 
