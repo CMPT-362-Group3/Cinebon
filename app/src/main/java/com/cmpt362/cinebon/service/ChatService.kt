@@ -14,13 +14,14 @@ import androidx.core.app.ServiceCompat
 import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.repo.ChatRepository
-import com.cmpt362.cinebon.data.repo.ListRepository
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class ChatService : Service() {
@@ -33,7 +34,10 @@ class ChatService : Service() {
     private val userRepository = UserRepository.getInstance()
     private val chatRepository = ChatRepository.getInstance()
     private val listRepository = ListRepository.getInstance()
-    private val serviceScope = CoroutineScope(Default)
+
+    private val serviceScope = CoroutineScope(IO)
+    private var messagingScope = CoroutineScope(IO)
+
 
     override fun onBind(p0: Intent?): IBinder {
         return Binder()
@@ -46,16 +50,16 @@ class ChatService : Service() {
         showForegroundNotification()
 
         // Start the chat listener worker coroutine to listen for chat updates
-        startChatWorker()
+        startChatWorkers()
 
-        // Start teh list refresh worker coroutine to listen for list updates
+        // Start thh list refresh worker coroutine to listen for list updates
         startListWorker()
 
         // Trigger a user data update manually to ensure that the user data is up to date
         serviceScope.launch { userRepository.updateCurrentUserData() }
     }
 
-    private fun startChatWorker() {
+    private fun startChatWorkers() {
         serviceScope.launch {
             userRepository.attachUserRefListener(userRefListener)
         }
@@ -63,6 +67,8 @@ class ChatService : Service() {
         serviceScope.launch {
             chatRepository.startChatRefreshWorker()
         }
+
+        startMessagesRefreshWorker()
 
         serviceScope.launch {
             Log.d("ChatService", "Starting chat worker")
@@ -80,13 +86,52 @@ class ChatService : Service() {
     // We only use it to receive latest user chats state
     private val userRefListener = EventListener<DocumentSnapshot> { snapshot, e ->
         if (e != null) {
-            Log.w("ChatService", "Listen failed", e)
+            Log.w("ChatService", "User ref listen failed", e)
             return@EventListener
         }
 
         Log.w("ChatService", "User ref snapshot updated: $snapshot")
         serviceScope.launch {
             userRepository.updateCurrentUserData()
+        }
+    }
+
+    private val messagesRefListener = EventListener<QuerySnapshot> { snapshot, e ->
+        if (e != null) {
+            Log.w("ChatService", "Messages ref listen failed", e)
+            return@EventListener
+        }
+
+        Log.w("ChatService", "Messages ref snapshot updated: $snapshot")
+        serviceScope.launch {
+            chatRepository.forceResolveChats()
+        }
+    }
+
+    // This worker reacts to the new list of chats user is part of
+    // and then listens to the messages collection in those chat documents.
+    private fun startMessagesRefreshWorker() {
+        serviceScope.launch {
+
+            // Observed user authenticated chats
+            chatRepository.userChats.collectLatest {
+                Log.d("ChatService", "User chats updated, cancelling message scope")
+
+                // Cancel any previously running message observers (they may be invalid)
+                messagingScope.cancel()
+                messagingScope = CoroutineScope(IO)
+
+                Log.d("ChatService", "Starting new message scope")
+
+                // For each chat, start a message listener coroutine
+                // Whenever a message document updates, update the resolved chats list.
+                for (chat in it) {
+                    messagingScope.launch {
+                        Log.d("ChatService", "Attaching messages ref listener for chat ${chat.chatId}")
+                        chatRepository.attachMessagesRefListener(chat, messagesRefListener)
+                    }
+                }
+            }
         }
     }
 
