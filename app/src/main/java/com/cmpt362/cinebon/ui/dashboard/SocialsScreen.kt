@@ -1,40 +1,39 @@
 package com.cmpt362.cinebon.ui.dashboard
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.chats.ChatUser
 import com.cmpt362.cinebon.data.enums.DashboardNavItems
@@ -45,66 +44,97 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @DashboardNavGraph
 @Destination
 @Composable
 fun SocialScreen(navigator: DestinationsNavigator) {
     val scrollState = rememberScrollState()
-    Surface(
+
+    Box(
         modifier = Modifier
             .scrollable(scrollState, Orientation.Vertical)
-            .fillMaxSize(), color = MaterialTheme.colorScheme.background
-    ){
-        Column{
-            Row(
-                verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column {
+            Surface(
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-            ){
-                IconButton(onClick = {navigator.navigate(DashboardNavItems.Profile.destination.route){
-                    launchSingleTop = true //if profile screen is already at the top of the stack it will be reused instead of creating another instance of it
-                } }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
-                        contentDescription = "profile",
-                        tint = MaterialTheme.colorScheme.primary,
+                    .height(56.dp)
+                    .padding(8.dp),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SearchBar(
                         modifier = Modifier
-                            .size(48.dp),
+                            .weight(1f)
+                            .padding(start = 8.dp, end = 8.dp),
+                        shape = MaterialTheme.shapes.large,
+                        placeholder = { Text("Search") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.search_icon),
+                                contentDescription = "Search",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        onQueryChange = { /* TODO*/ },
+                        onActiveChange = {/* TODO*/},
+                        active = true,
+                        query = "Search Friends",
+                        content = {/* TODO*/},
+                        onSearch = {/* TODO*/},
+                    )
 
-                        )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.addchat_icon),
-                        contentDescription = "new chat",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(48.dp),
+                    Spacer(Modifier.weight(1f))
 
+                    IconButton(
+                        onClick = {
+                            navigator.navigate(DashboardNavItems.Profile.destination.route) {
+                                launchSingleTop = true //doesnt create new instance of profile screen if it already exists
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
+                            contentDescription = "profile",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(48.dp)
                         )
-                }
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.search_icon),
-                        contentDescription = "search",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(48.dp)
-
-                        )
+                    }
                 }
             }
+
             Text(
                 text = "Chats",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(8.dp)
             )
-            ChatList(dummyChatList(), onItemClick = {/*TODO*/})
+
+            ChatList(dummyChatList(), onItemClick = { /*TODO*/ })
         }
 
-
+        FloatingActionButton(
+            onClick = { /*TODO*/ },
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.BottomEnd)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.addchat_icon),
+                contentDescription = "new chat",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .size(48.dp),
+            )
+        }
     }
 }
 private fun dummyChatList():List<ChatUser>{

@@ -1,4 +1,4 @@
-package com.cmpt362.cinebon.ui.dashboard
+package com.cmpt362.cinebon.ui.friends
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.Orientation
