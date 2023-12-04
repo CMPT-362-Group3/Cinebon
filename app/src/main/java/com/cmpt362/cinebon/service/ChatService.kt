@@ -14,6 +14,7 @@ import androidx.core.app.ServiceCompat
 import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.repo.ChatRepository
+import com.cmpt362.cinebon.data.repo.ListRepository
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
