@@ -41,7 +41,7 @@ class ChatRepository private constructor() {
     val resolvedChats: StateFlow<List<ResolvedChatEntity>>
         get() = _resolvedChats
 
-    suspend fun attachChatRefsWorker() {
+    suspend fun attachChatResolverWorker() {
         // Start the chat refs worker
         userChats.collectLatest { chats ->
             resolveChats(chats)

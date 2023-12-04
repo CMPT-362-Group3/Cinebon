@@ -80,7 +80,7 @@ class NetworkService : Service() {
 
         serviceScope.launch {
             Log.d("ChatService", "Starting chat worker")
-            chatRepository.attachChatRefsWorker()
+            chatRepository.attachChatResolverWorker()
         }
     }
 
