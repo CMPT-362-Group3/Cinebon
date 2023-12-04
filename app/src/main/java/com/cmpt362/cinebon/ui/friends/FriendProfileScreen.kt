@@ -172,7 +172,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
 
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text(
-                    text = "Last Watched = Barbie",
+                    text = "Last Watched",
                     style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier
                         .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
@@ -184,6 +184,10 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                         .padding(horizontal = 8.dp),
                     color = MaterialTheme.colorScheme.primary,
                     thickness = 4.dp
+                )
+                Text(
+                    text = "Barbie",
+                    style = MaterialTheme.typography.headlineMedium,
                 )
             }
 

@@ -194,7 +194,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Last Watched: $lastWatched",
+                        text = "Last Watched",
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
@@ -206,6 +206,11 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                             .padding(horizontal = 8.dp),
                         color = MaterialTheme.colorScheme.primary,
                         thickness = 4.dp
+                    )
+
+                    Text(
+                        text = lastWatched,
+                        style = MaterialTheme.typography.headlineMedium,
                     )
                 }
 
