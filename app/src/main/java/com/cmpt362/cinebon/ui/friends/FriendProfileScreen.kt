@@ -22,12 +22,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
@@ -39,8 +44,16 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Destination
 @Composable
 fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
+    val userAuthViewModel = viewModel<UserAuthViewModel>()
     val scrollState = rememberScrollState()
-    Log.d("FriendProfileScreen", userID)
+    val userInfo = userAuthViewModel.otherUserFlow.collectAsStateWithLifecycle()
+    val friendsCount by rememberSaveable { mutableIntStateOf(0) }
+    val moviesWatched by rememberSaveable { mutableIntStateOf(0) }
+    val lastWatched by rememberSaveable { mutableStateOf("") }
+
+    // Triggers the userViewModel to get user by their id
+    userAuthViewModel.getUserByID(userID) {}
+
     Surface(
         modifier = Modifier
             .scrollable(scrollState, Orientation.Vertical)
@@ -75,7 +88,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                     .size(200.dp)
             )
             Text(
-                text = "Jack Doe",
+                text = userInfo.value?.username ?: "",
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
@@ -140,7 +153,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                     )
 
                     Text(
-                        text = "20",
+                        text = friendsCount.toString(),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -164,7 +177,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                     )
 
                     Text(
-                        text = "100",
+                        text = moviesWatched.toString(),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
@@ -186,7 +199,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                     thickness = 4.dp
                 )
                 Text(
-                    text = "Barbie",
+                    text = lastWatched,
                     style = MaterialTheme.typography.headlineMedium,
                 )
             }
@@ -203,7 +216,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                 modifier = Modifier
                     .padding(vertical = 64.dp)
             ) {
-                Text("Jack's Movie List")
+                Text("${userInfo.value?.fname}'s Movie List")
             }
         }
     }
