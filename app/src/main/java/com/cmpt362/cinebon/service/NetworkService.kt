@@ -50,26 +50,33 @@ class NetworkService : Service() {
         // Create a notification and start the service as a foreground service
         showForegroundNotification()
 
+        // Start the current user worker coroutine to listen for chat updates
+        startUserWorker()
+
         // Start the chat listener worker coroutine to listen for chat updates
         startChatWorkers()
 
-        // Start thh list refresh worker coroutine to listen for list updates
+        // Start the list refresh worker coroutine to listen for list updates
         startListWorker()
 
         // Trigger a user data update manually to ensure that the user data is up to date
         serviceScope.launch { userRepository.updateCurrentUserData() }
     }
 
-    private fun startChatWorkers() {
+    private fun startUserWorker() {
         serviceScope.launch {
             userRepository.attachUserRefListener(userRefListener)
         }
+    }
 
+    private fun startChatWorkers() {
         serviceScope.launch {
             chatRepository.startChatRefreshWorker()
         }
 
-        startMessagesRefreshWorker()
+        serviceScope.launch {
+            startMessagesRefreshWorker()
+        }
 
         serviceScope.launch {
             Log.d("ChatService", "Starting chat worker")
@@ -111,26 +118,23 @@ class NetworkService : Service() {
 
     // This worker reacts to the new list of chats user is part of
     // and then listens to the messages collection in those chat documents.
-    private fun startMessagesRefreshWorker() {
-        serviceScope.launch {
+    private suspend fun startMessagesRefreshWorker() {
+        // Observe user authenticated chats
+        chatRepository.userChats.collectLatest {
+            Log.d("ChatService", "User chats updated, cancelling message scope")
 
-            // Observed user authenticated chats
-            chatRepository.userChats.collectLatest {
-                Log.d("ChatService", "User chats updated, cancelling message scope")
+            // Cancel any previously running message observers (they may be invalid)
+            messagingScope.cancel()
+            messagingScope = CoroutineScope(IO)
 
-                // Cancel any previously running message observers (they may be invalid)
-                messagingScope.cancel()
-                messagingScope = CoroutineScope(IO)
+            Log.d("ChatService", "Starting new message scope")
 
-                Log.d("ChatService", "Starting new message scope")
-
-                // For each chat, start a message listener coroutine
-                // Whenever a message document updates, update the resolved chats list.
-                for (chat in it) {
-                    messagingScope.launch {
-                        Log.d("ChatService", "Attaching messages ref listener for chat ${chat.chatId}")
-                        chatRepository.attachMessagesRefListener(chat, messagesRefListener)
-                    }
+            // For each chat, start a message listener coroutine
+            // Whenever a message document updates, update the resolved chats list.
+            for (chat in it) {
+                messagingScope.launch {
+                    Log.d("ChatService", "Attaching messages ref listener for chat ${chat.chatId}")
+                    chatRepository.attachMessagesRefListener(chat, messagesRefListener)
                 }
             }
         }
