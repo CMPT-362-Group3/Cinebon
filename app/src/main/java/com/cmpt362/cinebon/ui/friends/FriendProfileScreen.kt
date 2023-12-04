@@ -1,6 +1,5 @@
 package com.cmpt362.cinebon.ui.friends
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,13 +24,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.ramcosta.composedestinations.annotation.Destination
 
+@DashboardNavGraph
+@Destination
 @Composable
 fun FriendProfileScreen() {
     val scrollState = rememberScrollState()
