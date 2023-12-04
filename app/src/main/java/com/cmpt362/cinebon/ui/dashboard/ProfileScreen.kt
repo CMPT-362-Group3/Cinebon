@@ -82,9 +82,8 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                     .padding(16.dp)
             ){
                 IconButton(
-                    onClick = { navigator.navigate(DashboardNavItems.Socials.destination.route) {
-                    launchSingleTop = true //doesn't create new instance of social screen if it already exists
-                        }
+                    onClick = {
+                        navigator.popBackStack()
                     }
                 ) {
                     Icon(

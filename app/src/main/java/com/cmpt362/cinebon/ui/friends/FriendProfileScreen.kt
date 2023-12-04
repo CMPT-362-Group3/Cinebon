@@ -1,5 +1,6 @@
 package com.cmpt362.cinebon.ui.friends
 
+import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,13 +32,15 @@ import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 @DashboardNavGraph
 @Destination
 @Composable
-fun FriendProfileScreen() {
+fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
     val scrollState = rememberScrollState()
-
+    Log.d("FriendProfileScreen", userID)
     Surface(
         modifier = Modifier
             .scrollable(scrollState, Orientation.Vertical)
@@ -47,7 +50,9 @@ fun FriendProfileScreen() {
             horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()
                 .padding(16.dp)
         ){
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                navigator.popBackStack()
+            }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.back_icon),
                     contentDescription = "back",
@@ -203,6 +208,6 @@ fun FriendProfileScreen() {
 @Composable
 fun FriendProfilePreview() {
     CinebonTheme {
-        FriendProfileScreen()
+        FriendProfileScreen(EmptyDestinationsNavigator, "")
     }
 }

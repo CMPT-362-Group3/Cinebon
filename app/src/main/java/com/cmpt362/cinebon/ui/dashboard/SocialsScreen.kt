@@ -44,6 +44,7 @@ import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.chats.ChatUser
 import com.cmpt362.cinebon.data.enums.DashboardNavItems
 import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.ui.destinations.FriendProfileScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.SearchViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -89,7 +90,9 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                     query = searchQuery,
                     content = {//show the search results int he dropdown
                         if (searchQuery.isNotEmpty()) {
-                            UserList(users = searchResults, onItemClick = { /* TODO */ })
+                            UserList(users = searchResults) { userId ->
+                                navigator.navigate(FriendProfileScreenDestination(userID = userId ))
+                            }
                         }
                     },
                     onSearch = {
@@ -183,19 +186,21 @@ fun SocialScreen(navigator: DestinationsNavigator) {
 
 //UserList displays search results
 @Composable
-fun UserList(users: List<User>, onItemClick: (User) -> Unit) {
+fun UserList(users: List<User>, onItemClick: (String) -> Unit) {
     LazyColumn {
         items(users) { user ->
-            UserListItem(user = user, onItemClick = onItemClick)
+            UserListItem(user = user, onItemClick = {onItemClick(user.userId)} )
         }
     }
 }
 
 // UserListItem displays each user in the list
 @Composable
-fun UserListItem(user: User, onItemClick: (User) -> Unit) {
+fun UserListItem(user: User, onItemClick: (String) -> Unit) {
             Column (
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable { onItemClick(user.userId) }
             ){
                 Text(
                     text = user.username,
