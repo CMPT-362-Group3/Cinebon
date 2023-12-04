@@ -1,10 +1,14 @@
 package com.cmpt362.cinebon.data.repo
 
 import android.util.Log
+import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.entity.ListEntity
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
@@ -30,6 +34,7 @@ class ListRepository private constructor() {
     }
 
     private val userRepo = UserRepository.getInstance()
+    private val movieRepo = MoviesRepository.instance
 
     private val database = Firebase.firestore
 
@@ -90,14 +95,6 @@ class ListRepository private constructor() {
         return null
     }
 
-    suspend fun deleteList(listId: String) {
-        withContext(IO) {
-            database.collection(LIST_COLLECTION).document(listId)
-                .delete()
-                .await()
-        }
-    }
-
     fun resetListCreateResult() {
         _listCreatedResult.value = Result.success(false)
     }
@@ -115,7 +112,7 @@ class ListRepository private constructor() {
         if (user == null) _userLists.value = emptyList()
 
         Log.d("ListRepository", "Getting user lists from user object")
-        val listRefs = user!!.lists
+        val listRefs = user!!.movieList
         val lists = mutableListOf<ListEntity>()
 
         flow {
@@ -131,7 +128,77 @@ class ListRepository private constructor() {
             Log.d("ListRepository", "User lists updated with size ${lists.size}")
             _userLists.value = lists
         }.collect {
+            Log.d("ListRepository", "User list collected with id ${it.listId}")
             lists.add(it)
+        }
+    }
+
+    // Method to attach listeners to list document
+    // All the registered listeners are tracked by the repository
+    // And can be requested to be removed.
+    private val _listRefsListeners = mutableListOf<ListenerRegistration>()
+    fun attachListRefListener(list: ListEntity, listener: EventListener<DocumentSnapshot>) {
+        val listRef = database.collection(LIST_COLLECTION).document(list.listId)
+
+        // Add the listener and track it
+        listRef.addSnapshotListener(listener).let {
+            _listRefsListeners.add(it)
+        }
+    }
+
+    // This method will remove all the list update listeners that were registered
+    fun invalidateListRefsListeners() {
+        _listRefsListeners.forEach {
+            it.remove()
+        }
+
+        _listRefsListeners.clear()
+    }
+
+    suspend fun attachListResolverWorker() {
+        userLists.collectLatest {
+            resolveLists(it)
+        }
+    }
+
+    // Method to convert ListEntity to ResolvedListEntity for each list
+    private suspend fun resolveLists(lists: List<ListEntity>) {
+        val resolvedLists = mutableListOf<ResolvedListEntity>()
+
+        for (list in lists) {
+            // Resolve the owner of the list
+            val owner = userRepo.getUserData(list.owner.id) ?: continue
+
+            // Resolve the movies of the list
+            val resolvedMovies = mutableListOf<Movie>()
+            list.movies.forEach { movieId ->
+                movieRepo.getMovieById(movieId).let {
+                    resolvedMovies.add(it)
+                }
+            }
+
+            resolvedLists.add(
+                ResolvedListEntity(
+                    list.listId,
+                    owner,
+                    list.name,
+                    resolvedMovies
+                )
+            )
+        }
+
+        _resolvedLists.value = resolvedLists
+    }
+
+    suspend fun forceResolveLists() {
+        resolveLists(userLists.value)
+    }
+
+    suspend fun deleteList(listId: String) {
+        withContext(IO) {
+            database.collection(LIST_COLLECTION).document(listId)
+                .delete()
+                .await()
         }
     }
 }
