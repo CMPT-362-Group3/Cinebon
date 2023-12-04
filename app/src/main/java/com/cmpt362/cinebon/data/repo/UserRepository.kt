@@ -64,7 +64,7 @@ class UserRepository private constructor() {
         }
     }
 
-    private fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
+    fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
 
     suspend fun updateCurrentUserData() {
         val docRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)

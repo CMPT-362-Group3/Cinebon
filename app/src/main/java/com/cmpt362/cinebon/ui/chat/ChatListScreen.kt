@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,24 +30,23 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.ui.destinations.ChatScreenDestination
+import com.cmpt362.cinebon.utils.formatted
 import com.cmpt362.cinebon.viewmodels.ChatListViewModel
 import com.ramcosta.composedestinations.annotation.Destination
-import java.text.SimpleDateFormat
-import java.util.Locale
-
-data class ChatUser(val id: String, val name: String, val lastMessage: String, val profilePicture: Int, val lastDate: String)
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @DashboardNavGraph
 @Destination
 @Composable
-fun ChatListScreen() {
+fun ChatListScreen(navigator: DestinationsNavigator) {
     val chatListVM = viewModel<ChatListViewModel>()
     val chatList = chatListVM.resolvedChats.collectAsStateWithLifecycle().value
 
     LazyColumn {
         items(chatList) { chatItem ->
             ChatListItem(chat = chatItem, onItemClick = {
-                // TODO: Navigate to individual chat screen
+                navigator.navigate(ChatScreenDestination(chatId = it.chatId))
             })
         }
     }
@@ -58,8 +58,7 @@ fun ChatListItem(chat: ResolvedChatEntity, onItemClick: (ResolvedChatEntity) -> 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick(chat) }
-            .padding(16.dp), color = MaterialTheme.colorScheme.background
+            .clickable { onItemClick(chat) }, color = MaterialTheme.colorScheme.background
     ) {
         Row(
             modifier = Modifier
@@ -85,29 +84,26 @@ fun ChatListItem(chat: ResolvedChatEntity, onItemClick: (ResolvedChatEntity) -> 
                 ) {
                     Text(
                         text = chat.others.joinToString { it.fname },
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1
                     )
+
                     Text(
-                        text = "Replace date", // TODO: Replace with last message date
+                        text = chat.messages.last().timestamp.formatted(),
                         style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.End
                     )
                 }
                 Text(
-                    text = "{user.lastMessage}", // TODO: Replace with last message
+                    text = chat.messages.last().text,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(vertical = 4.dp)
                 )
             }
 
         }
     }
-}
-
-private fun formatDate(dateString: String): String {
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val date = dateFormat.parse(dateString)
-    return date?.let {
-        SimpleDateFormat("E", Locale.getDefault()).format(date)
-    } ?: ""
 }
