@@ -40,6 +40,10 @@ class UserRepository private constructor() {
     val userInfo: StateFlow<User?>
         get() = _userInfo
 
+    private val _searchResults = MutableStateFlow<List<User>>(emptyList())
+    val searchResults: StateFlow<List<User>>
+        get() = _searchResults
+
     suspend fun createUserData(user: User) {
         withContext(IO) {
             database.collection(USER_COLLECTION).document(user.userId)
@@ -116,6 +120,24 @@ class UserRepository private constructor() {
         }
     }
 
+    suspend fun searchUsers(username: String) {
+        withContext(IO) {
+            try {
+                val querySnapshot = database.collection(USER_COLLECTION)
+                    .whereEqualTo("username", username)
+                    .get()
+                    .await()
+
+                val users = querySnapshot.documents.mapNotNull { it.toObject<User>() }
+
+                _searchResults.value = users
+
+            } catch (e: Exception) {
+                Log.w("UserRepository", "error searching for users", e)
+                _searchResults.value = emptyList()
+            }
+        }
+    }
     fun attachUserRefListener(listener: EventListener<DocumentSnapshot>) {
         getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
             .addSnapshotListener(listener)
