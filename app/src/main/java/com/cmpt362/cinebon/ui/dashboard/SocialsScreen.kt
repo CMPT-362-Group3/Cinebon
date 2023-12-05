@@ -26,7 +26,6 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,9 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.chats.ChatUser
-import com.cmpt362.cinebon.data.enums.DashboardNavItems
 import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.ui.destinations.FriendProfileScreenDestination
+import com.cmpt362.cinebon.ui.destinations.ProfileScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.SearchViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -144,10 +143,7 @@ fun SocialScreen(navigator: DestinationsNavigator) {
 
                     IconButton(//profile button
                         onClick = {
-                            navigator.navigate(DashboardNavItems.Profile.destination.route) {
-                                launchSingleTop =
-                                    true //doesnt create new instance of profile screen if it already exists
-                            }
+                            navigator.navigate(ProfileScreenDestination)
                         }
                     ) {
                         Icon(

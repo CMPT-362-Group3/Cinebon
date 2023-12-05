@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.ui.destinations.RequestListScreenDestination
 import com.cmpt362.cinebon.ui.destinations.SettingsScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
@@ -125,6 +126,19 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                             .clickable { navigator.navigate(SettingsScreenDestination) }
                     )
 
+                }
+                Button(
+                    onClick = {
+                        navigator.navigate(RequestListScreenDestination)
+                    },
+                    colors = ButtonDefaults.buttonColors
+                        (
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text("Friend Requests")
                 }
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
