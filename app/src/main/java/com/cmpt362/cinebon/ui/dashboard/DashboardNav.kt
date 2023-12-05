@@ -92,6 +92,7 @@ private fun BottomBar(navController: NavController) {
         sections.forEachIndexed { index, section ->
             NavigationBarItem(icon = { Icon(ImageVector.vectorResource(id = section.icon), contentDescription = section.name) }, onClick = {
                 navigationIndex = index
+                navController.popBackStack()
                 navController.navigate(section.destination.route) {
                     launchSingleTop = true
                 }
