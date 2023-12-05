@@ -1,16 +1,21 @@
 package com.cmpt362.cinebon.data.repo
 
 import android.util.Log
-import com.cmpt362.cinebon.data.entity.Request
+import com.cmpt362.cinebon.data.entity.FriendRequest
+import com.cmpt362.cinebon.data.entity.FriendRequest.Companion.REQUEST_RECEIVER
+import com.cmpt362.cinebon.data.entity.FriendRequest.Companion.REQUEST_SENDER
+import com.cmpt362.cinebon.data.entity.ResolvedFriendRequest
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -29,10 +34,13 @@ class FriendsRepository private constructor() {
     private val auth = FirebaseAuth.getInstance()
 
     private val requestsCollection: CollectionReference = database.collection(REQUESTS_COLLECTION)
-
-    private val _requestList = MutableStateFlow<List<Request>>(emptyList())
-    val requestList: StateFlow<List<Request>>
+    private val _requestList = MutableStateFlow<List<FriendRequest>>(emptyList())
+    val requestList: StateFlow<List<FriendRequest>>
         get() = _requestList
+
+    private val _resolvedRequestList = MutableStateFlow<List<ResolvedFriendRequest>>(emptyList())
+    val resolvedRequestList: StateFlow<List<ResolvedFriendRequest>>
+        get() = _resolvedRequestList
 
     private val _requestSent = MutableStateFlow<Boolean>(false)
     val requestSent: StateFlow<Boolean>
@@ -42,67 +50,84 @@ class FriendsRepository private constructor() {
     val requestReceived: StateFlow<Boolean>
         get() = _requestReceived
 
-    suspend fun getRequestList(){
+    suspend fun getResolvedRequestList() {
         withContext(IO) {
-            try {
-                val querySnapshot = requestsCollection
-                    .whereEqualTo("receiver", auth.currentUser!!.uid)
-                    .get()
-                    .await()
+            val resolvedRequestList = mutableListOf<ResolvedFriendRequest>() // Create list of requests
 
-                val requests = querySnapshot.documents.mapNotNull { it.toObject<Request>().apply {
-                    if (this != null) {
-                        this.requestId = it.id //applying document snapshot id as request id
+            _requestList.value.forEach { request -> // For each request in user's requests
+                val sender = request.sender.get().await().toObject<User>() // Convert to Request object
+                val receiver = request.receiver.get().await().toObject<User>() // Convert to Request object
+                if (sender != null && receiver != null) {
+                    resolvedRequestList.add(
+                        ResolvedFriendRequest(
+                            request.requestId,
+                            request.accepted,
+                            receiver,
+                            sender
+                        )
+                    ) // Add to list
+                }
+            }
+
+            Log.d("FriendsRepository", "Resolved request list: $resolvedRequestList")
+            _resolvedRequestList.value = resolvedRequestList // Set request list
+        }
+    }
+    suspend fun getRequestList() {
+        withContext(IO) {
+            userRepo.userInfo.value?.let {
+                val requestList = mutableListOf<FriendRequest>() // Create list of requests
+
+                it.requests.forEach { request -> // For each request in user's requests
+                    val requestSnapshot = request.get().await()
+                    val requestObj = requestSnapshot.toObject<FriendRequest>() // Convert to Request object
+                    if (requestObj != null) {
+                        requestObj.requestId = requestSnapshot.id // Set request ID
+                        requestList.add(requestObj) // Add to list
                     }
-                } }
+                }
 
-                _requestList.value = requests
-                Log.d("FriendsRepository", "$requests")
-            } catch (e: Exception) {
-                Log.w("FriendsRepository", "error getting list of requests", e)
-                _requestList.value = emptyList()
+                Log.d("FriendsRepository", "Request list: $requestList")
+                _requestList.value = requestList // Set request list
             }
         }
     }
 
-    suspend fun acceptRequest(request: Request) {
-        withContext(IO){
+    suspend fun acceptRequest(request: FriendRequest) {
+        request.accepted = true
+        withContext(IO) {
             requestsCollection
                 .document(request.requestId)
-                .update("accepted", true)
-                .addOnSuccessListener {
-                    Log.d("FriendsRepository", "request status updated successfully")
-                }
-                .addOnFailureListener { e ->
-                    Log.w("FriendsRepository", "error updating request status", e)
-                }
+                .set(request)
             userRepo.addFriends(request.receiver, request.sender)
             userRepo.addFriends(request.sender, request.receiver)
         }
-
     }
 
-    suspend fun rejectRequest(request: Request) {
+    suspend fun rejectRequest(request: FriendRequest) {
         withContext(IO){
-            requestsCollection
-                .document(request.requestId)
-                .delete()
-                .addOnSuccessListener {
-                    Log.d("FriendsRepository", "friend request deleted successfully")
-                }
-                .addOnFailureListener { e ->
-                    Log.w("FriendsRepository", "error deleting friend request", e)
-                }
+            val reference = requestsCollection.document(request.requestId) // Get reference to request
+
+            userRepo.getUserRef(request.sender.id)
+                .update(REQUESTS_COLLECTION, FieldValue.arrayRemove(reference)) // Remove request from sender's requests
+            userRepo.getUserRef(request.receiver.id)
+                .update(REQUESTS_COLLECTION, FieldValue.arrayRemove(reference)) // Remove request from receiver's requests
+
+            reference.delete() // Delete request
         }
-
     }
 
-    suspend fun createRequest(receiver: User){
-        withContext(IO){
-            val request = Request()
-            request.sender = auth.currentUser!!.uid
-            request.receiver = receiver.userId
-            requestsCollection.add(request)
+    suspend fun createRequest(receiver: User) {
+        withContext(IO) {
+            val request = FriendRequest() // Create new request
+            request.sender = userRepo.getUserRef(auth.currentUser!!.uid) // Set sender
+            request.receiver = userRepo.getUserRef(receiver.userId) // Set receiver
+            val requestReference = requestsCollection.add(request).await() // Add request to collection
+
+            userRepo.getUserRef(userRepo.userInfo.value!! .userId)
+                .update(REQUESTS_COLLECTION, FieldValue.arrayUnion(requestReference))
+            userRepo.getUserRef(receiver.userId)
+                .update(REQUESTS_COLLECTION, FieldValue.arrayUnion(requestReference))
         }
     }
 
@@ -110,8 +135,8 @@ class FriendsRepository private constructor() {
         withContext(IO){
             try {
                 val querySnapshot = requestsCollection
-                    .whereEqualTo("sender", auth.currentUser!!.uid)
-                    .whereEqualTo("receiver", user.userId)
+                    .whereEqualTo(REQUEST_SENDER, auth.currentUser!!.uid)
+                    .whereEqualTo(REQUEST_RECEIVER, user.userId)
                     .get()
                     .await()
                 if(!querySnapshot.isEmpty){
@@ -122,8 +147,8 @@ class FriendsRepository private constructor() {
                 }
 
                 val querySnapshot2 = requestsCollection
-                    .whereEqualTo("sender", user.userId)
-                    .whereEqualTo("receiver", auth.currentUser!!.uid)
+                    .whereEqualTo(REQUEST_SENDER, user.userId)
+                    .whereEqualTo(REQUEST_RECEIVER, auth.currentUser!!.uid)
                     .get()
                     .await()
                 if(!querySnapshot2.isEmpty){
@@ -136,6 +161,13 @@ class FriendsRepository private constructor() {
             } catch (e: Exception) {
                 Log.e("FriendsRepository", "Error checking friend request", e)
             }
+        }
+    }
+
+    suspend fun startFriendRequestRefreshWorker() {
+        userRepo.userInfo.collectLatest {
+            Log.d("FriendsRepository", "Starting friend request refresh worker")
+            getRequestList()
         }
     }
 

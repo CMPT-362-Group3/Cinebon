@@ -14,6 +14,7 @@ import androidx.core.app.ServiceCompat
 import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.repo.ChatRepository
+import com.cmpt362.cinebon.data.repo.FriendsRepository
 import com.cmpt362.cinebon.data.repo.ListRepository
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.firestore.DocumentSnapshot
@@ -35,6 +36,7 @@ class NetworkService : Service() {
     private val userRepository = UserRepository.getInstance()
     private val chatRepository = ChatRepository.getInstance()
     private val listRepository = ListRepository.getInstance()
+    private val friendsRepository = FriendsRepository.getInstance()
 
     private val serviceScope = CoroutineScope(IO)
 
@@ -49,7 +51,7 @@ class NetworkService : Service() {
         showForegroundNotification()
 
         // Start the current user worker coroutine to listen for chat updates
-        startUserWorker()
+        startUserWorkers()
 
         // Start the chat listener worker coroutine to listen for chat updates
         startChatWorkers()
@@ -61,9 +63,13 @@ class NetworkService : Service() {
         serviceScope.launch { userRepository.updateCurrentUserData() }
     }
 
-    private fun startUserWorker() {
+    private fun startUserWorkers() {
         serviceScope.launch {
             userRepository.attachUserRefListener(userRefListener)
+        }
+
+        serviceScope.launch {
+            friendsRepository.startFriendRequestRefreshWorker()
         }
     }
 

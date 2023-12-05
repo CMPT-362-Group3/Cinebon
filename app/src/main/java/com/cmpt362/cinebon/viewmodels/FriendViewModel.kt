@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.repo.FriendsRepository
 import com.cmpt362.cinebon.data.repo.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 
 class FriendViewModel(userId: String): ViewModel() {
     private val userRepository = UserRepository.getInstance()
+    private  val friendsRepository = FriendsRepository.getInstance()
 
     private val _friendInfo = MutableStateFlow<User?>(null)
     val friendInfo: StateFlow<User?>

@@ -75,22 +75,11 @@ class UserRepository private constructor() {
     fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
 
     suspend fun updateCurrentUserData() {
-        val docRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
-
-        val snapShot = docRef.get().await()
-
-        if (snapShot.exists()) {
-            Log.d("UserRepository", "Current user data successfully retrieved")
-            _userInfo.value = snapShot.toObject<User>()
-        }
-
-        Log.d("UserRepository", "Error getting user data")
+        _userInfo.value = getUserData(FirebaseAuth.getInstance().currentUser!!.uid)
     }
 
     suspend fun getUserData(userId: String): User? {
-        val docRef = getUserRef(userId)
-
-        val snapShot = docRef.get().await()
+        val snapShot = getUserRef(userId).get().await()
 
         if (snapShot.exists()) {
             Log.d("UserRepository", "User data successfully retrieved")
@@ -101,18 +90,11 @@ class UserRepository private constructor() {
         return null
     }
 
-    suspend fun updateUserData(
-        userId: String, username: String, firstName: String,
-        lastName: String, email: String, onResult: (Throwable?) -> Unit
+    suspend fun updateUserData(user: User, onResult: (Throwable?) -> Unit
     ) {
         withContext(IO) {
-            database.collection(USER_COLLECTION).document(userId)
-                .update(
-                    "username", username,
-                    "fname", firstName,
-                    "lname", lastName,
-                    "email", email
-                )
+            getUserRef(user.userId)
+                .set(user)
                 .addOnSuccessListener {
                     Log.d("UserRepository", "user data updated successfully")
                     onResult(null)
@@ -126,7 +108,7 @@ class UserRepository private constructor() {
 
     suspend fun addUserList(listRef: DocumentReference) {
         withContext(IO) {
-            database.collection(USER_COLLECTION).document(FirebaseAuth.getInstance().currentUser!!.uid)
+            getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
                 .update(USER_MOVIE_LIST, FieldValue.arrayUnion(listRef))
                 .addOnSuccessListener {
                     Log.d("UserRepository", "user list added successfully")
@@ -137,11 +119,11 @@ class UserRepository private constructor() {
         }
     }
 
-    suspend fun addFriends(userId: String, friendId: String){
+    suspend fun addFriends(userRef: DocumentReference, friendRef: DocumentReference){
         withContext(IO) {
             try{
-                database.collection(USER_COLLECTION).document(userId)
-                    .update("friends", FieldValue.arrayUnion(friendId))
+                userRef
+                    .update("friends", FieldValue.arrayUnion(friendRef))
                     .await()
                 Log.d("UserRepository", "user's friend list updated successfully")
 

@@ -19,9 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,10 +28,14 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.entity.FriendUser
+import com.cmpt362.cinebon.data.entity.ResolvedFriendRequest
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.FriendsViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
@@ -42,7 +44,11 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Destination
 @Composable
 fun RequestListScreen(navigator: DestinationsNavigator) {
+    val friendsViewModel = viewModel<FriendsViewModel>()
+    val requestList = friendsViewModel.requestList.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+
+    friendsViewModel.getRequestList()
 
     Scaffold(
         topBar = {
@@ -72,48 +78,37 @@ fun RequestListScreen(navigator: DestinationsNavigator) {
 
         }
 
-    ){innerPadding ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(state = scrollState)
-        ){
+        ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(8.dp)
             ){
 
-                RequestList(requestList = dummyUserList(), onItemClick = {})
+                RequestList(requestList = requestList.value, onItemClick = {})
 
             }
         }
     }
-
-}
-
-private fun dummyUserList():List<FriendUser>{
-    val dummyUserList = listOf(
-        FriendUser("1", "yellow", "Maisha", "C", "m@email.com"),
-        FriendUser("2", "quantumcry", "Tanish", "M", "t@email.com"),
-        FriendUser("3", "dardikg", "Darrick", "G", "d@email.com"),
-        FriendUser("4", "shabzprime", "Shabbir", "Y", "s@email.com"),
-        )
-    return dummyUserList
 }
 
 @Composable
-fun RequestList(requestList: List<FriendUser>, onItemClick: (FriendUser) -> Unit){
+fun RequestList(requestList: List<ResolvedFriendRequest>, onItemClick: (FriendUser) -> Unit){
     LazyColumn {
         items(requestList) { user ->
-            RequestListItem(user = user, onItemClick = onItemClick)
+            RequestListItem(friendRequest = user, onItemClick = onItemClick)
         }
     }
 }
 
 @Composable
-fun RequestListItem(user: FriendUser, onItemClick: (FriendUser) -> Unit){
+fun RequestListItem(friendRequest: ResolvedFriendRequest, onItemClick: (FriendUser) -> Unit){
     Column {
         Divider(
             color = MaterialTheme.colorScheme.primary,
@@ -128,7 +123,7 @@ fun RequestListItem(user: FriendUser, onItemClick: (FriendUser) -> Unit){
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = user.username,
+                text = friendRequest.sender.username,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(8.dp)
@@ -164,7 +159,7 @@ fun RequestListItem(user: FriendUser, onItemClick: (FriendUser) -> Unit){
             }
         }
         Text(
-            text = user.fname + " " + user.lname,
+            text = friendRequest.sender.fname + " " + friendRequest.sender.lname,
             style = MaterialTheme.typography.bodyLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

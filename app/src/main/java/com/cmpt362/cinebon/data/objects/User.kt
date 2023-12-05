@@ -10,4 +10,6 @@ class User {
     lateinit var email: String
     var chats = mutableListOf<DocumentReference>()
     var movieList = mutableListOf<DocumentReference>()
+    var friends = mutableListOf<DocumentReference>()
+    var requests = mutableListOf<DocumentReference>()
 }

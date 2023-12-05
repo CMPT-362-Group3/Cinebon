@@ -39,7 +39,6 @@ import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.FriendViewModel
 import com.cmpt362.cinebon.viewmodels.FriendsViewModel
-import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
@@ -125,10 +124,10 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                 }
                 Button(
                     onClick = {
-                        val otherUser = friendInfo
-                        if (otherUser != null && !friendRequestSent) {
-                            friendsViewModel.sendRequest(otherUser)
-                        } else if(otherUser!=null && friendRequestReceived){
+                        val friend = friendInfo
+                        if (friend != null && !friendRequestSent) {
+                            friendsViewModel.sendRequest(friend)
+                        } else if(friend!=null && friendRequestReceived) {
                             //friendsViewModel.acceptRequest()
                         } //else if () {
                             //remove friend here: TODO
