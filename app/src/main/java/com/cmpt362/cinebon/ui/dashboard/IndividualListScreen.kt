@@ -92,7 +92,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                 SearchBar(
                     query = query,
                     onQueryChange = {
-                        query = it.trim()
+                        query = it
                         searchViewModel.updateSearchResults(query)
                     },
                     onSearch = { },

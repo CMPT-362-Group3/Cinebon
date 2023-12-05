@@ -26,7 +26,7 @@ class MoviesSearchViewModel : ViewModel() {
         searchJob?.cancel()
 
         // If there's nothing to search, reset the results
-        if (query.isEmpty()) {
+        if (query.trim().isEmpty()) {
             return resetSearchResults()
         }
 
@@ -35,7 +35,7 @@ class MoviesSearchViewModel : ViewModel() {
             if (rateLimit) delay(750)
 
             // Dispatch the get request
-            _searchResults.value = movieRepo.searchMovies(query)
+            _searchResults.value = movieRepo.searchMovies(query.trim())
 
             // On completion, reset the job
             searchJob = null
