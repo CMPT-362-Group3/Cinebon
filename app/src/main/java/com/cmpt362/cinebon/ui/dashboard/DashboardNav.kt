@@ -14,10 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -82,16 +78,13 @@ private fun BottomBar(navController: NavController) {
 
     if (shouldHideBottomBar(navController)) return
 
-    var navigationIndex by rememberSaveable {
-        mutableIntStateOf(0)
-    }
 
     val currentDestination: DestinationSpec<out Any?> = navController.appCurrentDestinationAsState().value ?: NavGraphs.dashboard.startDestination
 
     NavigationBar {
-        sections.forEachIndexed { index, section ->
+        sections.forEach { section ->
             NavigationBarItem(icon = { Icon(ImageVector.vectorResource(id = section.icon), contentDescription = section.name) }, onClick = {
-                navigationIndex = index
+                if (currentDestination == section.destination) return@NavigationBarItem
                 navController.popBackStack()
                 navController.navigate(section.destination.route) {
                     launchSingleTop = true
