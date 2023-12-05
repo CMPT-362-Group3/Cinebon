@@ -154,7 +154,8 @@ class UserRepository private constructor() {
         withContext(IO) {
             try {
                 val querySnapshot = database.collection(USER_COLLECTION)
-                    .whereEqualTo("username", username)
+                    .whereGreaterThanOrEqualTo("username", username) //makes sure username starts with our given query
+                    .whereLessThanOrEqualTo("username", username+"z")//makes sure username is less than our query + z
                     .get()
                     .await()
 
