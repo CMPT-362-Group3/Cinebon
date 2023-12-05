@@ -28,6 +28,7 @@ class UserRepository private constructor() {
     }
 
     private val database = Firebase.firestore
+    private val auth = FirebaseAuth.getInstance()
 
     // Success.false means initial state
     // Success.true means user created
@@ -36,9 +37,9 @@ class UserRepository private constructor() {
     val userCreatedResult: StateFlow<Result<Boolean>>
         get() = _userCreatedResult
 
-    private val _userInfo = MutableStateFlow<User?>(null)
-    val userInfo: StateFlow<User?>
-        get() = _userInfo
+    private val _currentUserInfo = MutableStateFlow<User?>(null)
+    val currentUserInfo: StateFlow<User?>
+        get() = _currentUserInfo
 
     private val _otherUserInfo = MutableStateFlow<User?>(null)
     val otherUserInfo: StateFlow<User?>
@@ -55,12 +56,12 @@ class UserRepository private constructor() {
                 .addOnSuccessListener {
                     Log.d("UserRepository", "User data successfully written")
                     _userCreatedResult.value = Result.success(true)
-                    _userInfo.value = user
+                    _currentUserInfo.value = user
                 }
                 .addOnFailureListener { e ->
                     Log.w("UserRepository", "Error writing document", e)
                     _userCreatedResult.value = Result.failure(e)
-                    _userInfo.value = null
+                    _currentUserInfo.value = null
                 }
         }
     }
@@ -68,7 +69,7 @@ class UserRepository private constructor() {
     suspend fun signOut() {
         withContext(IO) {
             FirebaseAuth.getInstance().signOut()
-            _userInfo.value = null
+            _currentUserInfo.value = null
         }
     }
 
@@ -81,7 +82,7 @@ class UserRepository private constructor() {
 
         if (snapShot.exists()) {
             Log.d("UserRepository", "User data successfully retrieved")
-            _userInfo.value = snapShot.toObject<User>()
+            _currentUserInfo.value = snapShot.toObject<User>()
         }
 
         Log.d("UserRepository", "Error getting user data")
@@ -146,7 +147,7 @@ class UserRepository private constructor() {
 
                 val users = querySnapshot.documents.mapNotNull { it.toObject<User>() }
 
-                _searchResults.value = users
+                _searchResults.value = users.filter { it.userId != auth.currentUser!!.uid }
                 Log.d("UserRepository", "$users")
 
             } catch (e: Exception) {

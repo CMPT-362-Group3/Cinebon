@@ -1,6 +1,5 @@
 package com.cmpt362.cinebon.ui.friends
 
-import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,10 +31,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
@@ -52,7 +53,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
     val lastWatched by rememberSaveable { mutableStateOf("") }
 
     // Triggers the userViewModel to get user by their id
-    userAuthViewModel.getUserByID(userID) {}
+    userAuthViewModel.getUserByID(userID)
 
     Surface(
         modifier = Modifier

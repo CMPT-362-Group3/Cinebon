@@ -24,7 +24,7 @@ interface AccountService {
     fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit)
     fun signOut()
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
-    fun getSignedInUser(onResult: (User?) -> Unit)
+    fun getSignedInUser()
     fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit)
 
     fun getUserByID(userId: String)
@@ -36,7 +36,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
     val userFlow: StateFlow<User?>
-        get() = userRepository.userInfo
+        get() = userRepository.currentUserInfo
 
     val otherUserFlow: StateFlow<User?>
         get() = userRepository.otherUserInfo
@@ -149,7 +149,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
             }
     }
 
-    override fun getSignedInUser(onResult: (User?) -> Unit) {
+    override fun getSignedInUser() {
         if (userFlow.value != null) {
             return
         }

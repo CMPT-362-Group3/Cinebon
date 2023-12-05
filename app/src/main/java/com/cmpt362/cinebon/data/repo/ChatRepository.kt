@@ -53,7 +53,7 @@ class ChatRepository private constructor() {
 
                 // For each user in the chat, resolve the user data
                 for (userRef in chat.users) {
-                    if (userRef.id == userRepo.userInfo.value?.userId) continue
+                    if (userRef.id == userRepo.currentUserInfo.value?.userId) continue
 
                     val user = userRepo.getUserData(userRef.id)
                     if (user != null) {
@@ -92,7 +92,7 @@ class ChatRepository private constructor() {
         isChatRefreshWorkerStarted = true
 
         // Listen to updates in user info and repopulate user chats when it changes
-        userRepo.userInfo.collectLatest {
+        userRepo.currentUserInfo.collectLatest {
             if (it == null) return@collectLatest
 
             Log.d("ChatRepository", "User info updated, updating chats")
