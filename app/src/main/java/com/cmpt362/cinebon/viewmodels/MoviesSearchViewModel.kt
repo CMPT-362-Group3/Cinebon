@@ -24,6 +24,12 @@ class MoviesSearchViewModel : ViewModel() {
     // The delay allows us to cancel any previously sent requests for more efficiency
     fun updateSearchResults(query: String, rateLimit: Boolean = true) {
         searchJob?.cancel()
+
+        // If there's nothing to search, reset the results
+        if (query.isEmpty()) {
+            return resetSearchResults()
+        }
+
         searchJob = viewModelScope.launch {
             // Artificial 1-second input delay for cancellation
             if (rateLimit) delay(750)
@@ -34,6 +40,10 @@ class MoviesSearchViewModel : ViewModel() {
             // On completion, reset the job
             searchJob = null
         }
+    }
+
+    fun resetSearchResults() {
+        _searchResults.value = emptyList()
     }
 
 }

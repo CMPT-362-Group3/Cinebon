@@ -45,7 +45,7 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Composable
 fun RequestListScreen(navigator: DestinationsNavigator) {
     val friendsViewModel = viewModel<FriendsViewModel>()
-    val requestList = friendsViewModel.requestList.collectAsStateWithLifecycle()
+    val requestList = friendsViewModel.receivedRequests.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
     friendsViewModel.getRequestList()

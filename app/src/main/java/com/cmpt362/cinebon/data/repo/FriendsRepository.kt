@@ -2,12 +2,11 @@ package com.cmpt362.cinebon.data.repo
 
 import android.util.Log
 import com.cmpt362.cinebon.data.entity.FriendRequest
-import com.cmpt362.cinebon.data.entity.FriendRequest.Companion.REQUEST_RECEIVER
-import com.cmpt362.cinebon.data.entity.FriendRequest.Companion.REQUEST_SENDER
 import com.cmpt362.cinebon.data.entity.ResolvedFriendRequest
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
@@ -29,6 +28,7 @@ class FriendsRepository private constructor() {
             return instance
         }
     }
+
     private val userRepo = UserRepository.getInstance()
     private val database = Firebase.firestore
     private val auth = FirebaseAuth.getInstance()
@@ -50,7 +50,7 @@ class FriendsRepository private constructor() {
     val requestReceived: StateFlow<Boolean>
         get() = _requestReceived
 
-    suspend fun getResolvedRequestList() {
+    private suspend fun getResolvedRequestList() {
         withContext(IO) {
             val resolvedRequestList = mutableListOf<ResolvedFriendRequest>() // Create list of requests
 
@@ -61,7 +61,6 @@ class FriendsRepository private constructor() {
                     resolvedRequestList.add(
                         ResolvedFriendRequest(
                             request.requestId,
-                            request.accepted,
                             receiver,
                             sender
                         )
@@ -73,6 +72,7 @@ class FriendsRepository private constructor() {
             _resolvedRequestList.value = resolvedRequestList // Set request list
         }
     }
+
     suspend fun getRequestList() {
         withContext(IO) {
             userRepo.userInfo.value?.let {
@@ -93,81 +93,71 @@ class FriendsRepository private constructor() {
         }
     }
 
-    suspend fun acceptRequest(request: FriendRequest) {
-        request.accepted = true
+    suspend fun acceptRequest(friend: User) {
         withContext(IO) {
-            requestsCollection
-                .document(request.requestId)
-                .set(request)
-            userRepo.addFriends(request.receiver, request.sender)
-            userRepo.addFriends(request.sender, request.receiver)
+            // Update the users' friends lists
+            userRepo.addFriend(friend)
+
+            // Delete the request, it's no longer needed
+            deleteRequest(friend)
         }
     }
 
-    suspend fun rejectRequest(request: FriendRequest) {
-        withContext(IO){
-            val reference = requestsCollection.document(request.requestId) // Get reference to request
+    suspend fun deleteRequest(friend: User) {
+        withContext(IO) {
+            val requestRef = getRequestRef(friend)
 
-            userRepo.getUserRef(request.sender.id)
-                .update(REQUESTS_COLLECTION, FieldValue.arrayRemove(reference)) // Remove request from sender's requests
-            userRepo.getUserRef(request.receiver.id)
-                .update(REQUESTS_COLLECTION, FieldValue.arrayRemove(reference)) // Remove request from receiver's requests
+            if (requestRef == null) {
+                Log.e("FriendsRepository", "Error deleting friend request")
+                return@withContext
+            }
 
-            reference.delete() // Delete request
+            userRepo.getUserRef(friend.userId)
+                .update(REQUESTS_COLLECTION, FieldValue.arrayRemove(requestRef)) // Remove request from sender's requests
+            userRepo.getUserRef(userRepo.userInfo.value!!.userId)
+                .update(REQUESTS_COLLECTION, FieldValue.arrayRemove(requestRef)) // Remove request from receiver's requests
+
+            requestRef.delete() // Delete request
         }
     }
 
-    suspend fun createRequest(receiver: User) {
+    suspend fun createFriendRequest(receiver: User) {
         withContext(IO) {
             val request = FriendRequest() // Create new request
             request.sender = userRepo.getUserRef(auth.currentUser!!.uid) // Set sender
             request.receiver = userRepo.getUserRef(receiver.userId) // Set receiver
             val requestReference = requestsCollection.add(request).await() // Add request to collection
 
-            userRepo.getUserRef(userRepo.userInfo.value!! .userId)
+            userRepo.getUserRef(userRepo.userInfo.value!!.userId)
                 .update(REQUESTS_COLLECTION, FieldValue.arrayUnion(requestReference))
             userRepo.getUserRef(receiver.userId)
                 .update(REQUESTS_COLLECTION, FieldValue.arrayUnion(requestReference))
         }
     }
 
-    suspend fun checkRequestSent(user:User){
-        withContext(IO){
-            try {
-                val querySnapshot = requestsCollection
-                    .whereEqualTo(REQUEST_SENDER, auth.currentUser!!.uid)
-                    .whereEqualTo(REQUEST_RECEIVER, user.userId)
-                    .get()
-                    .await()
-                if(!querySnapshot.isEmpty){
-                    _requestSent.value = true
-                } else {
-                    _requestSent.value = false
-                    Log.d("FriendsRepository", "Friend request not sent")
-                }
+    private fun getRequestRef(friend: User): DocumentReference? {
 
-                val querySnapshot2 = requestsCollection
-                    .whereEqualTo(REQUEST_SENDER, user.userId)
-                    .whereEqualTo(REQUEST_RECEIVER, auth.currentUser!!.uid)
-                    .get()
-                    .await()
-                if(!querySnapshot2.isEmpty){
-                    _requestReceived.value = true
-                } else {
-                    _requestReceived.value = false
-                    Log.d("FriendsRepository", "Friend request not sent")
-                }
-
-            } catch (e: Exception) {
-                Log.e("FriendsRepository", "Error checking friend request", e)
+        // Try finding it in our resolved requests
+        resolvedRequestList.value.forEach {
+            if (it.sender.userId == friend.userId || it.receiver.userId == friend.userId) {
+                return requestsCollection.document(it.requestId)
             }
         }
+
+        return null
     }
 
     suspend fun startFriendRequestRefreshWorker() {
         userRepo.userInfo.collectLatest {
             Log.d("FriendsRepository", "Starting friend request refresh worker")
             getRequestList()
+        }
+    }
+
+    suspend fun startFriendRequestResolverWorker() {
+        requestList.collectLatest {
+            Log.d("FriendsRepository", "Starting friend request resolver worker")
+            getResolvedRequestList()
         }
     }
 

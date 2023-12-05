@@ -82,7 +82,7 @@ class UserRepository private constructor() {
         val snapShot = getUserRef(userId).get().await()
 
         if (snapShot.exists()) {
-            Log.d("UserRepository", "User data successfully retrieved")
+//            Log.d("UserRepository", "User data successfully retrieved")
             return snapShot.toObject<User>()
         }
 
@@ -90,7 +90,8 @@ class UserRepository private constructor() {
         return null
     }
 
-    suspend fun updateUserData(user: User, onResult: (Throwable?) -> Unit
+    suspend fun updateUserData(
+        user: User, onResult: (Throwable?) -> Unit
     ) {
         withContext(IO) {
             getUserRef(user.userId)
@@ -119,17 +120,33 @@ class UserRepository private constructor() {
         }
     }
 
-    suspend fun addFriends(userRef: DocumentReference, friendRef: DocumentReference){
+    suspend fun addFriend(friend: User) {
         withContext(IO) {
-            try{
-                userRef
-                    .update("friends", FieldValue.arrayUnion(friendRef))
-                    .await()
-                Log.d("UserRepository", "user's friend list updated successfully")
+            val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+            val friendRef = getUserRef(friend.userId)
 
-            } catch (e: Exception){
-                Log.w("UserRepository", "error updating user's friend list", e)
-            }
+            selfRef
+                .update("friends", FieldValue.arrayUnion(friendRef))
+
+            friendRef
+                .update("friends", FieldValue.arrayUnion(selfRef))
+
+            Log.d("UserRepository", "Friend added")
+        }
+    }
+
+    suspend fun removeFriend(friend: User) {
+        withContext(IO) {
+            val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+            val friendRef = getUserRef(friend.userId)
+
+            selfRef
+                .update("friends", FieldValue.arrayRemove(friendRef))
+
+            friendRef
+                .update("friends", FieldValue.arrayRemove(selfRef))
+
+            Log.d("UserRepository", "Friend deleted")
         }
     }
 
@@ -153,7 +170,7 @@ class UserRepository private constructor() {
         }
     }
 
-    fun resetUserSearchResults(){
+    fun resetUserSearchResults() {
         _searchResults.value = emptyList()
     }
 

@@ -71,6 +71,10 @@ class NetworkService : Service() {
         serviceScope.launch {
             friendsRepository.startFriendRequestRefreshWorker()
         }
+
+        serviceScope.launch {
+            friendsRepository.startFriendRequestResolverWorker()
+        }
     }
 
     private fun startChatWorkers() {

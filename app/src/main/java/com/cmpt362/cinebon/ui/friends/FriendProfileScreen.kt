@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,10 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.data.enums.FriendRequestStatus
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.FriendViewModel
-import com.cmpt362.cinebon.viewmodels.FriendsViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
@@ -47,30 +46,29 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Destination
 @Composable
 fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
-    val friendsViewModel = viewModel<FriendsViewModel>()
     val friendViewModel = viewModel<FriendViewModel>(factory = FriendViewModel.Factory(userID))
-    val scrollState = rememberScrollState()
     val friendInfo by friendViewModel.friendInfo.collectAsStateWithLifecycle()
+    val friendStatus by friendViewModel.requestStatus.collectAsStateWithLifecycle()
+
+    val scrollState = rememberScrollState()
     val friendsCount by rememberSaveable { mutableIntStateOf(0) }
     val moviesWatched by rememberSaveable { mutableIntStateOf(0) }
     val lastWatched by rememberSaveable { mutableStateOf("") }
 
-    if(friendInfo != null) { friendsViewModel.checkRequest(user = friendInfo!!) }
-    var friendRequestSent by rememberSaveable { mutableStateOf(false) }
-    friendRequestSent = friendsViewModel.requestSent.collectAsStateWithLifecycle().value
-
-    var friendRequestReceived by rememberSaveable { mutableStateOf(false) }
-    friendRequestReceived = friendsViewModel.requestReceived.collectAsStateWithLifecycle().value
+    if (friendInfo == null) {
+        return
+    }
 
     Surface(
         modifier = Modifier
             .scrollable(scrollState, Orientation.Vertical)
             .fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
-        Row (
-            horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()
+        Row(
+            horizontalArrangement = Arrangement.Start, modifier = Modifier
+                .fillMaxWidth()
                 .padding(16.dp)
-        ){
+        ) {
             IconButton(onClick = {
                 navigator.popBackStack()
             }) {
@@ -80,7 +78,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .size(48.dp)
-                    )
+                )
             }
         }
         Column(
@@ -124,16 +122,24 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                 }
                 Button(
                     onClick = {
-                        val friend = friendInfo
-                        if (friend != null && !friendRequestSent) {
-                            friendsViewModel.sendRequest(friend)
-                        } else if(friend!=null && friendRequestReceived) {
-                            //friendsViewModel.acceptRequest()
-                        } //else if () {
-                            //remove friend here: TODO
-//                        } else {
-                            //friendsViewModel.rejectRequest()
-//                        }
+                        when (friendStatus) {
+                            FriendRequestStatus.NONE -> {
+                                friendViewModel.sendRequest(friendInfo!!)
+                            }
+
+                            FriendRequestStatus.SENT -> {
+                                friendViewModel.rejectRequest(friendInfo!!)
+                            }
+
+                            FriendRequestStatus.RECEIVED -> {
+                                friendViewModel.acceptRequest(friendInfo!!)
+                            }
+
+                            else -> {
+                                friendViewModel.removeFriend(friendInfo!!)
+                            }
+
+                        }
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -145,7 +151,12 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                         .padding(start = 4.dp)
                 ) {
                     Text(
-                        if(friendRequestSent) "Friend Request Sent" else if(friendRequestReceived) "Accept Friend Request" else "Add Friend",
+                        text = when (friendStatus) {
+                            FriendRequestStatus.NONE -> "Add Friend"
+                            FriendRequestStatus.SENT -> "Cancel Request"
+                            FriendRequestStatus.RECEIVED -> "Accept Request"
+                            else -> "Remove friend"
+                        },
                         Modifier.padding(8.dp)
                     )
                 }
@@ -241,6 +252,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun FriendProfilePreview() {

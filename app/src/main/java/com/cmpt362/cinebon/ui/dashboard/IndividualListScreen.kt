@@ -33,9 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -103,6 +105,30 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                         }
                     },
                     placeholder = { Text("Search for movies") },
+                    leadingIcon = { //search icon
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.search_icon),
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingIcon = { //exit icon
+                        if (active) {
+                            Icon(
+                                modifier = Modifier.clickable {
+                                    if (query.isNotEmpty()) {
+                                        query = ""
+                                        searchViewModel.resetSearchResults()
+                                    } else {
+                                        active = false
+                                    }
+                                },
+                                imageVector = ImageVector.vectorResource(R.drawable.close_icon),
+                                contentDescription = "Exit search",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    },
                     modifier = Modifier
                         .focusRequester(focusRequester)
                         .onGloballyPositioned {
