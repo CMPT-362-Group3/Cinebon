@@ -82,18 +82,16 @@ class FriendsRepository private constructor() {
 
     }
 
-    suspend fun rejectRequest(request: Request, onResult: (Throwable?) -> Unit) {
+    suspend fun rejectRequest(request: Request) {
         withContext(IO){
             requestsCollection
                 .document(request.requestId)
                 .delete()
                 .addOnSuccessListener {
                     Log.d("FriendsRepository", "friend request deleted successfully")
-                    onResult(null)
                 }
                 .addOnFailureListener { e ->
                     Log.w("FriendsRepository", "error deleting friend request", e)
-                    onResult(e)
                 }
         }
 

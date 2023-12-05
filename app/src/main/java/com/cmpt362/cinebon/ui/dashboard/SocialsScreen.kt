@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.data.chats.ChatUser
 import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.ui.chat.ChatList
 import com.cmpt362.cinebon.ui.destinations.FriendProfileScreenDestination
 import com.cmpt362.cinebon.ui.destinations.ProfileScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
@@ -49,8 +48,6 @@ import com.cmpt362.cinebon.viewmodels.SearchViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -158,7 +155,7 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                 }
 
             //display list of all chat
-            ChatList(dummyChatList(), onItemClick = { /* TODO */ })
+            ChatList(navigator = navigator)
 
             FloatingActionButton(//new chat button
                 onClick = { /*TODO*/ },
@@ -210,86 +207,6 @@ fun UserListItem(user: User, onItemClick: (String) -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-}
-
-private fun dummyChatList():List<ChatUser>{
-    val dummyChatList = listOf(
-        ChatUser("1", "Maisha", "Is anyone alive? The chat function is killing me!!", "2023-11-25"),
-        ChatUser("2", "Tanish", "LGTM!", "2023-11-23"),
-        ChatUser("3", "Darrick", "I'm still sleeping.", "2023-11-22"),
-        ChatUser("3", "Shabbir", "SKILL ISSUE", "2023-11-20"),
-
-        )
-    return dummyChatList
-}
-
-//ChatList displays chat list
-@Composable
-fun ChatList(chatList: List<ChatUser>, onItemClick: (ChatUser) -> Unit) {
-    LazyColumn {
-        items(chatList) { user ->
-            ChatListItem(user = user, onItemClick = onItemClick)
-        }
-    }
-}
-
-//ChatListItem displays each chat in the list of chats
-@Composable
-fun ChatListItem(user: ChatUser, onItemClick: (ChatUser) -> Unit) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onItemClick(user) },
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Divider(
-            color = MaterialTheme.colorScheme.primary,
-            thickness = 0.5.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = user.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = formatDate(user.lastDate),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                Text(
-                    text = "${user.lastMessage}",
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-        }
-    }
-}
-
-private fun formatDate(dateString: String): String {
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val date = dateFormat.parse(dateString)
-    return date?.let {
-        SimpleDateFormat("E", Locale.getDefault()).format(date)
-    } ?: ""
 }
 
 @Preview(showBackground = true)

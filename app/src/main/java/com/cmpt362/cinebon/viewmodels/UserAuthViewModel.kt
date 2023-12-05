@@ -9,6 +9,7 @@ import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -24,20 +25,14 @@ interface AccountService {
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
     fun getSignedInUser()
     fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit)
-
-    fun getUserByID(userId: String)
-
 }
 
-class UserAuthViewModel(private val userRepository: UserRepository = UserRepository.getInstance()) : ViewModel(),
-    AccountService {
+class UserAuthViewModel(): ViewModel(), AccountService {
+    private val userRepository: UserRepository = UserRepository.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
     val userFlow: StateFlow<User?>
-        get() = userRepository.currentUserInfo
-
-    val otherUserFlow: StateFlow<User?>
-        get() = userRepository.otherUserInfo
+        get() = userRepository.userInfo
 
     fun isSignedIn(): Boolean {
         val currentUser = auth.currentUser
@@ -159,15 +154,6 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
             viewModelScope.launch { userRepository.updateCurrentUserData() }
         } catch (e: Exception) {
             Log.d("UserViewModel", "Failed to get signed in user")
-        }
-    }
-
-    override fun getUserByID(userId: String) {
-        try {
-            viewModelScope.launch { userRepository.getOtherUserData(userId) }
-            Log.d("UserViewModel", "Successfully got user by their id")
-        } catch (e: Exception) {
-            Log.d("UserViewModel", "Failed to get user by their id", e)
         }
     }
 

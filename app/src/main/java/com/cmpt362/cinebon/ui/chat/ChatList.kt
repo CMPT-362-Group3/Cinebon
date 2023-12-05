@@ -22,18 +22,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
-import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.destinations.ChatScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.utils.formatted
 import com.cmpt362.cinebon.viewmodels.ChatListViewModel
-import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@DashboardNavGraph
-@Destination
 @Composable
-fun ChatListScreen(navigator: DestinationsNavigator) {
+fun ChatList(navigator: DestinationsNavigator) {
     val chatListVM = viewModel<ChatListViewModel>()
     val chatList = chatListVM.resolvedChats.collectAsStateWithLifecycle().value
 
@@ -62,7 +58,7 @@ fun ChatListItem(chat: ResolvedChatEntity, onItemClick: (ResolvedChatEntity) -> 
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.defaultphoto),
+                painter = painterResource(id = R.drawable.profile_icon),
                 contentDescription = null,
                 modifier = Modifier
                     .size(56.dp)

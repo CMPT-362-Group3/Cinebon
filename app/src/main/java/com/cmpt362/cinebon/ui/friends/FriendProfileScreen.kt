@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.FriendViewModel
 import com.cmpt362.cinebon.viewmodels.FriendsViewModel
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -47,20 +48,15 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Destination
 @Composable
 fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
-    val userAuthViewModel = viewModel<UserAuthViewModel>()
     val friendsViewModel = viewModel<FriendsViewModel>()
+    val friendViewModel = viewModel<FriendViewModel>(factory = FriendViewModel.Factory(userID))
     val scrollState = rememberScrollState()
-    val userInfo = userAuthViewModel.otherUserFlow.collectAsStateWithLifecycle()
+    val friendInfo by friendViewModel.friendInfo.collectAsStateWithLifecycle()
     val friendsCount by rememberSaveable { mutableIntStateOf(0) }
     val moviesWatched by rememberSaveable { mutableIntStateOf(0) }
     val lastWatched by rememberSaveable { mutableStateOf("") }
 
-    // Triggers the userViewModel to get user by their id
-    userAuthViewModel.getUserByID(userID)
-
-    if(userInfo.value != null) {
-        friendsViewModel.checkRequest(user = userInfo.value!!)
-    }
+    if(friendInfo != null) { friendsViewModel.checkRequest(user = friendInfo!!) }
     var friendRequestSent by rememberSaveable { mutableStateOf(false) }
     friendRequestSent = friendsViewModel.requestSent.collectAsStateWithLifecycle().value
 
@@ -101,7 +97,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                     .size(200.dp)
             )
             Text(
-                text = userInfo.value?.username ?: "",
+                text = friendInfo?.username ?: "",
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier
                     .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
@@ -129,12 +125,16 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                 }
                 Button(
                     onClick = {
-                        val otherUser = userInfo.value
+                        val otherUser = friendInfo
                         if (otherUser != null && !friendRequestSent) {
                             friendsViewModel.sendRequest(otherUser)
-                        }else if(otherUser!=null && friendRequestReceived){
-                            //accept request here: TODO
-                        }
+                        } else if(otherUser!=null && friendRequestReceived){
+                            //friendsViewModel.acceptRequest()
+                        } //else if () {
+                            //remove friend here: TODO
+//                        } else {
+                            //friendsViewModel.rejectRequest()
+//                        }
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -237,7 +237,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                 modifier = Modifier
                     .padding(vertical = 64.dp)
             ) {
-                Text("${userInfo.value?.fname}'s Movie List")
+                Text("${friendInfo?.fname}'s Movie List")
             }
         }
     }

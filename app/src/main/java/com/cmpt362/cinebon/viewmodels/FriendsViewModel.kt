@@ -1,5 +1,6 @@
 package com.cmpt362.cinebon.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cmpt362.cinebon.data.entity.Request
@@ -50,9 +51,9 @@ class FriendsViewModel: ViewModel() {
         }
     }
 
-    fun rejectRequest(request: Request, onResult:(Throwable?)-> Unit) {
+    fun rejectRequest(request: Request) {
         viewModelScope.launch {
-            friendsRepository.rejectRequest(request, onResult)
+            friendsRepository.rejectRequest(request)
         }
     }
 

@@ -92,7 +92,7 @@ fun ChatScreen(navigator: DestinationsNavigator, chatId: String) {
                         )
                     }
                     Image(
-                        painter = painterResource(id = R.drawable.defaultphoto),
+                        painter = painterResource(id = R.drawable.profile_icon),
                         contentDescription = null,
                         modifier = Modifier
                             .size(48.dp)
