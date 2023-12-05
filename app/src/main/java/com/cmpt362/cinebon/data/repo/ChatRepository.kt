@@ -156,6 +156,10 @@ class ChatRepository private constructor() {
         _messageRefsListeners.clear()
     }
 
+    fun getResolvedChatById(id: String): ResolvedChatEntity? {
+        return resolvedChats.value.find { chat -> chat.chatId == id }
+    }
+
     suspend fun sendMessage(chat: ResolvedChatEntity, text: String) {
         withContext(IO) {
             val message = PackagedMessageEntity(

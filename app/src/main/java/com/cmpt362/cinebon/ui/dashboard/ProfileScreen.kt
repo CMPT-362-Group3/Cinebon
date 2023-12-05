@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -42,6 +43,7 @@ import com.cmpt362.cinebon.MainActivity
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.destinations.SettingsScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -63,6 +65,8 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
 
     // Triggers the userViewModel to get the signed in user
     userAuthViewModel.getSignedInUser {}
+
+    SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
 
     if (userInfo.value == null) {
         LocalContext.current.startActivity(Intent(LocalContext.current, MainActivity::class.java))

@@ -14,7 +14,7 @@ class DashBoardViewModel(private val app: Application) : AndroidViewModel(app) {
     // This prevents more start calls on recompositions in the same app instance
     // But does not prevent multiple start calls across multiple app launches
     // However, since the service is foreground and unbound, there's only 1 instance of it
-    fun ensureRunningChatService() {
+    fun ensureRunningNetworkService() {
         if (isRunning) return
 
         Log.d("DashBoardViewModel", "Starting chat service")

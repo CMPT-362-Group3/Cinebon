@@ -1,6 +1,5 @@
 package com.cmpt362.cinebon.data.repo
 
-import android.util.Log
 import com.cmpt362.cinebon.data.entity.ChatEntity
 import com.cmpt362.cinebon.data.entity.MessageEntity
 import com.cmpt362.cinebon.data.entity.MessageEntity.Companion.TIMESTAMP_FIELD
@@ -31,12 +30,12 @@ class MessagesRepository private constructor() {
         val messagesRef = database.collection(chat.messagePath())
         val messages = mutableListOf<MessageEntity>()
 
-        messagesRef.orderBy(TIMESTAMP_FIELD)
+        messagesRef.orderBy(TIMESTAMP_FIELD).limit(200)
             .get().await().forEach { messageDoc ->
-            messageDoc.toObject<MessageEntity>().let {
-                messages.add(it)
+                messageDoc.toObject<MessageEntity>().let {
+                    messages.add(it)
+                }
             }
-        }
 
         val resolvedMessages = mutableListOf<ResolvedMessageEntity>()
 
@@ -59,9 +58,6 @@ class MessagesRepository private constructor() {
                 )
             )
         }
-
-        Log.d("MessagesRepository", "Resolved messages size: ${resolvedMessages.size} for chat: ${chat.chatId}")
-        Log.d("MessagesRepository", "Messages in: ${chat.chatId} are: ${resolvedMessages.map { it.timestamp.toString() }}")
 
         return resolvedMessages
     }

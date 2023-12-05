@@ -54,7 +54,7 @@ fun DashboardNav() {
 
     // This creates a dashboard VM instance which starts the chat service
     val dashboardVM = viewModel<DashBoardViewModel>()
-    dashboardVM.ensureRunningChatService()
+    dashboardVM.ensureRunningNetworkService()
 
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background

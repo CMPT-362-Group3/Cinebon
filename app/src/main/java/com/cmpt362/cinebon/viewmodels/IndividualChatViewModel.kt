@@ -15,7 +15,7 @@ class IndividualChatViewModel(id: String) : ViewModel() {
     private val chatRepository = ChatRepository.getInstance()
 
     private val _currentChat = MutableStateFlow(
-        getResolvedChatById(id)
+        chatRepository.getResolvedChatById(id)
     )
     val currentChat: StateFlow<ResolvedChatEntity?>
         get() = _currentChat
@@ -25,13 +25,9 @@ class IndividualChatViewModel(id: String) : ViewModel() {
         // And keep it plugged to the UI whenever resolved chats update
         viewModelScope.launch {
             chatRepository.resolvedChats.collectLatest {
-                _currentChat.value = getResolvedChatById(id)
+                _currentChat.value = chatRepository.getResolvedChatById(id)
             }
         }
-    }
-
-    private fun getResolvedChatById(id: String): ResolvedChatEntity? {
-        return chatRepository.resolvedChats.value.find { chat -> chat.chatId == id }
     }
 
     fun sendMessage(text: String) {
@@ -40,6 +36,7 @@ class IndividualChatViewModel(id: String) : ViewModel() {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     class Factory(private val id: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return IndividualChatViewModel(id) as T

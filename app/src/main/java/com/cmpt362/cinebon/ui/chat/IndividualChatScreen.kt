@@ -48,6 +48,7 @@ import com.cmpt362.cinebon.data.entity.ResolvedMessageEntity
 import com.cmpt362.cinebon.ui.common.Border
 import com.cmpt362.cinebon.ui.common.border
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.IndividualChatViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -65,11 +66,13 @@ fun ChatScreen(navigator: DestinationsNavigator, chatId: String) {
     var newMessage by remember { mutableStateOf("") } //remember the value of the message written
 
     LaunchedEffect(key1 = currentChat.value?.messages?.size) {
-        if ((currentChat.value?.messages?.size ?: 0) > 0 && (currentChat.value?.messages?.last()?.isSelf == true)) {
+        if ((currentChat.value?.messages?.size ?: 0) > 0) {
             Log.d("ChatScreen", "Scrolling to bottom")
             lazyListState.animateScrollToItem(currentChat.value!!.messages.size - 1)
         }
     }
+
+    SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
 
     Scaffold(
         topBar = {
@@ -189,14 +192,14 @@ fun MessageItem(message: ResolvedMessageEntity) {
     val backgroundColor = if (message.isSelf) {
         MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.secondary
+        MaterialTheme.colorScheme.secondaryContainer
     }
 
     // Use different text colors for user and sender messages
     val contentColor = if (message.isSelf) {
         MaterialTheme.colorScheme.onPrimary
     } else {
-        MaterialTheme.colorScheme.onSecondary
+        MaterialTheme.colorScheme.onSecondaryContainer
     }
 
     // Display each message in a box

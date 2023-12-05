@@ -57,5 +57,9 @@ class MoviesRepository {
     suspend fun getMovieById(id: Int): Movie {
         return service.getMovieById(id)
     }
+
+    suspend fun searchMovies(query: String): List<Movie> {
+        return service.searchMovies(query).results
+    }
 }
 

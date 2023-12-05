@@ -99,11 +99,11 @@ class NetworkService : Service() {
     // We only use it to receive latest user chats state
     private val userRefListener = EventListener<DocumentSnapshot> { snapshot, e ->
         if (e != null) {
-            Log.w("ChatService", "User ref listen failed", e)
+            Log.w("NetworkService", "User ref listen failed", e)
             return@EventListener
         }
 
-        Log.w("ChatService", "User ref snapshot updated: $snapshot")
+        Log.w("NetworkService", "User ref snapshot updated: $snapshot")
         serviceScope.launch {
             userRepository.updateCurrentUserData()
         }
@@ -113,11 +113,11 @@ class NetworkService : Service() {
     // in a chat. We use it to update the resolved chats list with message changes.
     private val messagesRefListener = EventListener<QuerySnapshot> { snapshot, e ->
         if (e != null) {
-            Log.w("ChatService", "Messages ref listen failed", e)
+            Log.w("NetworkService", "Messages ref listen failed", e)
             return@EventListener
         }
 
-        Log.w("ChatService", "Messages ref snapshot updated: $snapshot")
+        Log.w("NetworkService", "Messages ref snapshot updated: $snapshot")
         serviceScope.launch {
             chatRepository.forceResolveChats()
         }
@@ -134,7 +134,7 @@ class NetworkService : Service() {
             // For each chat, start a message listener coroutine
             // Whenever a message document updates, update the resolved chats list.
             for (chat in it) {
-                Log.d("ChatService", "Attaching messages ref listener for chat ${chat.chatId}")
+                Log.d("NetworkService", "Attaching messages ref listener for chat ${chat.chatId}")
                 chatRepository.attachMessagesRefListener(chat, messagesRefListener)
             }
         }
@@ -144,28 +144,33 @@ class NetworkService : Service() {
     // We only use it to receive latest list state - because the user subscribes to the list.
     private val listRefListener = EventListener<DocumentSnapshot> { snapshot, e ->
         if (e != null) {
-            Log.w("ChatService", "User ref listen failed", e)
+            Log.w("NetworkService", "List ref listen failed", e)
             return@EventListener
         }
 
-        Log.w("ChatService", "User ref snapshot updated: $snapshot")
+        Log.w("NetworkService", "List ref snapshot updated: $snapshot")
         serviceScope.launch {
-            listRepository.forceResolveLists()
+            listRepository.forceUpdateLists()
         }
     }
 
     // This worker reacts to the new list of chats user is subscribed to
     // and then listens to the messages collection in those chat documents.
     private suspend fun startListUpdateListenerWorker() {
+        Log.d("NetworkService", "Starting list update worker")
+
         // Observe user subscribed lists
         listRepository.userLists.collectLatest {
+
+            Log.d("NetworkService", "User subscribed lists updated: $it")
+
             // Cancel any previously registered list observers (they may be invalid now)
             listRepository.invalidateListRefsListeners()
 
             // For each chat, start a message listener coroutine
             // Whenever a message document updates, update the resolved chats list.
             for (list in it) {
-                Log.d("ChatService", "Attaching messages ref listener for chat ${list.listId}")
+                Log.d("NetworkService", "Attaching list ref listener for list ${list.listId}")
                 listRepository.attachListRefListener(list, listRefListener)
             }
         }
@@ -198,7 +203,7 @@ class NetworkService : Service() {
     }
 
     override fun onDestroy() {
-        Log.d("ChatService", "Chat service destroyed")
+        Log.d("NetworkService", "Chat service destroyed")
 
         // Cancel all listeners in the coroutine scope
         serviceScope.cancel()

@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +24,7 @@ import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.destinations.ChatScreenDestination
+import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.utils.formatted
 import com.cmpt362.cinebon.viewmodels.ChatListViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -35,6 +37,8 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
     val chatListVM = viewModel<ChatListViewModel>()
     val chatList = chatListVM.resolvedChats.collectAsStateWithLifecycle().value
 
+    SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+
     LazyColumn {
         items(chatList) { chatItem ->
             ChatListItem(chat = chatItem, onItemClick = {
@@ -42,7 +46,6 @@ fun ChatListScreen(navigator: DestinationsNavigator) {
             })
         }
     }
-
 }
 
 @Composable

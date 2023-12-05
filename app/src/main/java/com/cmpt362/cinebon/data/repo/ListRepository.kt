@@ -8,6 +8,7 @@ import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
@@ -38,10 +39,6 @@ class ListRepository private constructor() {
 
     private val database = Firebase.firestore
 
-    private val _listCreatedResult = MutableStateFlow(Result.success(false))
-    val listCreatedResult: StateFlow<Result<Boolean>>
-        get() = _listCreatedResult
-
     private val _listInfo = MutableStateFlow<ListEntity?>(null)
     val listInfo: StateFlow<ListEntity?>
         get() = _listInfo
@@ -59,18 +56,28 @@ class ListRepository private constructor() {
 
             list.owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
 
-            database.collection(LIST_COLLECTION).add(list)
-                .addOnSuccessListener {
-                    Log.d("ListRepository", "List data successfully written")
-                    _listCreatedResult.value = Result.success(true)
-                    _listInfo.value = list
-                }
+            val listRef = database.collection(LIST_COLLECTION).add(list)
                 .addOnFailureListener { e ->
                     Log.w("ListRepository", "Error writing document", e)
-                    _listCreatedResult.value = Result.failure(e)
-                    _listInfo.value = null
                 }
+                .await()
+
+            Log.d("ListRepository", "List data successfully written")
+
+            // Add the new list doc to the user's subscribed lists
+            // This should update the user snapshot, which will refresh everything else automatically!
+            userRepo.addUserList(listRef)
         }
+    }
+
+    suspend fun createEmptyNewList() {
+        createList(
+            ListEntity().apply {
+                owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+                userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+                name = "New list"
+            }
+        )
     }
 
     suspend fun updateList(listId: String, updatedList: ListEntity) {
@@ -81,7 +88,29 @@ class ListRepository private constructor() {
         }
     }
 
-    suspend fun getList(listId: String): ListEntity? {
+    suspend fun updateListName(listId: String, name: String) {
+        withContext(IO) {
+            database.collection(LIST_COLLECTION).document(listId)
+                .update("name", name)
+        }
+    }
+
+    suspend fun addMovieToList(listId: String, movieId: Int) {
+        withContext(IO) {
+            database.collection(LIST_COLLECTION).document(listId)
+                .update("movies", FieldValue.arrayUnion(movieId))
+        }
+    }
+
+    suspend fun deleteMovieFromList(listId: String, movieId: Int) {
+        withContext(IO) {
+            database.collection(LIST_COLLECTION).document(listId)
+                .update("movies", FieldValue.arrayRemove(movieId))
+        }
+    }
+
+    // Private method to fetch list data from remote
+    private suspend fun getListRemote(listId: String): ListEntity? {
         val docRef = database.collection(LIST_COLLECTION).document(listId)
 
         val snapShot = docRef.get().await()
@@ -95,8 +124,9 @@ class ListRepository private constructor() {
         return null
     }
 
-    fun resetListCreateResult() {
-        _listCreatedResult.value = Result.success(false)
+    // Check the locally fetched list for a match, if not found, fetch from remote
+    fun getResolvedListById(listId: String): ResolvedListEntity? {
+        return _resolvedLists.value.find { list -> list.listId == listId }
     }
 
     suspend fun startListRefreshWorker() {
@@ -162,16 +192,19 @@ class ListRepository private constructor() {
     }
 
     // Method to convert ListEntity to ResolvedListEntity for each list
-    private suspend fun resolveLists(lists: List<ListEntity>) {
+    private suspend fun resolveLists(lists: List<ListEntity>, fetchSource: Boolean = false) {
         val resolvedLists = mutableListOf<ResolvedListEntity>()
 
         for (list in lists) {
+            // Check if we're forcing re-fetch
+            val actualList = if (fetchSource) getListRemote(list.listId) ?: list else list
+
             // Resolve the owner of the list
-            val owner = userRepo.getUserData(list.owner.id) ?: continue
+            val owner = userRepo.getUserData(actualList.owner.id) ?: continue
 
             // Resolve the movies of the list
             val resolvedMovies = mutableListOf<Movie>()
-            list.movies.forEach { movieId ->
+            actualList.movies.forEach { movieId ->
                 movieRepo.getMovieById(movieId).let {
                     resolvedMovies.add(it)
                 }
@@ -181,8 +214,9 @@ class ListRepository private constructor() {
                 ResolvedListEntity(
                     list.listId,
                     owner,
-                    list.name,
-                    resolvedMovies
+                    actualList.name,
+                    resolvedMovies,
+                    owner.userId == FirebaseAuth.getInstance().currentUser!!.uid
                 )
             )
         }
@@ -190,8 +224,9 @@ class ListRepository private constructor() {
         _resolvedLists.value = resolvedLists
     }
 
-    suspend fun forceResolveLists() {
-        resolveLists(userLists.value)
+    suspend fun forceUpdateLists() {
+        Log.d("ListRepository", "Forcing list resolution")
+        resolveLists(_userLists.value, fetchSource = true)
     }
 
     suspend fun deleteList(listId: String) {

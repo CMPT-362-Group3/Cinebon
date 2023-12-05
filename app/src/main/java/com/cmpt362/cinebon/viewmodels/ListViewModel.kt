@@ -17,6 +17,12 @@ class ListViewModel : ViewModel() {
         }
     }
 
+    fun createEmptyNewList() {
+        viewModelScope.launch {
+            listRepository.createEmptyNewList()
+        }
+    }
+
     fun updateList(listId: String, updatedList: ListEntity) {
         viewModelScope.launch {
             listRepository.updateList(listId, updatedList)
