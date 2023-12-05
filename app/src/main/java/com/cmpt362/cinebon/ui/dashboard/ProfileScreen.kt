@@ -54,7 +54,6 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
     val userAuthViewModel = viewModel<UserAuthViewModel>()
 
     val scrollState = rememberScrollState()
-    // TODO: insert variables here
 
     val userInfo = userAuthViewModel.userFlow.collectAsStateWithLifecycle()
     val friendsCount by rememberSaveable { mutableIntStateOf(0) }

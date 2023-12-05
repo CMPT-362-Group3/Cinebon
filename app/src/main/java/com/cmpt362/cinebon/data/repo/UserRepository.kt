@@ -5,6 +5,7 @@ import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
@@ -134,6 +135,20 @@ class UserRepository private constructor() {
                     Log.w("UserRepository", "error updating user data", e)
                     onResult(e)
                 }
+        }
+    }
+
+    suspend fun addFriends(userId: String, friendId: String){
+        withContext(IO) {
+            try{
+                database.collection(USER_COLLECTION).document(userId)
+                    .update("friends", FieldValue.arrayUnion(friendId))
+                    .await()
+                Log.d("UserRepository", "user's friend list updated successfully")
+
+            } catch (e: Exception){
+                Log.w("UserRepository", "error updating user's friend list", e)
+            }
         }
     }
 
