@@ -34,6 +34,14 @@ class FriendsRepository private constructor() {
     val requestList: StateFlow<List<Request>>
         get() = _requestList
 
+    private val _requestSent = MutableStateFlow<Boolean>(false)
+    val requestSent: StateFlow<Boolean>
+        get() = _requestSent
+
+    private val _requestReceived = MutableStateFlow<Boolean>(false)
+    val requestReceived: StateFlow<Boolean>
+        get() = _requestReceived
+
     suspend fun getRequestList(){
         withContext(IO) {
             try {
@@ -57,18 +65,16 @@ class FriendsRepository private constructor() {
         }
     }
 
-    suspend fun acceptRequest(request: Request, onResult: (Throwable?) -> Unit) {
+    suspend fun acceptRequest(request: Request) {
         withContext(IO){
             requestsCollection
                 .document(request.requestId)
                 .update("accepted", true)
                 .addOnSuccessListener {
                     Log.d("FriendsRepository", "request status updated successfully")
-                    onResult(null)
                 }
                 .addOnFailureListener { e ->
                     Log.w("FriendsRepository", "error updating request status", e)
-                    onResult(e)
                 }
             userRepo.addFriends(request.receiver, request.sender)
             userRepo.addFriends(request.sender, request.receiver)
@@ -102,5 +108,37 @@ class FriendsRepository private constructor() {
         }
     }
 
+    suspend fun checkRequestSent(user:User){
+        withContext(IO){
+            try {
+                val querySnapshot = requestsCollection
+                    .whereEqualTo("sender", auth.currentUser!!.uid)
+                    .whereEqualTo("receiver", user.userId)
+                    .get()
+                    .await()
+                if(!querySnapshot.isEmpty){
+                    _requestSent.value = true
+                } else {
+                    _requestSent.value = false
+                    Log.d("FriendsRepository", "Friend request not sent")
+                }
+
+                val querySnapshot2 = requestsCollection
+                    .whereEqualTo("sender", user.userId)
+                    .whereEqualTo("receiver", auth.currentUser!!.uid)
+                    .get()
+                    .await()
+                if(!querySnapshot2.isEmpty){
+                    _requestReceived.value = true
+                } else {
+                    _requestReceived.value = false
+                    Log.d("FriendsRepository", "Friend request not sent")
+                }
+
+            } catch (e: Exception) {
+                Log.e("FriendsRepository", "Error checking friend request", e)
+            }
+        }
+    }
 
 }

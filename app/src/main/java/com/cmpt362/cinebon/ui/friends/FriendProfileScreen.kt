@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.FriendsViewModel
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -46,6 +48,7 @@ import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 @Composable
 fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
     val userAuthViewModel = viewModel<UserAuthViewModel>()
+    val friendsViewModel = viewModel<FriendsViewModel>()
     val scrollState = rememberScrollState()
     val userInfo = userAuthViewModel.otherUserFlow.collectAsStateWithLifecycle()
     val friendsCount by rememberSaveable { mutableIntStateOf(0) }
@@ -54,6 +57,15 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
 
     // Triggers the userViewModel to get user by their id
     userAuthViewModel.getUserByID(userID)
+
+    if(userInfo.value != null) {
+        friendsViewModel.checkRequest(user = userInfo.value!!)
+    }
+    var friendRequestSent by rememberSaveable { mutableStateOf(false) }
+    friendRequestSent = friendsViewModel.requestSent.collectAsStateWithLifecycle().value
+
+    var friendRequestReceived by rememberSaveable { mutableStateOf(false) }
+    friendRequestReceived = friendsViewModel.requestReceived.collectAsStateWithLifecycle().value
 
     Surface(
         modifier = Modifier
@@ -117,7 +129,12 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                 }
                 Button(
                     onClick = {
-                            /*TODO*/
+                        val otherUser = userInfo.value
+                        if (otherUser != null && !friendRequestSent) {
+                            friendsViewModel.sendRequest(otherUser)
+                        }else if(otherUser!=null && friendRequestReceived){
+                            //accept request here: TODO
+                        }
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -128,7 +145,10 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                         .padding(vertical = 16.dp)
                         .padding(start = 4.dp)
                 ) {
-                    Text("Add Friend", Modifier.padding(8.dp))
+                    Text(
+                        if(friendRequestSent) "Friend Request Sent" else if(friendRequestReceived) "Accept Friend Request" else "Add Friend",
+                        Modifier.padding(8.dp)
+                    )
                 }
             }
 

@@ -18,6 +18,13 @@ class FriendsViewModel: ViewModel() {
     val requestList: StateFlow<List<Request>>
         get() = _requestList
 
+    private val _requestSent = MutableStateFlow<Boolean>(false)
+    val requestSent: StateFlow<Boolean>
+        get() = _requestSent
+
+    private val _requestReceived = MutableStateFlow<Boolean>(false)
+    val requestReceived: StateFlow<Boolean>
+        get() = _requestReceived
     fun getRequestList() {
         viewModelScope.launch {
             friendsRepository.getRequestList()
@@ -39,7 +46,7 @@ class FriendsViewModel: ViewModel() {
 
     fun acceptRequest(request: Request, onResult:(Throwable?)-> Unit) {
         viewModelScope.launch {
-            friendsRepository.acceptRequest(request, onResult)
+            friendsRepository.acceptRequest(request)
         }
     }
 
@@ -49,5 +56,16 @@ class FriendsViewModel: ViewModel() {
         }
     }
 
+    fun checkRequest(user: User){
+        viewModelScope.launch{
+            friendsRepository.checkRequestSent(user)
+            friendsRepository.requestSent.collectLatest {
+                _requestSent.value = it
+            }
+            friendsRepository.requestReceived.collectLatest {
+                _requestReceived.value = it
+            }
+        }
+    }
 
 }
