@@ -10,6 +10,5 @@ class MovieEntity(
     val review: Int,
     val description: String,
     val releaseDate: String,
-    val image: Int,
     val bookmarked: MutableStateFlow<Boolean> = MutableStateFlow(false)
 )

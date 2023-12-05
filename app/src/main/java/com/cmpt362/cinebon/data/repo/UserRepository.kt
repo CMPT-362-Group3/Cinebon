@@ -3,6 +3,7 @@ package com.cmpt362.cinebon.data.repo
 import android.util.Log
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FieldValue
@@ -20,6 +21,7 @@ class UserRepository private constructor() {
 
     companion object {
         const val USER_COLLECTION = "users"
+        private const val USER_MOVIE_LIST = "movieList"
 
         private val instance = UserRepository()
 
@@ -74,7 +76,7 @@ class UserRepository private constructor() {
         }
     }
 
-    private fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
+    fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
 
     suspend fun updateCurrentUserData() {
         val docRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
@@ -134,6 +136,19 @@ class UserRepository private constructor() {
                 .addOnFailureListener { e ->
                     Log.w("UserRepository", "error updating user data", e)
                     onResult(e)
+                }
+        }
+    }
+
+    suspend fun addUserList(listRef: DocumentReference) {
+        withContext(IO) {
+            database.collection(USER_COLLECTION).document(FirebaseAuth.getInstance().currentUser!!.uid)
+                .update(USER_MOVIE_LIST, FieldValue.arrayUnion(listRef))
+                .addOnSuccessListener {
+                    Log.d("UserRepository", "user list added successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.w("UserRepository", "error adding user list", e)
                 }
         }
     }

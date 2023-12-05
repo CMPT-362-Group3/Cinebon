@@ -8,11 +8,9 @@ import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 
 interface AccountService {
@@ -53,7 +51,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     }
 
     override fun signOut() {
-        CoroutineScope(viewModelScope.coroutineContext).launch {
+        viewModelScope.launch {
             userRepository.signOut()
         }
     }
