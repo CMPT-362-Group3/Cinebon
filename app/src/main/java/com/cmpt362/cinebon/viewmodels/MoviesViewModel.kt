@@ -18,15 +18,15 @@ class MoviesViewModel : ViewModel() {
     val upcomingMovies = MutableStateFlow(EmptyMoviesResult.results)
 
     init {
-        getNowPlayingMovies()
-        getPopularMovies()
-        getUpcomingMovies()
+        getNowPlayingMovies() // Initialize the movies
+        getPopularMovies() // Initialize the movies
+        getUpcomingMovies() // Initialize the movies
     }
 
     private fun getNowPlayingMovies() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                nowPlayingMovies.value = repo.getNowPlayingMovies().value
+                nowPlayingMovies.value = repo.getNowPlayingMovies().value // Update the now playing movies
             }
         }
     }
@@ -34,7 +34,7 @@ class MoviesViewModel : ViewModel() {
     private fun getUpcomingMovies() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                upcomingMovies.value = repo.getUpcomingMovies().value
+                upcomingMovies.value = repo.getUpcomingMovies().value // Update the upcoming movies
             }
         }
     }
@@ -42,7 +42,7 @@ class MoviesViewModel : ViewModel() {
     private fun getPopularMovies() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                popularMovies.value = repo.getPopularMovies().value
+                popularMovies.value = repo.getPopularMovies().value // Update the popular movies
             }
         }
     }

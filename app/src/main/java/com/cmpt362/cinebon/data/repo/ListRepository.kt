@@ -171,7 +171,7 @@ class ListRepository private constructor() {
         val lists = mutableListOf<ListEntity>()
 
         flow {
-            // Show wishlist on top
+            // Show watchlist on top
             Log.d("ListRepository", "Fetching default list")
             emit(getListEntity(user.defaultList))
             Log.d("ListRepository", "Default list fetched")

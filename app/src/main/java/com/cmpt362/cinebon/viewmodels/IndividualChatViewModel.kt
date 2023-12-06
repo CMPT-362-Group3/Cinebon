@@ -25,17 +25,18 @@ class IndividualChatViewModel(id: String) : ViewModel() {
         // And keep it plugged to the UI whenever resolved chats update
         viewModelScope.launch {
             chatRepository.resolvedChats.collectLatest {
-                _currentChat.value = chatRepository.getResolvedChatById(id)
+                _currentChat.value = chatRepository.getResolvedChatById(id) // Update the chat
             }
         }
     }
 
     fun sendMessage(text: String) {
         viewModelScope.launch {
-            chatRepository.sendMessage(_currentChat.value!!, text)
+            chatRepository.sendMessage(_currentChat.value!!, text) // Send the message
         }
     }
 
+    // Factory for creating the view model
     @Suppress("UNCHECKED_CAST")
     class Factory(private val id: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

@@ -36,34 +36,34 @@ class UserAuthViewModel : ViewModel(), AccountService {
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
     val userFlow: StateFlow<UserEntity?>
-        get() = userRepository.userInfo
+        get() = userRepository.userInfo // Expose user data to view
 
     fun isSignedIn(): Boolean {
         val currentUser = auth.currentUser
         return if (currentUser != null) {
             Log.d("UserAuthViewModel", "User is signed in")
-            true
+            true // User is signed in
         } else {
             Log.d("UserAuthViewModel", "User is not signed in")
-            false
+            false // User is not signed in
         }
     }
 
     override fun signOut() {
         viewModelScope.launch {
-            userRepository.signOut()
+            userRepository.signOut() // Sign out user
         }
     }
 
     override fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit) {
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password) // Sign in user
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("AccountService", "User signed in successfully")
-                    onResult(null)
+                    onResult(null) // Continue to next step
                 } else {
                     Log.d("AccountService", "User sign in failed")
-                    onResult(task.exception)
+                    onResult(task.exception) // Show error
                 }
             }
     }
@@ -79,31 +79,23 @@ class UserAuthViewModel : ViewModel(), AccountService {
                 // User create in auth
                 val user = auth.currentUser
 
-                startSignUpListener(onResult)
+                startSignUpListener(onResult) // Start listening for user creation
 
                 if (user != null) {
                     // Create user data in Firestore
                     viewModelScope.launch {
                         val newUser = UserEntity()
+
                         newUser.userId = user.uid
                         newUser.email = email
                         newUser.fname = fName
                         newUser.lname = lName
                         newUser.username = username
 
-                        userRepository
-                            .createUserData(newUser)
+                        userRepository.createUserData(newUser) // Create user data in Firestore
                     }
 
-                    // Send verification email
-                    user.sendEmailVerification()
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Log.d("AccountService", "Verification email sent successfully")
-                            } else {
-                                Log.d("AccountService", "Verification email failed to send")
-                            }
-                        }
+                    user.sendEmailVerification() // Send verification email
                 }
             }
             .addOnFailureListener { e ->
@@ -123,39 +115,37 @@ class UserAuthViewModel : ViewModel(), AccountService {
                     onResult(Throwable()) // Show error
                 }
 
-                if ((it.isSuccess && it.getOrNull() == true) ||
-                    it.isFailure
-                ) {
-                    userRepository.resetUserCreatedResult()
-                    signUpJob?.cancel()
+                if ((it.isSuccess && it.getOrNull() == true) || it.isFailure) {
+                    userRepository.resetUserCreatedResult() // Reset user creation result
+                    signUpJob?.cancel() // Stop listening for user creation
                 }
             }
         }
     }
 
     override fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit) {
-        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email) // Send reset password email
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("AccountService", "Reset password email sent successfully")
-                    onResult(null)
+                    onResult(null) // Continue to next step
                 } else {
                     Log.d("AccountService", "Reset password email failed to send")
-                    onResult(task.exception)
+                    onResult(task.exception) // Show error
                 }
             }
     }
 
     override fun getSignedInUser() {
         if (userFlow.value != null) {
-            return
+            return // User data already exists
         }
 
         try {
-            auth.currentUser ?: throw Exception("User is not signed in")
+            auth.currentUser ?: throw Exception("User is not signed in") // Check if user is signed in
 
             Log.d("UserViewModel", "User is signed in")
-            viewModelScope.launch { userRepository.updateCurrentUserData() }
+            viewModelScope.launch { userRepository.updateCurrentUserData() } // Update user data
         } catch (e: Exception) {
             Log.d("UserViewModel", "Failed to get signed in user")
         }
@@ -168,48 +158,49 @@ class UserAuthViewModel : ViewModel(), AccountService {
         email: String,
         onResult: (Throwable?) -> Unit
     ) {
-        // get current user
-        val firebaseUser = FirebaseAuth.getInstance().currentUser
+        val firebaseUser = FirebaseAuth.getInstance().currentUser // get current user
 
         // if current user exist, launch updateUserData from userRepo to update user data
         if (firebaseUser != null) {
             if (firebaseUser.email != email) {
-                firebaseUser.updateEmail(email)
+                firebaseUser.updateEmail(email) // update email
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Log.d("UserAuthViewModel", "User email address updated.")
                         } else {
                             Log.d("UserAuthViewModel", "Failed to update user email address.")
-                            onResult(task.exception)
+                            onResult(task.exception) // Show error
                         }
                     }
             }
 
             val profileUpdates = UserProfileChangeRequest.Builder()
-                .setDisplayName(username)
+                .setDisplayName(username) // update username
                 .build()
 
-            firebaseUser.updateProfile(profileUpdates)
+            firebaseUser.updateProfile(profileUpdates) // update username
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         viewModelScope.launch {
                             val user = userRepository.getUserData(firebaseUser.uid)
                             if (user != null) {
+
                                 user.email = email
                                 user.username = username
                                 user.fname = firstName
                                 user.lname = lastName
-                                userRepository.updateUserData(user, onResult)
+
+                                userRepository.updateUserData(user, onResult) // update user data
                             } else {
-                                onResult(Throwable("User Not Found"))
+                                onResult(Throwable("User Not Found")) // Show error
                             }
                         }
                     } else {
-                        onResult(task.exception)
+                        onResult(task.exception) // Show error
                     }
                 }
         } else {
-            onResult(Throwable("User Not Authenticated"))
+            onResult(Throwable("User Not Authenticated")) // Show error
         }
     }
 }

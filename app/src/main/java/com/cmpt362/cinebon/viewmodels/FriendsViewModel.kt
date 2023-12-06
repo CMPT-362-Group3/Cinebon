@@ -21,7 +21,7 @@ class FriendsViewModel : ViewModel() {
 
     fun getRequestList() {
         viewModelScope.launch {
-            friendsRepository.getRequestList()
+            friendsRepository.getRequestList() // Get the list of requests
         }
     }
 
@@ -29,7 +29,9 @@ class FriendsViewModel : ViewModel() {
         // Launch a worker to filter out received requests when resolved
         viewModelScope.launch {
             friendsRepository.resolvedRequestList.collectLatest { reqList ->
-                _receivedRequests.value = reqList.filter { it.sender.userId != userRepository.userInfo.value?.userId }
+                _receivedRequests.value = reqList.filter {
+                    it.sender.userId != userRepository.userInfo.value?.userId // Filter out requests from self
+                }
             }
         }
     }

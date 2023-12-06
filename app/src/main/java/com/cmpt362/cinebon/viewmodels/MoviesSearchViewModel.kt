@@ -23,7 +23,7 @@ class MoviesSearchViewModel : ViewModel() {
     // It dispatches a search requests after an input delay
     // The delay allows us to cancel any previously sent requests for more efficiency
     fun updateSearchResults(query: String, rateLimit: Boolean = true) {
-        searchJob?.cancel()
+        searchJob?.cancel() // Cancel any previous requests
 
         // If there's nothing to search, reset the results
         if (query.trim().isEmpty()) {
@@ -43,7 +43,7 @@ class MoviesSearchViewModel : ViewModel() {
     }
 
     fun resetSearchResults() {
-        _searchResults.value = emptyList()
+        _searchResults.value = emptyList() // Reset the results
     }
 
 }

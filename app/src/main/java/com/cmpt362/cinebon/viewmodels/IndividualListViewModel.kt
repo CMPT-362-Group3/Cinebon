@@ -34,27 +34,32 @@ class IndividualListViewModel(listId: String) : ViewModel() {
     // Method to update the shown list's name
     // We do a little verification to only update if user is owner
     fun updateListName(name: String) {
+        // If the list is not owned by the user, or is the default list, do nothing
         if (currentList.value?.isSelf == false || name == DEFAULT_LIST_NAME) {
             return
         }
 
+        // Update the list name in the DB
         viewModelScope.launch {
             listRepository.updateListName(currentList.value!!.listId, name)
         }
     }
 
+    // Method to add a movie to the shown list
     fun addMovieToList(movieId: Int) {
         viewModelScope.launch {
             listRepository.addMovieToList(currentList.value!!.listId, movieId)
         }
     }
 
+    // Method to remove a movie from the shown list
     fun removeMovieFromList(movieId: Int) {
         viewModelScope.launch {
             listRepository.deleteMovieFromList(currentList.value!!.listId, movieId)
         }
     }
 
+    // Method to delete the shown list
     fun deleteList(list: ResolvedListEntity?) {
         if (list == null) return
 

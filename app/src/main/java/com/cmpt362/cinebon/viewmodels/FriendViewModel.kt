@@ -46,6 +46,7 @@ class FriendViewModel(private val friendId: String) : ViewModel() {
 
                 Log.d("FriendViewModel", "Not already friends")
 
+                // Check if there's a pending request
                 val pendingRequest = requests.find {
                     (it.sender.userId == userRepository.userInfo.value?.userId && it.receiver.userId == friendId) ||
                             (it.receiver.userId == userRepository.userInfo.value?.userId && it.sender.userId == friendId)
@@ -56,6 +57,7 @@ class FriendViewModel(private val friendId: String) : ViewModel() {
                     "Pending request: R ${pendingRequest?.receiver?.userId} S ${pendingRequest?.sender?.userId}"
                 )
 
+                // Update the request status
                 _requestStatus.value = when {
                     pendingRequest == null -> FriendRequestStatus.NONE
                     pendingRequest.receiver.userId == userRepository.userInfo.value?.userId -> FriendRequestStatus.RECEIVED
@@ -69,34 +71,35 @@ class FriendViewModel(private val friendId: String) : ViewModel() {
 
     fun sendRequest(friend: UserEntity) {
         viewModelScope.launch {
-            friendsRepository.createFriendRequest(friend)
+            friendsRepository.createFriendRequest(friend) // Create the request
         }
     }
 
     fun acceptRequest(friend: UserEntity) {
         viewModelScope.launch {
-            friendsRepository.acceptRequest(friend)
+            friendsRepository.acceptRequest(friend) // Accept the request
         }
     }
 
     fun rejectRequest(friend: UserEntity) {
         viewModelScope.launch {
-            friendsRepository.deleteRequest(friend)
+            friendsRepository.deleteRequest(friend) // Reject the request
         }
     }
 
     fun removeFriend(friend: UserEntity) {
         viewModelScope.launch {
-            userRepository.removeFriend(friend)
+            userRepository.removeFriend(friend) // Remove the friend
         }
     }
 
     private fun updateFriendDetails() {
         viewModelScope.launch {
-            _friendInfo.value = userRepository.getUserData(friendId)
+            _friendInfo.value = userRepository.getUserData(friendId) // Get the friend's info
         }
     }
 
+    // Factory for creating the view model
     @Suppress("UNCHECKED_CAST")
     class Factory(private val id: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

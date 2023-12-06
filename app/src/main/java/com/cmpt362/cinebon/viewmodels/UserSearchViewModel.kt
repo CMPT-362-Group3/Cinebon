@@ -21,25 +21,23 @@ class UserSearchViewModel: ViewModel() {
     fun searchUsers(query: String) {
         searchJob = viewModelScope.launch {
             // Artificial delay to prevent too many API calls
-            delay(750)
+            delay(750) // delay 750ms
 
-            // Dispatch the call
-            userRepository.searchUsers(query)
+            userRepository.searchUsers(query) // Dispatch the call
 
-            // Reset search job reference
-            searchJob = null
+            searchJob = null // Reset search job reference
         }
     }
 
     init{
         viewModelScope.launch {
             userRepository.searchResults.collectLatest {
-                _searchResults.value = it
+                _searchResults.value = it // Update search results
             }
         }
     }
 
     fun resetSearchResults(){
-        userRepository.resetUserSearchResults()
+        userRepository.resetUserSearchResults() // Reset search results
     }
 }

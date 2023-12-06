@@ -12,13 +12,13 @@ class NewListViewModel : ViewModel() {
 
     fun createDefaultList() {
         viewModelScope.launch {
-            listRepository.createDefaultList()
+            listRepository.createDefaultList() // Create default list
         }
     }
 
     fun createEmptyNewList() {
         viewModelScope.launch {
-            listRepository.createEmptyNewList()
+            listRepository.createEmptyNewList() // Create empty list
         }
     }
 }

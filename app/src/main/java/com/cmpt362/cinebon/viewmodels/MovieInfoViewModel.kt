@@ -21,11 +21,12 @@ class MovieInfoViewModel(private val movieId: Int) : ViewModel() {
     init {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                _movieInfo.value = repo.getMovieById(movieId)
+                _movieInfo.value = repo.getMovieById(movieId) // Get movie info from repo
             }
         }
     }
 
+    // Factory for creating MovieInfoViewModel with movieId
     @Suppress("UNCHECKED_CAST")
     class Factory(private val movieId: Int) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

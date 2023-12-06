@@ -51,7 +51,7 @@ import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.utils.UNICODE_DOT
 import com.cmpt362.cinebon.utils.shimmerBrush
 import com.cmpt362.cinebon.viewmodels.MovieInfoViewModel
-import com.cmpt362.cinebon.viewmodels.WishlistViewModel
+import com.cmpt362.cinebon.viewmodels.WatchlistViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlin.math.roundToInt
 
@@ -61,9 +61,9 @@ import kotlin.math.roundToInt
 fun MovieInfoScreen(movieId: Int) {
 
     val movieInfoViewModel = viewModel<MovieInfoViewModel>(factory = MovieInfoViewModel.Factory(movieId))
-    val wishlistViewModel = viewModel<WishlistViewModel>()
+    val watchlistViewModel = viewModel<WatchlistViewModel>()
     val movieInfo = movieInfoViewModel.movieInfo.collectAsStateWithLifecycle()
-    val wishlist by wishlistViewModel.wishlist.collectAsStateWithLifecycle()
+    val watchlist by watchlistViewModel.watchlist.collectAsStateWithLifecycle()
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surface)
 
@@ -96,12 +96,12 @@ fun MovieInfoScreen(movieId: Int) {
 
         MovieBookmarkIcon(
             modifier = Modifier.align(alignment = Alignment.TopEnd),
-            isBookmarked = wishlist.containsMovie(movieId),
+            isBookmarked = watchlist.containsMovie(movieId),
             onClick = { isBookmarked ->
                 if (isBookmarked) {
-                    wishlistViewModel.addMovieToWishlist(movieId)
+                    watchlistViewModel.addMovieToWatchlist(movieId)
                 } else {
-                    wishlistViewModel.removeMovieFromWishlist(movieId)
+                    watchlistViewModel.removeMovieFromWatchlist(movieId)
                 }
             }
         )

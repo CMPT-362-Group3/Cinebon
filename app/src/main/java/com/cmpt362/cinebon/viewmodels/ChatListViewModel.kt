@@ -19,12 +19,12 @@ class ChatListViewModel : ViewModel() {
 
     fun startChatWithUser(userId: String) {
         viewModelScope.launch {
-            _openedChat.value = chatRepository.getResolvedChatByFriend(userId)
+            _openedChat.value = chatRepository.getResolvedChatByFriend(userId) // Start chat with user
         }
     }
 
     fun resetCreationStatus() {
-        _openedChat.value = null
+        _openedChat.value = null // Reset the creation status
     }
 
 }

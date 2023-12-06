@@ -37,7 +37,7 @@ import com.cmpt362.cinebon.data.entity.containsMovie
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.MoviesViewModel
-import com.cmpt362.cinebon.viewmodels.WishlistViewModel
+import com.cmpt362.cinebon.viewmodels.WatchlistViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -134,8 +134,8 @@ fun MovieCard(
     modifier: Modifier = Modifier,
     showBookmark: Boolean = true
 ) {
-    val wishlistViewModel = viewModel<WishlistViewModel>()
-    val wishlist by wishlistViewModel.wishlist.collectAsStateWithLifecycle()
+    val watchlistViewModel = viewModel<WatchlistViewModel>()
+    val watchlist by watchlistViewModel.watchlist.collectAsStateWithLifecycle()
 
     Card(modifier = modifier.fillMaxSize()) {
         Box(modifier = modifier.fillMaxSize()) {
@@ -144,12 +144,12 @@ fun MovieCard(
             if (showBookmark) {
                 MovieBookmarkIcon(
                     modifier = modifier.align(Alignment.TopEnd),
-                    isBookmarked = wishlist.containsMovie(movie.id),
+                    isBookmarked = watchlist.containsMovie(movie.id),
                     onClick = { isBookmarked ->
                         if (isBookmarked) {
-                            wishlistViewModel.addMovieToWishlist(movie.id)
+                            watchlistViewModel.addMovieToWatchlist(movie.id)
                         } else {
-                            wishlistViewModel.removeMovieFromWishlist(movie.id)
+                            watchlistViewModel.removeMovieFromWatchlist(movie.id)
                         }
                     }
                 )
