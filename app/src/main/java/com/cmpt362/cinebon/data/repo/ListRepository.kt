@@ -39,10 +39,6 @@ class ListRepository private constructor() {
 
     private val database = Firebase.firestore
 
-    private val _listInfo = MutableStateFlow<ListEntity?>(null)
-    val listInfo: StateFlow<ListEntity?>
-        get() = _listInfo
-
     private val _resolvedLists = MutableStateFlow<List<ResolvedListEntity>>(emptyList())
     val resolvedLists: StateFlow<List<ResolvedListEntity>>
         get() = _resolvedLists
@@ -51,7 +47,7 @@ class ListRepository private constructor() {
     val userLists: StateFlow<List<ListEntity>>
         get() = _userLists
 
-    suspend fun createList(list: ListEntity) {
+    private suspend fun createList(list: ListEntity, isDefault: Boolean = false) {
         withContext(IO) {
 
             list.owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
@@ -66,8 +62,19 @@ class ListRepository private constructor() {
 
             // Add the new list doc to the user's subscribed lists
             // This should update the user snapshot, which will refresh everything else automatically!
-            userRepo.addUserList(listRef)
+            userRepo.addUserList(listRef, isDefault)
         }
+    }
+
+    suspend fun createDefaultList() {
+        createList(
+            ListEntity().apply {
+                owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+                userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+                name = "Watchlist"
+            },
+            isDefault = true
+        )
     }
 
     suspend fun createEmptyNewList() {
@@ -75,7 +82,7 @@ class ListRepository private constructor() {
             ListEntity().apply {
                 owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
                 userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
-                name = "New list"
+                name = "New List"
             }
         )
     }

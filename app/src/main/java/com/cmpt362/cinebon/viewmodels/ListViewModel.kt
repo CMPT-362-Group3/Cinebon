@@ -11,9 +11,9 @@ class ListViewModel : ViewModel() {
     private val listRepository = ListRepository.getInstance()
     val userLists = listRepository.resolvedLists
 
-    fun createList(list: ListEntity) {
+    fun createDefaultList() {
         viewModelScope.launch {
-            listRepository.createList(list)
+            listRepository.createDefaultList()
         }
     }
 

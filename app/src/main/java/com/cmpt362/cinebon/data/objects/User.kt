@@ -8,6 +8,7 @@ class User {
     lateinit var fname: String
     lateinit var lname: String
     lateinit var email: String
+    lateinit var defaultList: DocumentReference
     var chats = mutableListOf<DocumentReference>()
     var movieList = mutableListOf<DocumentReference>()
     var friends = mutableListOf<DocumentReference>()

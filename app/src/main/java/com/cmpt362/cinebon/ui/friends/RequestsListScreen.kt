@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,10 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.data.entity.FriendUser
 import com.cmpt362.cinebon.data.entity.ResolvedFriendRequest
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.FriendViewModel
 import com.cmpt362.cinebon.viewmodels.FriendsViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -64,7 +65,6 @@ fun RequestListScreen(navigator: DestinationsNavigator) {
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(24.dp),
-
                         )
                 }
 
@@ -90,25 +90,38 @@ fun RequestListScreen(navigator: DestinationsNavigator) {
                     .weight(1f)
                     .padding(8.dp)
             ){
-
-                RequestList(requestList = requestList.value, onItemClick = {})
-
+                RequestList(requestList = requestList.value)
             }
         }
     }
 }
 
 @Composable
-fun RequestList(requestList: List<ResolvedFriendRequest>, onItemClick: (FriendUser) -> Unit){
+fun RequestList(requestList: List<ResolvedFriendRequest>) {
     LazyColumn {
-        items(requestList) { user ->
-            RequestListItem(friendRequest = user, onItemClick = onItemClick)
+        if(requestList.isNotEmpty()) {
+            items(requestList) { user ->
+                RequestListItem(friendRequest = user)
+            }
+        } else {
+            item {
+                Text(
+                    text = "No friend requests",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
+
     }
 }
 
 @Composable
-fun RequestListItem(friendRequest: ResolvedFriendRequest, onItemClick: (FriendUser) -> Unit){
+fun RequestListItem(friendRequest: ResolvedFriendRequest){
+    val friendViewModel = viewModel<FriendViewModel>(factory = FriendViewModel.Factory(friendRequest.sender.userId))
+    val friendInfo by friendViewModel.friendInfo.collectAsStateWithLifecycle()
+
     Column {
         Divider(
             color = MaterialTheme.colorScheme.primary,
@@ -132,7 +145,7 @@ fun RequestListItem(friendRequest: ResolvedFriendRequest, onItemClick: (FriendUs
 
             Button(
                 onClick = {
-                    /*TODO*/
+                    friendViewModel.acceptRequest(friendInfo!!)
                 },
                 colors = ButtonDefaults.buttonColors
                     (
@@ -146,7 +159,7 @@ fun RequestListItem(friendRequest: ResolvedFriendRequest, onItemClick: (FriendUs
 
             Button(
                 onClick = {
-                    /*TODO*/
+                      friendViewModel.rejectRequest(friendInfo!!)
                 },
                 colors = ButtonDefaults.buttonColors
                     (

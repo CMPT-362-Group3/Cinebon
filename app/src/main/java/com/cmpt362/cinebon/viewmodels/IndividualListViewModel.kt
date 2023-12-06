@@ -33,7 +33,7 @@ class IndividualListViewModel(listId: String) : ViewModel() {
     // Method to update the shown list's name
     // We do a little verification to only update if user is owner
     fun updateListName(name: String) {
-        if (currentList.value?.isSelf == false) {
+        if (currentList.value?.isSelf == false || name == "Watchlist") {
             return
         }
 
@@ -52,10 +52,6 @@ class IndividualListViewModel(listId: String) : ViewModel() {
         viewModelScope.launch {
             listRepository.deleteMovieFromList(currentList.value!!.listId, movieId)
         }
-    }
-
-    fun resetSearchResults() {
-
     }
 
     @Suppress("UNCHECKED_CAST")

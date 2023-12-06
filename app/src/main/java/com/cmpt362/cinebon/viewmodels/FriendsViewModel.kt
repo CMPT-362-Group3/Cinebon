@@ -29,7 +29,7 @@ class FriendsViewModel : ViewModel() {
         // Launch a worker to filter out received requests when resolved
         viewModelScope.launch {
             friendsRepository.resolvedRequestList.collectLatest { reqList ->
-                _receivedRequests.value = reqList.filter { it.sender != userRepository.userInfo.value }
+                _receivedRequests.value = reqList.filter { it.sender.userId != userRepository.userInfo.value?.userId }
             }
         }
     }

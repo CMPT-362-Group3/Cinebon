@@ -22,6 +22,7 @@ class UserRepository private constructor() {
     companion object {
         const val USER_COLLECTION = "users"
         private const val USER_MOVIE_LIST = "movieList"
+        private const val USER_DEFAULT_LIST = "defaultList"
 
         private val instance = UserRepository()
 
@@ -107,16 +108,12 @@ class UserRepository private constructor() {
         }
     }
 
-    suspend fun addUserList(listRef: DocumentReference) {
+    suspend fun addUserList(listRef: DocumentReference, isDefault: Boolean = false) {
         withContext(IO) {
-            getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
-                .update(USER_MOVIE_LIST, FieldValue.arrayUnion(listRef))
-                .addOnSuccessListener {
-                    Log.d("UserRepository", "user list added successfully")
-                }
-                .addOnFailureListener { e ->
-                    Log.w("UserRepository", "error adding user list", e)
-                }
+            val userRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+            userRef.update(USER_MOVIE_LIST, FieldValue.arrayUnion(listRef))
+            if(isDefault)
+                userRef.update(USER_DEFAULT_LIST, listRef)
         }
     }
 

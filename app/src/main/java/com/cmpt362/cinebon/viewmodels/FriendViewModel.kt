@@ -32,7 +32,6 @@ class FriendViewModel(private val friendId: String) : ViewModel() {
         startFriendRequestStatusWorker()
     }
 
-
     private fun startFriendRequestStatusWorker() {
         viewModelScope.launch {
             friendsRepository.resolvedRequestList.collectLatest { requests ->

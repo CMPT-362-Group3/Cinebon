@@ -76,6 +76,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
     var listName by rememberSaveable { mutableStateOf(list?.name ?: "") }
     var query by rememberSaveable { mutableStateOf("") }
     var active by rememberSaveable { mutableStateOf(false) }
+    var isInvalidName by rememberSaveable { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
     var textFieldLoaded by remember { mutableStateOf(false) }
@@ -167,27 +168,53 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                 }
 
                 if (list!!.isSelf) {
-                    OutlinedTextField(
-                        value = listName,
-                        onValueChange = {
-                            listName = it
-                        },
-                        label = {
-                            Text("Title")
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = {
-                            if (listName.isNotEmpty()) {
-                                listViewModel.updateListName(listName.trim())
-                            }
-                            focusManager.clearFocus(true)
-                        }),
-                        placeholder = { Text("Hint: Marvel collection?") },
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
+                    if(listName != "Watchlist" || isInvalidName) {
+                        OutlinedTextField(
+                            value = listName,
+                            onValueChange = {
+                                listName = it
+                                isInvalidName = listName == "Watchlist"
+                            },
+                            label = {
+                                Text("Title")
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(onDone = {
+                                if (listName.isNotEmpty()) {
+                                    if(listName != "Watchlist")
+                                        listViewModel.updateListName(listName.trim())
+                                    else
+                                        isInvalidName = true
+                                }
+                                focusManager.clearFocus(true)
+                            }),
+                            placeholder = { Text("Hint: Marvel collection?") },
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
+                        if (isInvalidName) {
+                            Text(
+                                text = "Title cannot be Watchlist",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.error,
+                                        shape = MaterialTheme.shapes.medium
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = listName,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(top = 16.dp)
+                        )
+                    }
 
                     if (listName.isEmpty()) {
                         Text(

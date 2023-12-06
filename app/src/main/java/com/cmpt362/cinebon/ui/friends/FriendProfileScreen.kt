@@ -5,12 +5,10 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -22,9 +20,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,6 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.enums.FriendRequestStatus
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.ui.destinations.IndividualListScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.FriendViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -51,9 +47,6 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
     val friendStatus by friendViewModel.requestStatus.collectAsStateWithLifecycle()
 
     val scrollState = rememberScrollState()
-    val friendsCount by rememberSaveable { mutableIntStateOf(0) }
-    val moviesWatched by rememberSaveable { mutableIntStateOf(0) }
-    val lastWatched by rememberSaveable { mutableStateOf("") }
 
     if (friendInfo == null) {
         return
@@ -184,60 +177,16 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                     )
 
                     Text(
-                        text = friendsCount.toString(),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(32.dp))
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Watched",
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier
-                            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                    )
-
-                    Divider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        thickness = 4.dp
-                    )
-
-                    Text(
-                        text = moviesWatched.toString(),
+                        text = (friendInfo?.friends?.size ?: 0).toString(),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 }
             }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Text(
-                    text = "Last Watched",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
-                )
-
-                Divider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    thickness = 4.dp
-                )
-                Text(
-                    text = lastWatched,
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-            }
 
             Button(
                 onClick = {
-
+                    navigator.navigate(IndividualListScreenDestination(listId =  friendInfo?.defaultList?.id!!))
                 },
                 colors = ButtonDefaults.buttonColors
                     (
