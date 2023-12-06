@@ -23,10 +23,16 @@ interface AccountService {
     fun signOut()
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
     fun getSignedInUser()
-    fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit)
+    fun updateUserProfile(
+        username: String,
+        firstName: String,
+        lastName: String,
+        email: String,
+        onResult: (Throwable?) -> Unit
+    )
 }
 
-class UserAuthViewModel(): ViewModel(), AccountService {
+class UserAuthViewModel() : ViewModel(), AccountService {
     private val userRepository: UserRepository = UserRepository.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
@@ -156,7 +162,13 @@ class UserAuthViewModel(): ViewModel(), AccountService {
         }
     }
 
-    override fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit) {
+    override fun updateUserProfile(
+        username: String,
+        firstName: String,
+        lastName: String,
+        email: String,
+        onResult: (Throwable?) -> Unit
+    ) {
         // get current user
         val firebaseUser = FirebaseAuth.getInstance().currentUser
 

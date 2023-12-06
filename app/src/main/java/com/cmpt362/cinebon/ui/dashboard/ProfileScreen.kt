@@ -71,10 +71,11 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                 .scrollable(scrollState, Orientation.Vertical)
                 .fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
-            Row (
-                horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()
+            Row(
+                horizontalArrangement = Arrangement.Start, modifier = Modifier
+                    .fillMaxWidth()
                     .padding(16.dp)
-            ){
+            ) {
                 IconButton(
                     onClick = {
                         navigator.popBackStack()
@@ -170,7 +171,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
 
                 Button(
                     onClick = {
-                        navigator.navigate(IndividualListScreenDestination(listId =  userInfo?.defaultList?.id!!))
+                        navigator.navigate(IndividualListScreenDestination(listId = userInfo?.defaultList?.id!!))
                     },
                     colors = ButtonDefaults.buttonColors
                         (
@@ -183,7 +184,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                     Text("${userInfo?.fname}'s Movie List")
                 }
 
-                Row (horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     Button(
                         onClick = { userAuthViewModel.signOut() },
                         colors = ButtonDefaults.buttonColors

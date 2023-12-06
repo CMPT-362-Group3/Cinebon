@@ -62,11 +62,12 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
 
-    val listViewModel = viewModel<IndividualListViewModel>(factory = IndividualListViewModel.Factory(listId))
+    val listViewModel =
+        viewModel<IndividualListViewModel>(factory = IndividualListViewModel.Factory(listId))
     val list by listViewModel.currentList.collectAsStateWithLifecycle()
     val searchViewModel = viewModel<MoviesSearchViewModel>()
     val searchResults by searchViewModel.searchResults.collectAsStateWithLifecycle()
-    
+
     // If the list is null, then we don't want to display anything.
     if (list == null) {
         Text("Whoops! Error loading list.")
@@ -88,7 +89,10 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
             .fillMaxSize()
     ) {
         Box {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
                 SearchBar(
                     query = query,
@@ -168,7 +172,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                 }
 
                 if (list!!.isSelf) {
-                    if(listName != "Watchlist" || isInvalidName) {
+                    if (listName != "Watchlist" || isInvalidName) {
                         OutlinedTextField(
                             value = listName,
                             onValueChange = {
@@ -184,7 +188,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                             ),
                             keyboardActions = KeyboardActions(onDone = {
                                 if (listName.isNotEmpty()) {
-                                    if(listName != "Watchlist")
+                                    if (listName != "Watchlist")
                                         listViewModel.updateListName(listName.trim())
                                     else
                                         isInvalidName = true
@@ -282,7 +286,10 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                     .padding(24.dp)
             ) {
                 FloatingActionButton(onClick = { active = true }) {
-                    Icon(painter = painterResource(id = R.drawable.book_search_outline), contentDescription = "Add new movie")
+                    Icon(
+                        painter = painterResource(id = R.drawable.book_search_outline),
+                        contentDescription = "Add new movie"
+                    )
                 }
             }
         }

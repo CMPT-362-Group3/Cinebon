@@ -51,7 +51,10 @@ class FriendViewModel(private val friendId: String) : ViewModel() {
                             (it.receiver.userId == userRepository.userInfo.value?.userId && it.sender.userId == friendId)
                 }
 
-                Log.d("FriendViewModel", "Pending request: R ${pendingRequest?.receiver?.userId} S ${pendingRequest?.sender?.userId}")
+                Log.d(
+                    "FriendViewModel",
+                    "Pending request: R ${pendingRequest?.receiver?.userId} S ${pendingRequest?.sender?.userId}"
+                )
 
                 _requestStatus.value = when {
                     pendingRequest == null -> FriendRequestStatus.NONE

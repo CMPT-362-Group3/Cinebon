@@ -160,7 +160,11 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
                 modifier = Modifier
                     .padding(horizontal = 8.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center, modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text(
                         text = "Friends",
                         style = MaterialTheme.typography.headlineMedium,
@@ -186,8 +190,8 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
 
             Button(
                 onClick = {
-                if(friendInfo?.defaultList?.id != null)
-                    navigator.navigate(IndividualListScreenDestination(listId = friendInfo?.defaultList?.id!!))
+                    if (friendInfo?.defaultList?.id != null)
+                        navigator.navigate(IndividualListScreenDestination(listId = friendInfo?.defaultList?.id!!))
                 },
                 colors = ButtonDefaults.buttonColors
                     (

@@ -209,7 +209,12 @@ class NetworkService : Service() {
             NotificationManager.IMPORTANCE_DEFAULT
         )
         notificationManager.createNotificationChannel(notificationChannel)
-        ServiceCompat.startForeground(this, SERVICE_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        ServiceCompat.startForeground(
+            this,
+            SERVICE_NOTIFICATION_ID,
+            notification,
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        )
     }
 
     override fun onDestroy() {

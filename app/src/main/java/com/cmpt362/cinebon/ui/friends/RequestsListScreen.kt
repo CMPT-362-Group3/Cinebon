@@ -65,7 +65,7 @@ fun RequestListScreen(navigator: DestinationsNavigator) {
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(24.dp),
-                        )
+                    )
                 }
 
                 Text(
@@ -89,7 +89,7 @@ fun RequestListScreen(navigator: DestinationsNavigator) {
                 modifier = Modifier
                     .weight(1f)
                     .padding(8.dp)
-            ){
+            ) {
                 RequestList(requestList = requestList.value)
             }
         }
@@ -99,7 +99,7 @@ fun RequestListScreen(navigator: DestinationsNavigator) {
 @Composable
 fun RequestList(requestList: List<ResolvedFriendRequest>) {
     LazyColumn {
-        if(requestList.isNotEmpty()) {
+        if (requestList.isNotEmpty()) {
             items(requestList) { user ->
                 RequestListItem(friendRequest = user)
             }
@@ -118,8 +118,9 @@ fun RequestList(requestList: List<ResolvedFriendRequest>) {
 }
 
 @Composable
-fun RequestListItem(friendRequest: ResolvedFriendRequest){
-    val friendViewModel = viewModel<FriendViewModel>(factory = FriendViewModel.Factory(friendRequest.sender.userId))
+fun RequestListItem(friendRequest: ResolvedFriendRequest) {
+    val friendViewModel =
+        viewModel<FriendViewModel>(factory = FriendViewModel.Factory(friendRequest.sender.userId))
     val friendInfo by friendViewModel.friendInfo.collectAsStateWithLifecycle()
 
     Column {
@@ -159,7 +160,7 @@ fun RequestListItem(friendRequest: ResolvedFriendRequest){
 
             Button(
                 onClick = {
-                      friendViewModel.rejectRequest(friendInfo!!)
+                    friendViewModel.rejectRequest(friendInfo!!)
                 },
                 colors = ButtonDefaults.buttonColors
                     (
@@ -185,6 +186,6 @@ fun RequestListItem(friendRequest: ResolvedFriendRequest){
 @Composable
 fun RequestListPreview() {
     CinebonTheme {
-       RequestListScreen(EmptyDestinationsNavigator)
+        RequestListScreen(EmptyDestinationsNavigator)
     }
 }
