@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
+import com.cmpt362.cinebon.ui.common.FullScreenLoader
 import com.cmpt362.cinebon.ui.destinations.ChatScreenDestination
 import com.cmpt362.cinebon.ui.destinations.FriendProfileScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
@@ -45,6 +46,11 @@ fun ChatList(navigator: DestinationsNavigator) {
     val chatList = chatListVM.resolvedChats.collectAsStateWithLifecycle().value
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+
+    if (chatList.isEmpty()) {
+        FullScreenLoader()
+        return
+    }
 
     LazyColumn {
         items(chatList) { chatItem ->

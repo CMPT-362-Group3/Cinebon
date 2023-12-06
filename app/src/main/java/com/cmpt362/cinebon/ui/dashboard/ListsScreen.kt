@@ -32,6 +32,7 @@ import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
 import com.cmpt362.cinebon.data.entity.UserEntity
+import com.cmpt362.cinebon.ui.common.FullScreenLoader
 import com.cmpt362.cinebon.ui.destinations.IndividualListScreenDestination
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
@@ -48,6 +49,11 @@ fun ListsScreen(navigator: DestinationsNavigator) {
     val lazyListState = rememberLazyListState()
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
+
+    if (userLists.isEmpty()) {
+        FullScreenLoader()
+        return
+    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Box {

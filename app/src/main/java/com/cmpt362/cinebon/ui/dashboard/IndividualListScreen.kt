@@ -57,6 +57,7 @@ import com.cmpt362.cinebon.data.api.response.DummyMovie
 import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.entity.containsMovie
 import com.cmpt362.cinebon.data.repo.ListRepository.Companion.DEFAULT_LIST_NAME
+import com.cmpt362.cinebon.ui.common.FullScreenLoader
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.IndividualListViewModel
@@ -79,7 +80,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
 
     // If the list is null, then we don't want to display anything.
     if (list == null) {
-        Text("Whoops! Error loading list.")
+        FullScreenLoader()
         return
     }
 
