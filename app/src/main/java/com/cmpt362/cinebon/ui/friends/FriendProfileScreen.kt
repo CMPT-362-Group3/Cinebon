@@ -32,6 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.enums.FriendRequestStatus
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.ui.destinations.ChatScreenDestination
 import com.cmpt362.cinebon.ui.destinations.IndividualListScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.viewmodels.ChatListViewModel
@@ -58,7 +59,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
     }
 
     if (chatCreationStatus != null) {
-        navigator.navigate(IndividualListScreenDestination(chatCreationStatus!!.chatId))
+        navigator.navigate(ChatScreenDestination(chatCreationStatus!!.chatId))
         chatListViewModel.resetCreationStatus()
     }
 
