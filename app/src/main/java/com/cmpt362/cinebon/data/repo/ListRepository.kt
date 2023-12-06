@@ -136,6 +136,31 @@ class ListRepository private constructor() {
         return _resolvedLists.value.find { list -> list.listId == listId }
     }
 
+    suspend fun getResolvedExternalListById(listId: String): ResolvedListEntity? {
+        val listRef = database.collection(LIST_COLLECTION).document(listId)
+        return getResolvedList(listRef.get().await().toObject<ListEntity>())
+    }
+
+    private suspend fun getResolvedList(listEntity: ListEntity?): ResolvedListEntity? {
+        if (listEntity == null) return null
+        val owner = userRepo.getUserData(listEntity.owner.id) ?: return null
+
+        val resolvedMovies = mutableListOf<Movie>()
+        listEntity.movies.forEach { movieId ->
+            movieRepo.getMovieById(movieId).let {
+                resolvedMovies.add(it)
+            }
+        }
+
+        return ResolvedListEntity(
+            listEntity.listId,
+            owner,
+            listEntity.name,
+            resolvedMovies,
+            owner.userId == FirebaseAuth.getInstance().currentUser!!.uid
+        )
+    }
+
     suspend fun startListRefreshWorker() {
         userRepo.userInfo.collectLatest {
             if (it == null) return@collectLatest

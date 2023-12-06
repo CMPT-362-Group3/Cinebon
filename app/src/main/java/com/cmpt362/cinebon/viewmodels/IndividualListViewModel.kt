@@ -25,9 +25,10 @@ class IndividualListViewModel(listId: String) : ViewModel() {
     init {
         viewModelScope.launch {
             listRepository.resolvedLists.collectLatest {
-                _currentList.value = listRepository.getResolvedListById(listId)
+                _currentList.value = listRepository.getResolvedExternalListById(listId)
             }
         }
+
     }
 
     // Method to update the shown list's name
@@ -55,9 +56,9 @@ class IndividualListViewModel(listId: String) : ViewModel() {
     }
 
     @Suppress("UNCHECKED_CAST")
-    class Factory(private val id: String) : ViewModelProvider.Factory {
+    class Factory(private val listId: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IndividualListViewModel(id) as T
+            return IndividualListViewModel(listId) as T
         }
     }
 }

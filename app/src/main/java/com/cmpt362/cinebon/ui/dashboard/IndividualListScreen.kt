@@ -66,7 +66,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
     val list by listViewModel.currentList.collectAsStateWithLifecycle()
     val searchViewModel = viewModel<MoviesSearchViewModel>()
     val searchResults by searchViewModel.searchResults.collectAsStateWithLifecycle()
-
+    
     // If the list is null, then we don't want to display anything.
     if (list == null) {
         Text("Whoops! Error loading list.")

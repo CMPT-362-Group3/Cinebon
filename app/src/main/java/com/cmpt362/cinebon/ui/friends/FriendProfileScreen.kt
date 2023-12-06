@@ -186,7 +186,8 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
 
             Button(
                 onClick = {
-                    navigator.navigate(IndividualListScreenDestination(listId =  friendInfo?.defaultList?.id!!))
+                if(friendInfo?.defaultList?.id != null)
+                    navigator.navigate(IndividualListScreenDestination(listId = friendInfo?.defaultList?.id!!))
                 },
                 colors = ButtonDefaults.buttonColors
                     (
