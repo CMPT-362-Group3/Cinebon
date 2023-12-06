@@ -55,6 +55,14 @@ class IndividualListViewModel(listId: String) : ViewModel() {
         }
     }
 
+    fun deleteList(list: ResolvedListEntity?) {
+        if (list == null) return
+
+        viewModelScope.launch {
+            listRepository.deleteList(list)
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     class Factory(private val listId: String) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

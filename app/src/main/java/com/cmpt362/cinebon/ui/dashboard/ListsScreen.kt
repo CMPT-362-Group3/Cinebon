@@ -35,7 +35,7 @@ import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.ui.destinations.IndividualListScreenDestination
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
-import com.cmpt362.cinebon.viewmodels.ListViewModel
+import com.cmpt362.cinebon.viewmodels.NewListViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -43,7 +43,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Destination
 @Composable
 fun ListsScreen(navigator: DestinationsNavigator) {
-    val listViewModel = viewModel<ListViewModel>()
+    val listViewModel = viewModel<NewListViewModel>()
     val userLists by listViewModel.userLists.collectAsStateWithLifecycle()
     val lazyListState = rememberLazyListState()
 

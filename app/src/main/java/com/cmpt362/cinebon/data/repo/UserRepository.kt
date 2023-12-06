@@ -112,7 +112,7 @@ class UserRepository private constructor() {
         withContext(IO) {
             val userRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
             userRef.update(USER_MOVIE_LIST, FieldValue.arrayUnion(listRef))
-            if(isDefault)
+            if (isDefault)
                 userRef.update(USER_DEFAULT_LIST, listRef)
         }
     }
@@ -147,12 +147,18 @@ class UserRepository private constructor() {
         }
     }
 
+    fun removeList(listRef: DocumentReference) {
+        val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
+        selfRef
+            .update(USER_MOVIE_LIST, FieldValue.arrayRemove(listRef))
+    }
+
     suspend fun searchUsers(username: String) {
         withContext(IO) {
             try {
                 val querySnapshot = database.collection(USER_COLLECTION)
                     .whereGreaterThanOrEqualTo("username", username) //makes sure username starts with our given query
-                    .whereLessThanOrEqualTo("username", username+"z")//makes sure username is less than our query + z
+                    .whereLessThanOrEqualTo("username", username + "z")//makes sure username is less than our query + z
                     .get()
                     .await()
 

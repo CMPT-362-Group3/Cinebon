@@ -20,7 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -291,14 +291,48 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
 
             AnimatedVisibility(
                 visible = !active, modifier = Modifier
-                    .align(Alignment.BottomEnd)
+                    .align(Alignment.BottomCenter)
                     .padding(24.dp)
             ) {
-                FloatingActionButton(onClick = { active = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.book_search_outline),
-                        contentDescription = "Add new movie"
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ExtendedFloatingActionButton(onClick = { active = true }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.book_search_outline),
+                            contentDescription = "Add new movie"
+                        )
+
+                        Text(text = "Add movie")
+                    }
+
+                    // If I own this list, and it's not the watchlist, I'm allowed to delete it.
+                    if (list!!.isSelf && list?.name != DEFAULT_LIST_NAME) {
+
+                        // This add a delete confirmation tap to the delete button
+                        var confirmDeleteFlag by remember { mutableStateOf(false) }
+
+                        ExtendedFloatingActionButton(
+                            onClick = {
+                                if (confirmDeleteFlag) {
+                                    listViewModel.deleteList(list)
+                                    navigator.popBackStack()
+                                } else {
+                                    confirmDeleteFlag = true
+                                }
+                            },
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(start = 16.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.delete_outline),
+                                contentDescription = "Delete list"
+                            )
+
+                            AnimatedVisibility(visible = confirmDeleteFlag) {
+                                Text(text = "Delete?", modifier = Modifier.padding(2.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
