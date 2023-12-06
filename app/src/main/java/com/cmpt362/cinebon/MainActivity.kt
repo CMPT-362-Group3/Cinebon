@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
@@ -14,7 +15,11 @@ import com.cmpt362.cinebon.ui.NavGraphs
 import com.cmpt362.cinebon.ui.login.LoginScreen
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
 import com.cmpt362.cinebon.utils.hasNotificationPerm
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.defaults.NestedNavGraphDefaultAnimations
+import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
+import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.navigation.EmptyDestinationsNavigator
 
 class MainActivity : ComponentActivity() {
@@ -23,6 +28,7 @@ class MainActivity : ComponentActivity() {
         const val PERMISSION_REQUEST_CODE = 1
     }
 
+    @OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -30,7 +36,17 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CinebonTheme {
-                DestinationsNavHost(navGraph = NavGraphs.root)
+
+                // Create a NavHostEngine that will be used to navigate between destinations
+                val animNavHostEngine = rememberAnimatedNavHostEngine(
+                    rootDefaultAnimations = RootNavGraphDefaultAnimations.ACCOMPANIST_FADING,
+                    defaultAnimationsForNestedNavGraph = mapOf(Pair(NavGraphs.dashboard, NestedNavGraphDefaultAnimations.ACCOMPANIST_FADING))
+                )
+
+                DestinationsNavHost(
+                    navGraph = NavGraphs.root,
+                    engine = animNavHostEngine
+                )
             }
         }
     }

@@ -67,7 +67,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
 
 
-    implementation("io.github.raamcosta.compose-destinations:core:1.9.54")
+    implementation("io.github.raamcosta.compose-destinations:animations-core:1.9.54")
     ksp("io.github.raamcosta.compose-destinations:ksp:1.9.54")
 
     implementation("androidx.core:core-ktx:1.12.0")
