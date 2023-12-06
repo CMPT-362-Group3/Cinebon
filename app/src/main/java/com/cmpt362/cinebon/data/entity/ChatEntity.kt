@@ -2,6 +2,7 @@ package com.cmpt362.cinebon.data.entity
 
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.Exclude
 
 class ChatEntity {
 
@@ -11,7 +12,9 @@ class ChatEntity {
     }
 
     var users = mutableListOf<DocumentReference>()
-    lateinit var chatId: String
+
+    @set:Exclude @get:Exclude
+    var chatId: String = ""
 }
 
 data class ResolvedChatEntity(

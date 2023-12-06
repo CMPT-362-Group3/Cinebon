@@ -80,14 +80,14 @@ fun ChatListItem(chat: ResolvedChatEntity, onItemClick: (ResolvedChatEntity) -> 
                     )
 
                     Text(
-                        text = chat.messages.last().timestamp.formatted(),
+                        text = if (chat.messages.isEmpty()) "" else chat.messages.last().timestamp.formatted(),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.End
                     )
                 }
                 Text(
-                    text = chat.messages.last().text,
+                    text = if (chat.messages.isEmpty()) "" else chat.messages.last().text,
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
