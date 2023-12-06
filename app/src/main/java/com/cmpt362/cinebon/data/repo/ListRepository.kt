@@ -6,6 +6,7 @@ import com.cmpt362.cinebon.data.entity.ListEntity
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FieldValue
@@ -26,6 +27,8 @@ class ListRepository private constructor() {
 
     companion object {
         const val LIST_COLLECTION = "lists"
+        const val MOVIES_ARRAY = "movies"
+        const val DEFAULT_LIST_NAME = "Watchlist"
 
         private val instance = ListRepository()
 
@@ -71,7 +74,7 @@ class ListRepository private constructor() {
             ListEntity().apply {
                 owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
                 userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
-                name = "Watchlist"
+                name = DEFAULT_LIST_NAME
             },
             isDefault = true
         )
@@ -87,48 +90,30 @@ class ListRepository private constructor() {
         )
     }
 
-    suspend fun updateList(listId: String, updatedList: ListEntity) {
-        withContext(IO) {
-            database.collection(LIST_COLLECTION).document(listId)
-                .set(updatedList)
-                .await()
-        }
+    fun getListRef(listId: String): DocumentReference {
+        return database.collection(LIST_COLLECTION).document(listId)
     }
 
     suspend fun updateListName(listId: String, name: String) {
         withContext(IO) {
-            database.collection(LIST_COLLECTION).document(listId)
-                .update("name", name)
+            getListRef(listId).update("name", name)
         }
     }
 
     suspend fun addMovieToList(listId: String, movieId: Int) {
         withContext(IO) {
-            database.collection(LIST_COLLECTION).document(listId)
-                .update("movies", FieldValue.arrayUnion(movieId))
+            Log.d("ListRepository", "Adding movie $movieId to list $listId")
+            getListRef(listId)
+                .update(MOVIES_ARRAY, FieldValue.arrayUnion(movieId))
         }
     }
 
     suspend fun deleteMovieFromList(listId: String, movieId: Int) {
         withContext(IO) {
-            database.collection(LIST_COLLECTION).document(listId)
-                .update("movies", FieldValue.arrayRemove(movieId))
+            Log.d("ListRepository", "Deleting movie $movieId from list $listId")
+            getListRef(listId)
+                .update(MOVIES_ARRAY, FieldValue.arrayRemove(movieId))
         }
-    }
-
-    // Private method to fetch list data from remote
-    private suspend fun getListRemote(listId: String): ListEntity? {
-        val docRef = database.collection(LIST_COLLECTION).document(listId)
-
-        val snapShot = docRef.get().await()
-
-        if (snapShot.exists()) {
-            Log.d("ListRepository", "List data successfully retrieved")
-            return snapShot.toObject<ListEntity>()
-        }
-
-        Log.d("ListRepository", "Error getting list data")
-        return null
     }
 
     // Check the locally fetched list for a match, if not found, fetch from remote
@@ -137,8 +122,16 @@ class ListRepository private constructor() {
     }
 
     suspend fun getResolvedExternalListById(listId: String): ResolvedListEntity? {
-        val listRef = database.collection(LIST_COLLECTION).document(listId)
-        return getResolvedList(listRef.get().await().toObject<ListEntity>())
+        return getResolvedList(getListEntity(listId))
+    }
+
+    private suspend fun getListEntity(listId: String): ListEntity? {
+        val listRef = getListRef(listId)
+        return getListEntity(listRef)
+    }
+
+    private suspend fun getListEntity(listRef: DocumentReference): ListEntity? {
+        return listRef.get().await().toObject<ListEntity>().apply { this?.listId = listRef.id }
     }
 
     private suspend fun getResolvedList(listEntity: ListEntity?): ResolvedListEntity? {
@@ -178,18 +171,22 @@ class ListRepository private constructor() {
         val lists = mutableListOf<ListEntity>()
 
         flow {
+            // Show wishlist on top
+            Log.d("ListRepository", "Fetching default list")
+            emit(getListEntity(user.defaultList))
+            Log.d("ListRepository", "Default list fetched")
+
+            // Emit the other lists
             for (listRef in listRefs) {
-                listRef.get().await().apply {
-                    toObject<ListEntity>()?.let {
-                        it.listId = this.id
-                        emit(it)
-                    }
-                }
+                emit(getListEntity(listRef))
             }
         }.onCompletion {
             Log.d("ListRepository", "User lists updated with size ${lists.size}")
             _userLists.value = lists
         }.collect {
+            // Don't collect bad/empty values
+            if (it == null) return@collect
+
             Log.d("ListRepository", "User list collected with id ${it.listId}")
             lists.add(it)
         }
@@ -200,7 +197,7 @@ class ListRepository private constructor() {
     // And can be requested to be removed.
     private val _listRefsListeners = mutableListOf<ListenerRegistration>()
     fun attachListRefListener(list: ListEntity, listener: EventListener<DocumentSnapshot>) {
-        val listRef = database.collection(LIST_COLLECTION).document(list.listId)
+        val listRef = getListRef(list.listId)
 
         // Add the listener and track it
         listRef.addSnapshotListener(listener).let {
@@ -229,7 +226,7 @@ class ListRepository private constructor() {
 
         for (list in lists) {
             // Check if we're forcing re-fetch
-            val actualList = if (fetchSource) getListRemote(list.listId) ?: list else list
+            val actualList = if (fetchSource) getListEntity(list.listId) ?: list else list
 
             // Resolve the owner of the list
             val owner = userRepo.getUserData(actualList.owner.id) ?: continue
@@ -261,11 +258,19 @@ class ListRepository private constructor() {
         resolveLists(_userLists.value, fetchSource = true)
     }
 
-    suspend fun deleteList(listId: String) {
+    suspend fun deleteList(list: ResolvedListEntity) {
+        // We can't delete someone else's list
+        // and we can't delete the default list
+        if (!list.isSelf && list.name != DEFAULT_LIST_NAME) return
+
         withContext(IO) {
-            database.collection(LIST_COLLECTION).document(listId)
-                .delete()
-                .await()
+            val listRef = getListRef(list.listId)
+
+            // Remove the list from the user's subscribed lists
+            userRepo.removeList(listRef)
+
+            // Delete the list document
+            listRef.delete()
         }
     }
 }

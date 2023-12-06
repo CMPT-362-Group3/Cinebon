@@ -59,7 +59,12 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
     }
 
     if (chatCreationStatus != null) {
-        navigator.navigate(ChatScreenDestination(chatCreationStatus!!.chatId))
+        navigator.navigate(ChatScreenDestination(chatCreationStatus!!.chatId)) {
+            // Make sure we don't circularly navigate back to the chat screen
+            popUpTo(ChatScreenDestination.route) {
+                inclusive = true
+            }
+        }
         chatListViewModel.resetCreationStatus()
     }
 
@@ -91,7 +96,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
             modifier = Modifier.fillMaxSize()
         ) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
+                imageVector = ImageVector.vectorResource(id = R.drawable.profile_icon),
                 contentDescription = "profile picture",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier

@@ -18,6 +18,10 @@ data class ResolvedListEntity (
     val listId: String,
     val owner: User,
     val name: String,
-    val movies: MutableList<Movie>,
+    val movies: List<Movie>,
     val isSelf: Boolean
 )
+
+fun ResolvedListEntity?.containsMovie(movieId: Int): Boolean {
+    return this?.movies?.any { movie -> movie.id == movieId } ?: false
+}

@@ -1,6 +1,7 @@
 package com.cmpt362.cinebon.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -8,14 +9,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,7 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -47,14 +55,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.api.response.DummyMovie
 import com.cmpt362.cinebon.data.api.response.Movie
-import com.cmpt362.cinebon.data.api.toRuntimeString
+import com.cmpt362.cinebon.data.entity.containsMovie
+import com.cmpt362.cinebon.data.repo.ListRepository.Companion.DEFAULT_LIST_NAME
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
-import com.cmpt362.cinebon.utils.UNICODE_DOT
 import com.cmpt362.cinebon.viewmodels.IndividualListViewModel
 import com.cmpt362.cinebon.viewmodels.MoviesSearchViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @DashboardNavGraph
@@ -100,7 +109,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                         query = it
                         searchViewModel.updateSearchResults(query)
                     },
-                    onSearch = { },
+                    onSearch = { searchViewModel.updateSearchResults(query, false) },
                     active = active,
                     onActiveChange = {
                         active = it
@@ -165,19 +174,19 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                                     }
                                     searchViewModel.updateSearchResults(query, false)
                                 },
-                                isToggled = list?.movies?.any { it.id == movie.id } ?: false
+                                isToggled = list.containsMovie(movie.id)
                             )
                         }
                     }
                 }
 
                 if (list!!.isSelf) {
-                    if (listName != "Watchlist" || isInvalidName) {
+                    if (listName != DEFAULT_LIST_NAME || isInvalidName) {
                         OutlinedTextField(
                             value = listName,
                             onValueChange = {
                                 listName = it
-                                isInvalidName = listName == "Watchlist"
+                                isInvalidName = listName == DEFAULT_LIST_NAME
                             },
                             label = {
                                 Text("Title")
@@ -188,7 +197,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                             ),
                             keyboardActions = KeyboardActions(onDone = {
                                 if (listName.isNotEmpty()) {
-                                    if (listName != "Watchlist")
+                                    if (listName != DEFAULT_LIST_NAME)
                                         listViewModel.updateListName(listName.trim())
                                     else
                                         isInvalidName = true
@@ -200,7 +209,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                         )
                         if (isInvalidName) {
                             Text(
-                                text = "Title cannot be Watchlist",
+                                text = "Title cannot be \"Watchlist\"",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.errorContainer,
                                 modifier = Modifier
@@ -282,14 +291,48 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
 
             AnimatedVisibility(
                 visible = !active, modifier = Modifier
-                    .align(Alignment.BottomEnd)
+                    .align(Alignment.BottomCenter)
                     .padding(24.dp)
             ) {
-                FloatingActionButton(onClick = { active = true }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.book_search_outline),
-                        contentDescription = "Add new movie"
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ExtendedFloatingActionButton(onClick = { active = true }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.book_search_outline),
+                            contentDescription = "Add new movie"
+                        )
+
+                        Text(text = "Add movie")
+                    }
+
+                    // If I own this list, and it's not the watchlist, I'm allowed to delete it.
+                    if (list!!.isSelf && list?.name != DEFAULT_LIST_NAME) {
+
+                        // This add a delete confirmation tap to the delete button
+                        var confirmDeleteFlag by remember { mutableStateOf(false) }
+
+                        ExtendedFloatingActionButton(
+                            onClick = {
+                                if (confirmDeleteFlag) {
+                                    listViewModel.deleteList(list)
+                                    navigator.popBackStack()
+                                } else {
+                                    confirmDeleteFlag = true
+                                }
+                            },
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(start = 16.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.delete_outline),
+                                contentDescription = "Delete list"
+                            )
+
+                            AnimatedVisibility(visible = confirmDeleteFlag) {
+                                Text(text = "Delete?", modifier = Modifier.padding(2.dp))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -315,22 +358,30 @@ fun MovieSearchItem(
             movie,
             onClick = { onClick(movie) },
             modifier = Modifier
-                .size(48.dp)
+                .size(56.dp)
                 .clip(CircleShape)
         )
 
         Column(
             modifier = Modifier
                 .weight(0.5f)
+                .padding(start = 16.dp)
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = movie.title, modifier = Modifier.padding(start = 8.dp))
-            Text(
-                text = "${movie.originalLanguage} $UNICODE_DOT ${movie.runtime.toRuntimeString()}",
-                modifier = Modifier.padding(start = 8.dp),
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(text = movie.title)
+            Row(modifier = Modifier.padding(top = 4.dp)) {
+                for (star in 1..5) {
+                    Image(
+                        painter = rememberVectorPainter(Icons.Filled.Star),
+                        contentDescription = "Star",
+                        colorFilter = ColorFilter.tint(if (star <= (movie.voteAverage / 2).roundToInt()) Color(0xFFE6BF41) else Color.Gray),
+                        modifier = Modifier
+                            .width(24.dp)
+                            .height(24.dp)
+                    )
+                }
+            }
         }
 
         if (enableToggle) {

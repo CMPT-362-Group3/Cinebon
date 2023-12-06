@@ -1,7 +1,6 @@
 package com.cmpt362.cinebon.ui.dashboard
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +33,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.data.api.response.Movie
+import com.cmpt362.cinebon.data.entity.containsMovie
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.MoviesViewModel
+import com.cmpt362.cinebon.viewmodels.WishlistViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -130,14 +132,27 @@ fun MovieCard(
     movie: Movie,
     onClick: (Movie) -> Unit,
     modifier: Modifier = Modifier,
-    showQuickAdd: Boolean = false,
-    onQuickAdd: (Movie) -> Unit = {}) {
+    showBookmark: Boolean = true
+) {
+    val wishlistViewModel = viewModel<WishlistViewModel>()
+    val wishlist by wishlistViewModel.wishlist.collectAsStateWithLifecycle()
+
     Card(modifier = modifier.fillMaxSize()) {
         Box(modifier = modifier.fillMaxSize()) {
             MovieImage(movie, onClick = { onClick(movie) })
 
-            if (showQuickAdd) {
-                MovieBookmarkIcon(movie, modifier = modifier.align(Alignment.TopEnd).clickable { onQuickAdd(movie) })
+            if (showBookmark) {
+                MovieBookmarkIcon(
+                    modifier = modifier.align(Alignment.TopEnd),
+                    isBookmarked = wishlist.containsMovie(movie.id),
+                    onClick = { isBookmarked ->
+                        if (isBookmarked) {
+                            wishlistViewModel.addMovieToWishlist(movie.id)
+                        } else {
+                            wishlistViewModel.removeMovieFromWishlist(movie.id)
+                        }
+                    }
+                )
             }
         }
     }

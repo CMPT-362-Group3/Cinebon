@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
 import com.cmpt362.cinebon.data.repo.ListRepository
+import com.cmpt362.cinebon.data.repo.ListRepository.Companion.DEFAULT_LIST_NAME
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -28,13 +29,12 @@ class IndividualListViewModel(listId: String) : ViewModel() {
                 _currentList.value = listRepository.getResolvedExternalListById(listId)
             }
         }
-
     }
 
     // Method to update the shown list's name
     // We do a little verification to only update if user is owner
     fun updateListName(name: String) {
-        if (currentList.value?.isSelf == false || name == "Watchlist") {
+        if (currentList.value?.isSelf == false || name == DEFAULT_LIST_NAME) {
             return
         }
 
@@ -52,6 +52,14 @@ class IndividualListViewModel(listId: String) : ViewModel() {
     fun removeMovieFromList(movieId: Int) {
         viewModelScope.launch {
             listRepository.deleteMovieFromList(currentList.value!!.listId, movieId)
+        }
+    }
+
+    fun deleteList(list: ResolvedListEntity?) {
+        if (list == null) return
+
+        viewModelScope.launch {
+            listRepository.deleteList(list)
         }
     }
 

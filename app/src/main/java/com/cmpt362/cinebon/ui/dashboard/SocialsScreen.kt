@@ -145,7 +145,7 @@ fun SocialScreen(navigator: DestinationsNavigator) {
                     }
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.profile_icon),
                         contentDescription = "profile",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
