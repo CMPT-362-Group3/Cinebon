@@ -26,6 +26,7 @@ class ListRepository private constructor() {
 
     companion object {
         const val LIST_COLLECTION = "lists"
+        const val MOVIES_ARRAY = "movies"
 
         private val instance = ListRepository()
 
@@ -104,15 +105,17 @@ class ListRepository private constructor() {
 
     suspend fun addMovieToList(listId: String, movieId: Int) {
         withContext(IO) {
+            Log.d("ListRepository", "Adding movie $movieId to list $listId")
             database.collection(LIST_COLLECTION).document(listId)
-                .update("movies", FieldValue.arrayUnion(movieId))
+                .update(MOVIES_ARRAY, FieldValue.arrayUnion(movieId))
         }
     }
 
     suspend fun deleteMovieFromList(listId: String, movieId: Int) {
         withContext(IO) {
+            Log.d("ListRepository", "Deleting movie $movieId from list $listId")
             database.collection(LIST_COLLECTION).document(listId)
-                .update("movies", FieldValue.arrayRemove(movieId))
+                .update(MOVIES_ARRAY, FieldValue.arrayRemove(movieId))
         }
     }
 
@@ -138,7 +141,7 @@ class ListRepository private constructor() {
 
     suspend fun getResolvedExternalListById(listId: String): ResolvedListEntity? {
         val listRef = database.collection(LIST_COLLECTION).document(listId)
-        return getResolvedList(listRef.get().await().toObject<ListEntity>())
+        return getResolvedList(listRef.get().await().toObject<ListEntity>().apply {this?.listId = listRef.id})
     }
 
     private suspend fun getResolvedList(listEntity: ListEntity?): ResolvedListEntity? {
