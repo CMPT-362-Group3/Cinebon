@@ -111,9 +111,9 @@ class UserRepository private constructor() {
     suspend fun addUserList(listRef: DocumentReference, isDefault: Boolean = false) {
         withContext(IO) {
             val userRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
-            userRef.update(USER_MOVIE_LIST, FieldValue.arrayUnion(listRef))
-            if (isDefault)
-                userRef.update(USER_DEFAULT_LIST, listRef)
+
+            if (isDefault) userRef.update(USER_DEFAULT_LIST, listRef)
+            else  userRef.update(USER_MOVIE_LIST, FieldValue.arrayUnion(listRef))
         }
     }
 
