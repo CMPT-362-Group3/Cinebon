@@ -35,6 +35,8 @@ class WatchlistViewModel : ViewModel() {
 
     fun addMovieToWatchlist(movieId: Int) {
         viewModelScope.launch {
+            if (_watchlist.value == null)
+                return@launch
             listRepository.addMovieToList(_watchlist.value!!.listId, movieId) // Add the movie to the watchlist
         }
     }
