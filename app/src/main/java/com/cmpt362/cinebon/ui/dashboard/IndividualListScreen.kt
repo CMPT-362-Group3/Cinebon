@@ -55,6 +55,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.api.response.DummyMovie
 import com.cmpt362.cinebon.data.api.response.Movie
+import com.cmpt362.cinebon.data.entity.containsMovie
+import com.cmpt362.cinebon.data.repo.ListRepository.Companion.DEFAULT_LIST_NAME
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.IndividualListViewModel
@@ -172,19 +174,19 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                                     }
                                     searchViewModel.updateSearchResults(query, false)
                                 },
-                                isToggled = list?.movies?.any { it.id == movie.id } ?: false
+                                isToggled = list.containsMovie(movie.id)
                             )
                         }
                     }
                 }
 
                 if (list!!.isSelf) {
-                    if (listName != "Watchlist" || isInvalidName) {
+                    if (listName != DEFAULT_LIST_NAME || isInvalidName) {
                         OutlinedTextField(
                             value = listName,
                             onValueChange = {
                                 listName = it
-                                isInvalidName = listName == "Watchlist"
+                                isInvalidName = listName == DEFAULT_LIST_NAME
                             },
                             label = {
                                 Text("Title")
@@ -195,7 +197,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                             ),
                             keyboardActions = KeyboardActions(onDone = {
                                 if (listName.isNotEmpty()) {
-                                    if (listName != "Watchlist")
+                                    if (listName != DEFAULT_LIST_NAME)
                                         listViewModel.updateListName(listName.trim())
                                     else
                                         isInvalidName = true
@@ -207,7 +209,7 @@ fun IndividualListScreen(navigator: DestinationsNavigator, listId: String) {
                         )
                         if (isInvalidName) {
                             Text(
-                                text = "Title cannot be Watchlist",
+                                text = "Title cannot be \"Watchlist\"",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.errorContainer,
                                 modifier = Modifier

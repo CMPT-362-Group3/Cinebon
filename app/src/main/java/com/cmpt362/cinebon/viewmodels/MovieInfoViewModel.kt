@@ -1,33 +1,35 @@
 package com.cmpt362.cinebon.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.cmpt362.cinebon.data.api.response.DUMMY_MOVIE_ID
-import com.cmpt362.cinebon.data.api.response.DummyMovie
 import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.repo.MoviesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MovieInfoViewModel : ViewModel() {
+class MovieInfoViewModel(private val movieId: Int) : ViewModel() {
 
     private val repo = MoviesRepository.instance
 
-    val movieInfo = MutableStateFlow(Movie())
+    private val _movieInfo = MutableStateFlow(Movie())
+    val movieInfo: StateFlow<Movie> = _movieInfo
 
-    fun getMovieInfo(id: Int) {
-
-        if (id == DUMMY_MOVIE_ID) {
-            movieInfo.value = DummyMovie
-            return
-        }
-
+    init {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                movieInfo.value = repo.getMovieById(id)
+                _movieInfo.value = repo.getMovieById(movieId)
             }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class Factory(private val movieId: Int) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return MovieInfoViewModel(movieId) as T
         }
     }
 

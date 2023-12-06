@@ -120,8 +120,7 @@ fun ListItem(list: ResolvedListEntity, onItemClick: (ResolvedListEntity) -> Unit
                     MovieCard(
                         movie = movie,
                         onClick = { onMovieClick(movie) },
-                        modifier = Modifier,
-                        showQuickAdd = false
+                        modifier = Modifier
                     )
                 }
             }

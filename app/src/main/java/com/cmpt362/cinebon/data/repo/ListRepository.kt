@@ -6,6 +6,7 @@ import com.cmpt362.cinebon.data.entity.ListEntity
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
 import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FieldValue
@@ -27,6 +28,7 @@ class ListRepository private constructor() {
     companion object {
         const val LIST_COLLECTION = "lists"
         const val MOVIES_ARRAY = "movies"
+        const val DEFAULT_LIST_NAME = "Watchlist"
 
         private val instance = ListRepository()
 
@@ -72,7 +74,7 @@ class ListRepository private constructor() {
             ListEntity().apply {
                 owner = userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
                 userRepo.getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
-                name = "Watchlist"
+                name = DEFAULT_LIST_NAME
             },
             isDefault = true
         )
@@ -119,29 +121,22 @@ class ListRepository private constructor() {
         }
     }
 
-    // Private method to fetch list data from remote
-    private suspend fun getListRemote(listId: String): ListEntity? {
-        val docRef = database.collection(LIST_COLLECTION).document(listId)
-
-        val snapShot = docRef.get().await()
-
-        if (snapShot.exists()) {
-            Log.d("ListRepository", "List data successfully retrieved")
-            return snapShot.toObject<ListEntity>()
-        }
-
-        Log.d("ListRepository", "Error getting list data")
-        return null
-    }
-
     // Check the locally fetched list for a match, if not found, fetch from remote
     fun getResolvedListById(listId: String): ResolvedListEntity? {
         return _resolvedLists.value.find { list -> list.listId == listId }
     }
 
     suspend fun getResolvedExternalListById(listId: String): ResolvedListEntity? {
+        return getResolvedList(getListEntity(listId))
+    }
+
+    private suspend fun getListEntity(listId: String): ListEntity? {
         val listRef = database.collection(LIST_COLLECTION).document(listId)
-        return getResolvedList(listRef.get().await().toObject<ListEntity>().apply {this?.listId = listRef.id})
+        return getListEntity(listRef)
+    }
+
+    private suspend fun getListEntity(listRef: DocumentReference): ListEntity? {
+        return listRef.get().await().toObject<ListEntity>().apply {this?.listId = listRef.id}
     }
 
     private suspend fun getResolvedList(listEntity: ListEntity?): ResolvedListEntity? {
@@ -181,18 +176,22 @@ class ListRepository private constructor() {
         val lists = mutableListOf<ListEntity>()
 
         flow {
+            // Show wishlist on top
+            Log.d("ListRepository", "Fetching default list")
+            emit(getListEntity(user.defaultList))
+            Log.d("ListRepository", "Default list fetched")
+
+            // Emit the other lists
             for (listRef in listRefs) {
-                listRef.get().await().apply {
-                    toObject<ListEntity>()?.let {
-                        it.listId = this.id
-                        emit(it)
-                    }
-                }
+                emit(getListEntity(listRef))
             }
         }.onCompletion {
             Log.d("ListRepository", "User lists updated with size ${lists.size}")
             _userLists.value = lists
         }.collect {
+            // Don't collect bad/empty values
+            if (it == null) return@collect
+
             Log.d("ListRepository", "User list collected with id ${it.listId}")
             lists.add(it)
         }
@@ -232,7 +231,7 @@ class ListRepository private constructor() {
 
         for (list in lists) {
             // Check if we're forcing re-fetch
-            val actualList = if (fetchSource) getListRemote(list.listId) ?: list else list
+            val actualList = if (fetchSource) getListEntity(list.listId) ?: list else list
 
             // Resolve the owner of the list
             val owner = userRepo.getUserData(actualList.owner.id) ?: continue
