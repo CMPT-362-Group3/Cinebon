@@ -19,7 +19,7 @@ class UserSearchViewModel: ViewModel() {
 
     private var searchJob: Job? = null
     fun searchUsers(query: String) {
-        searchJob = viewModelScope.launch() {
+        searchJob = viewModelScope.launch {
             // Artificial delay to prevent too many API calls
             delay(750)
 
@@ -32,7 +32,7 @@ class UserSearchViewModel: ViewModel() {
     }
 
     init{
-        viewModelScope.launch(){
+        viewModelScope.launch {
             userRepository.searchResults.collectLatest {
                 _searchResults.value = it
             }

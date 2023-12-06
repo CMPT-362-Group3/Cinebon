@@ -32,7 +32,7 @@ interface AccountService {
     )
 }
 
-class UserAuthViewModel() : ViewModel(), AccountService {
+class UserAuthViewModel : ViewModel(), AccountService {
     private val userRepository: UserRepository = UserRepository.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
