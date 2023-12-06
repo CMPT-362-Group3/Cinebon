@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import com.cmpt362.cinebon.R
 
+// A simple composable to show the app logo
 @Composable
 fun AppLogo(modifier: Modifier = Modifier) {
     return Image(

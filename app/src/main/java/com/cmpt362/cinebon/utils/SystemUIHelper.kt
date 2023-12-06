@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 
+// A helper composable function that sets the status bar color when a composable is loaded
 @Composable
 fun SetStatusBarColor(statusBarColor: Color) {
     val context = LocalContext.current
