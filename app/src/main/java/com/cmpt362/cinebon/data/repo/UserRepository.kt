@@ -49,6 +49,7 @@ class UserRepository private constructor() {
     val searchResults: StateFlow<List<UserEntity>>
         get() = _searchResults
 
+    // creating user data, called upon sign in
     suspend fun createUserData(user: UserEntity) {
         withContext(IO) {
             database.collection(USER_COLLECTION).document(user.userId)
@@ -66,6 +67,7 @@ class UserRepository private constructor() {
         }
     }
 
+    // sign out of the app
     suspend fun signOut() {
         withContext(IO) {
             FirebaseAuth.getInstance().signOut()
@@ -75,10 +77,12 @@ class UserRepository private constructor() {
 
     fun getUserRef(userId: String) = database.collection(USER_COLLECTION).document(userId)
 
+    // updates current user data when edited
     suspend fun updateCurrentUserData() {
         _userInfo.value = getUserData(FirebaseAuth.getInstance().currentUser!!.uid)
     }
 
+    // gets user data
     suspend fun getUserData(userId: String): UserEntity? {
         val snapShot = getUserRef(userId).get().await()
 
@@ -91,6 +95,7 @@ class UserRepository private constructor() {
         return null
     }
 
+    // update user data
     suspend fun updateUserData(
         user: UserEntity, onResult: (Throwable?) -> Unit
     ) {
@@ -108,6 +113,7 @@ class UserRepository private constructor() {
         }
     }
 
+    // add user to friends list
     suspend fun addUserList(listRef: DocumentReference, isDefault: Boolean = false) {
         withContext(IO) {
             val userRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
@@ -117,6 +123,7 @@ class UserRepository private constructor() {
         }
     }
 
+    // adds user as friend (connects them together in their individual object)
     suspend fun addFriend(friend: UserEntity) {
         withContext(IO) {
             val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
@@ -132,6 +139,7 @@ class UserRepository private constructor() {
         }
     }
 
+    // remove friend from friend list
     suspend fun removeFriend(friend: UserEntity) {
         withContext(IO) {
             val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
@@ -147,12 +155,14 @@ class UserRepository private constructor() {
         }
     }
 
+    // removes list from saved list
     fun removeList(listRef: DocumentReference) {
         val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
         selfRef
             .update(USER_MOVIE_LIST, FieldValue.arrayRemove(listRef))
     }
 
+    // search function for users
     suspend fun searchUsers(username: String) {
         withContext(IO) {
             try {
@@ -174,15 +184,18 @@ class UserRepository private constructor() {
         }
     }
 
+    // empties search bar
     fun resetUserSearchResults() {
         _searchResults.value = emptyList()
     }
 
+    // listens for input
     fun attachUserRefListener(listener: EventListener<DocumentSnapshot>) {
         getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
             .addSnapshotListener(listener)
     }
 
+    // reset user with created result
     fun resetUserCreatedResult() {
         _userCreatedResult.value = Result.success(false)
     }

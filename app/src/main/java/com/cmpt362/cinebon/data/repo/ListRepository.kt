@@ -50,6 +50,7 @@ class ListRepository private constructor() {
     val userLists: StateFlow<List<ListEntity>>
         get() = _userLists
 
+    // create list of movies
     private suspend fun createList(list: ListEntity, isDefault: Boolean = false) {
         withContext(IO) {
 
@@ -69,6 +70,7 @@ class ListRepository private constructor() {
         }
     }
 
+    // default list when user profile is first created
     suspend fun createDefaultList() {
         createList(
             ListEntity().apply {
@@ -80,6 +82,7 @@ class ListRepository private constructor() {
         )
     }
 
+    // creating an empty list
     suspend fun createEmptyNewList() {
         createList(
             ListEntity().apply {
@@ -90,16 +93,19 @@ class ListRepository private constructor() {
         )
     }
 
+    // get list by list id
     fun getListRef(listId: String): DocumentReference {
         return database.collection(LIST_COLLECTION).document(listId)
     }
 
+    // changes list name
     suspend fun updateListName(listId: String, name: String) {
         withContext(IO) {
             getListRef(listId).update("name", name)
         }
     }
 
+    // add movie to list with movie id
     suspend fun addMovieToList(listId: String, movieId: Int) {
         withContext(IO) {
             Log.d("ListRepository", "Adding movie $movieId to list $listId")
@@ -108,6 +114,7 @@ class ListRepository private constructor() {
         }
     }
 
+    // deletes movie from list
     suspend fun deleteMovieFromList(listId: String, movieId: Int) {
         withContext(IO) {
             Log.d("ListRepository", "Deleting movie $movieId from list $listId")
@@ -121,19 +128,23 @@ class ListRepository private constructor() {
         return _resolvedLists.value.find { list -> list.listId == listId }
     }
 
+    // wrapper function for get list
     suspend fun getResolvedExternalListById(listId: String): ResolvedListEntity? {
         return getResolvedList(getListEntity(listId))
     }
 
+    // get list entity (object)
     private suspend fun getListEntity(listId: String): ListEntity? {
         val listRef = getListRef(listId)
         return getListEntity(listRef)
     }
 
+    // same thing but different argument
     private suspend fun getListEntity(listRef: DocumentReference): ListEntity? {
         return listRef.get().await().toObject<ListEntity>().apply { this?.listId = listRef.id }
     }
 
+    // get resolved list of movies
     private suspend fun getResolvedList(listEntity: ListEntity?): ResolvedListEntity? {
         if (listEntity == null) return null
         val owner = userRepo.getUserData(listEntity.owner.id) ?: return null
@@ -154,6 +165,7 @@ class ListRepository private constructor() {
         )
     }
 
+    // update user's list whenever changes to the user happen
     suspend fun startListRefreshWorker() {
         userRepo.userInfo.collectLatest {
             if (it == null) return@collectLatest
@@ -163,6 +175,7 @@ class ListRepository private constructor() {
         }
     }
 
+    // actually updates the list
     private suspend fun updateUserLists(user: UserEntity?) {
         if (user == null) _userLists.value = emptyList()
 
@@ -214,6 +227,7 @@ class ListRepository private constructor() {
         _listRefsListeners.clear()
     }
 
+    // attach list resolve worker
     suspend fun attachListResolverWorker() {
         userLists.collectLatest {
             resolveLists(it)
@@ -253,11 +267,13 @@ class ListRepository private constructor() {
         _resolvedLists.value = resolvedLists
     }
 
+    // force list to update
     suspend fun forceUpdateLists() {
         Log.d("ListRepository", "Forcing list resolution")
         resolveLists(_userLists.value, fetchSource = true)
     }
 
+    // deletes a list
     suspend fun deleteList(list: ResolvedListEntity) {
         // We can't delete someone else's list
         // and we can't delete the default list
