@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -36,7 +37,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.enums.FriendRequestStatus
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.ui.destinations.IndividualListScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.ChatListViewModel
 import com.cmpt362.cinebon.viewmodels.FriendViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -55,8 +58,16 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
     val moviesWatched by rememberSaveable { mutableIntStateOf(0) }
     val lastWatched by rememberSaveable { mutableStateOf("") }
 
+    val chatListViewModel = viewModel<ChatListViewModel>()
+    val chatCreationStatus by chatListViewModel.openedChat.collectAsState()
+
     if (friendInfo == null) {
         return
+    }
+
+    if (chatCreationStatus != null) {
+        navigator.navigate(IndividualListScreenDestination(chatCreationStatus!!.chatId))
+        chatListViewModel.resetCreationStatus()
     }
 
     Surface(
@@ -107,7 +118,7 @@ fun FriendProfileScreen(navigator: DestinationsNavigator, userID: String) {
             ) {
                 Button(
                     onClick = {
-                        /*TODO*/
+                        chatListViewModel.startChatWithUser(userID)
                     },
                     colors = ButtonDefaults.buttonColors
                         (

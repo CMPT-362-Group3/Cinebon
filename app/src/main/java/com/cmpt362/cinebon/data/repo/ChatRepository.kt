@@ -2,11 +2,15 @@ package com.cmpt362.cinebon.data.repo
 
 import android.util.Log
 import com.cmpt362.cinebon.data.entity.ChatEntity
+import com.cmpt362.cinebon.data.entity.ChatEntity.Companion.CHAT_COLLECTION
 import com.cmpt362.cinebon.data.entity.PackagedMessageEntity
 import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
 import com.cmpt362.cinebon.data.entity.messagePath
 import com.cmpt362.cinebon.data.objects.User
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
@@ -172,5 +176,67 @@ class ChatRepository private constructor() {
 
             database.collection(chat.messagePath()).add(message)
         }
+    }
+
+    private suspend fun createChatWithUser(userId: String): ChatEntity {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid!!
+
+        // check if chat exists
+        val existingChat = userChats.value.find { chat ->
+            chat.users.containsAll(
+                listOf(userRepo.getUserRef(currentUserId), userRepo.getUserRef(userId))
+            )
+        }
+        if (existingChat != null) {
+            return existingChat
+        } else {
+            val newChat = ChatEntity()
+            newChat.users = mutableListOf(
+                userRepo.getUserRef(currentUserId),
+                userRepo.getUserRef(userId)
+            )
+
+            val chatReference = database.collection(CHAT_COLLECTION)
+                .add(newChat)
+                .await()
+
+            userRepo.getUserRef(userId)
+                .update(CHAT_COLLECTION, FieldValue.arrayUnion(chatReference))
+            userRepo.getUserRef(currentUserId)
+                .update(CHAT_COLLECTION, FieldValue.arrayUnion(chatReference))
+
+            Log.d("ChatRepository", "Chat created")
+            return chatReference.get().await().toObject<ChatEntity>()!!.apply { this.chatId = chatReference.id }
+        }
+    }
+
+    private suspend fun getResolvedChat(chat: ChatEntity): ResolvedChatEntity {
+
+        // For each chat, resolve the user references
+        val resolvedUsers = mutableListOf<User>()
+
+        // For each user in the chat, resolve the user data
+        for (userRef in chat.users) {
+            if (userRef.id == userRepo.userInfo.value?.userId) continue
+
+            val user = userRepo.getUserData(userRef.id)
+            if (user != null) {
+                resolvedUsers.add(user)
+            }
+        }
+
+        // Fetch and resolve messages for this chat
+        val messagesList = messagesRepo.getResolvedMessages(chat)
+
+        // Add the resolved chat to the resolved chats list
+        return ResolvedChatEntity(
+            others = resolvedUsers,
+            chatId = chat.chatId,
+            messages = messagesList
+        )
+    }
+
+    suspend fun getResolvedChatByFriend(userId: String): ResolvedChatEntity {
+        return getResolvedChat(createChatWithUser(userId))
     }
 }
