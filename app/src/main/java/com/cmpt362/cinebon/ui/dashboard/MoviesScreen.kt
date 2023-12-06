@@ -1,6 +1,7 @@
 package com.cmpt362.cinebon.ui.dashboard
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,14 +98,20 @@ fun MoviesScreen(navigator: DestinationsNavigator) {
                     1 -> moviesViewModel.popularMovies.collectAsStateWithLifecycle().value
                     2 -> moviesViewModel.upcomingMovies.collectAsStateWithLifecycle().value
                     else -> emptyList()
-                }, navigator
+                }, onClick = {
+                    navigator.navigate(
+                        MovieInfoScreenDestination(
+                            movieId = it.id,
+                        )
+                    )
+                }
             )
         }
     }
 }
 
 @Composable
-fun MoviesGrid(source: List<Movie>, navigator: DestinationsNavigator) {
+fun MoviesGrid(source: List<Movie>, onClick: (Movie) -> Unit) {
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
@@ -113,23 +120,25 @@ fun MoviesGrid(source: List<Movie>, navigator: DestinationsNavigator) {
         modifier = Modifier.padding(16.dp),
         content = {
             items(source.size) {
-                MovieCard(movie = source[it], onClick = {
-                    navigator.navigate(
-                        MovieInfoScreenDestination(
-                            movieId = source[it].id,
-                        )
-                    )
-                })
+                MovieCard(movie = source[it], onClick)
             }
         })
 }
 
 @Composable
-fun MovieCard(movie: Movie, onClick: () -> Unit) {
-    Card(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            MovieImage(movie, onClick)
-            MovieBookmarkIcon(movie, modifier = Modifier.align(Alignment.TopEnd))
+fun MovieCard(
+    movie: Movie,
+    onClick: (Movie) -> Unit,
+    modifier: Modifier = Modifier,
+    showQuickAdd: Boolean = false,
+    onQuickAdd: (Movie) -> Unit = {}) {
+    Card(modifier = modifier.fillMaxSize()) {
+        Box(modifier = modifier.fillMaxSize()) {
+            MovieImage(movie, onClick = { onClick(movie) })
+
+            if (showQuickAdd) {
+                MovieBookmarkIcon(movie, modifier = modifier.align(Alignment.TopEnd).clickable { onQuickAdd(movie) })
+            }
         }
     }
 }

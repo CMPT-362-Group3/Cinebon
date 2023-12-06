@@ -14,10 +14,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -42,7 +38,7 @@ import com.ramcosta.composedestinations.spec.DestinationSpec
 import com.ramcosta.composedestinations.utils.startDestination
 
 val sections = listOf(
-    DashboardNavItems.Movies, DashboardNavItems.Lists, DashboardNavItems.Profile
+    DashboardNavItems.Movies, DashboardNavItems.Lists, DashboardNavItems.Socials
 )
 
 @RootNavGraph
@@ -54,7 +50,7 @@ fun DashboardNav() {
 
     // This creates a dashboard VM instance which starts the chat service
     val dashboardVM = viewModel<DashBoardViewModel>()
-    dashboardVM.ensureRunningChatService()
+    dashboardVM.ensureRunningNetworkService()
 
     Surface(
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
@@ -82,16 +78,14 @@ private fun BottomBar(navController: NavController) {
 
     if (shouldHideBottomBar(navController)) return
 
-    var navigationIndex by rememberSaveable {
-        mutableIntStateOf(0)
-    }
 
     val currentDestination: DestinationSpec<out Any?> = navController.appCurrentDestinationAsState().value ?: NavGraphs.dashboard.startDestination
 
     NavigationBar {
-        sections.forEachIndexed { index, section ->
+        sections.forEach { section ->
             NavigationBarItem(icon = { Icon(ImageVector.vectorResource(id = section.icon), contentDescription = section.name) }, onClick = {
-                navigationIndex = index
+                if (currentDestination == section.destination) return@NavigationBarItem
+                navController.popBackStack()
                 navController.navigate(section.destination.route) {
                     launchSingleTop = true
                 }
@@ -118,7 +112,7 @@ private fun TopBar(navController: NavController) {
                     when (navController.appCurrentDestinationAsState().value?.route) {
                         DashboardNavItems.Movies.destination.route -> R.string.discover
                         DashboardNavItems.Lists.destination.route -> R.string.lists
-                        DashboardNavItems.Profile.destination.route -> R.string.profile
+                        DashboardNavItems.Socials.destination.route -> R.string.socials
                         else -> R.string.app_name
                     }
                 ),

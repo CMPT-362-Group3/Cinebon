@@ -137,7 +137,7 @@ fun ScheduleEventScreen() {
 }
 @Preview(showBackground = true)
 @Composable
-fun SignupPreview() {
+fun ScheduleEventPreview() {
     CinebonTheme {
         ScheduleEventScreen()
     }

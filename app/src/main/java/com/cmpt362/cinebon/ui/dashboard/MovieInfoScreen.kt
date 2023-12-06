@@ -47,6 +47,7 @@ import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.api.toPGString
 import com.cmpt362.cinebon.data.api.toRuntimeString
 import com.cmpt362.cinebon.utils.SetStatusBarColor
+import com.cmpt362.cinebon.utils.UNICODE_DOT
 import com.cmpt362.cinebon.utils.shimmerBrush
 import com.cmpt362.cinebon.viewmodels.MovieInfoViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -68,7 +69,7 @@ fun MovieInfoScreen(movieId: Int) {
 
     Box {
         AsyncImage(
-            model = movieInfo.value.poster.posterUrl(),
+            model = movieInfo.value.poster?.posterUrl() ?: R.drawable.movie_icon,
             contentDescription = movieInfo.value.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -110,7 +111,7 @@ fun MovieInfoScreen(movieId: Int) {
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 2.dp)
             ) {
                 Text(
-                    "${movieInfo.value.releaseDate} • ${movieInfo.value.runtime.toRuntimeString()} • ${movieInfo.value.originalLanguage}",
+                    "${movieInfo.value.releaseDate} $UNICODE_DOT ${movieInfo.value.runtime.toRuntimeString()} • ${movieInfo.value.originalLanguage}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White
                 )
@@ -166,14 +167,15 @@ fun MovieInfoScreen(movieId: Int) {
 }
 
 @Composable
-fun MovieImage(movie: Movie, onClick: () -> Unit = {}) {
+fun MovieImage(movie: Movie, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
     val showShimmer = remember { mutableStateOf(true) }
+
     AsyncImage(
-        model = movie.poster.posterUrl(),
+        model = movie.poster?.posterUrl() ?: R.drawable.movie_icon,
         contentDescription = movie.title,
         contentScale = ContentScale.FillWidth,
         onSuccess = { showShimmer.value = false },
-        modifier = Modifier
+        modifier = modifier
             .background(shimmerBrush(targetValue = 1300f, showShimmer = showShimmer.value))
             .heightIn(min = 100.dp)
             .fillMaxSize()

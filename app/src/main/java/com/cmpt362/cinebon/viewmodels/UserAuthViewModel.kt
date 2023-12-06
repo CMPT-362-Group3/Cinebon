@@ -8,7 +8,6 @@ import com.cmpt362.cinebon.data.objects.User
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -23,12 +22,18 @@ interface AccountService {
     fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit)
     fun signOut()
     fun sendResetPasswordEmail(email: String, onResult: (Throwable?) -> Unit)
-    fun getSignedInUser(onResult: (User?) -> Unit)
-    fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit)
+    fun getSignedInUser()
+    fun updateUserProfile(
+        username: String,
+        firstName: String,
+        lastName: String,
+        email: String,
+        onResult: (Throwable?) -> Unit
+    )
 }
 
-class UserAuthViewModel(private val userRepository: UserRepository = UserRepository.getInstance()) : ViewModel(),
-    AccountService {
+class UserAuthViewModel : ViewModel(), AccountService {
+    private val userRepository: UserRepository = UserRepository.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
     val userFlow: StateFlow<User?>
@@ -46,7 +51,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
     }
 
     override fun signOut() {
-        CoroutineScope(viewModelScope.coroutineContext).launch {
+        viewModelScope.launch {
             userRepository.signOut()
         }
     }
@@ -142,7 +147,7 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
             }
     }
 
-    override fun getSignedInUser(onResult: (User?) -> Unit) {
+    override fun getSignedInUser() {
         if (userFlow.value != null) {
             return
         }
@@ -157,14 +162,20 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
         }
     }
 
-    override fun updateUserProfile(username: String, firstName: String, lastName: String, email: String, onResult: (Throwable?) -> Unit) {
+    override fun updateUserProfile(
+        username: String,
+        firstName: String,
+        lastName: String,
+        email: String,
+        onResult: (Throwable?) -> Unit
+    ) {
         // get current user
-        val user = auth.currentUser
+        val firebaseUser = FirebaseAuth.getInstance().currentUser
 
         // if current user exist, launch updateUserData from userRepo to update user data
-        if (user != null) {
-            if (user.email != email) {
-                user.updateEmail(email)
+        if (firebaseUser != null) {
+            if (firebaseUser.email != email) {
+                firebaseUser.updateEmail(email)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Log.d("UserAuthViewModel", "User email address updated.")
@@ -179,25 +190,27 @@ class UserAuthViewModel(private val userRepository: UserRepository = UserReposit
                 .setDisplayName(username)
                 .build()
 
-            user.updateProfile(profileUpdates)
+            firebaseUser.updateProfile(profileUpdates)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         viewModelScope.launch {
-                            userRepository.updateUserData(
-                                user.uid,
-                                username,
-                                firstName,
-                                lastName,
-                                email,
-                                onResult
-                            )
+                            val user = userRepository.getUserData(firebaseUser.uid)
+                            if (user != null) {
+                                user.email = email
+                                user.username = username
+                                user.fname = firstName
+                                user.lname = lastName
+                                userRepository.updateUserData(user, onResult)
+                            } else {
+                                onResult(Throwable("User Not Found"))
+                            }
                         }
                     } else {
                         onResult(task.exception)
                     }
                 }
         } else {
-            onResult(Throwable("user not authenticated"))
+            onResult(Throwable("User Not Authenticated"))
         }
     }
 }

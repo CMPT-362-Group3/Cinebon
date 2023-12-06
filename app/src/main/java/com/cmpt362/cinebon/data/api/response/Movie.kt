@@ -24,7 +24,7 @@ data class Movie(
     val popularity: Double = 0.0,
 
     @SerializedName("poster_path")
-    val poster: String = "",
+    val poster: String? = null,
 
     @SerializedName("release_date")
     val releaseDate: String = "",

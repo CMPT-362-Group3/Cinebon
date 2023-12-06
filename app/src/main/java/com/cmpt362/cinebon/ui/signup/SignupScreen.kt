@@ -50,6 +50,7 @@ import com.cmpt362.cinebon.ui.destinations.DashboardNavDestination
 import com.cmpt362.cinebon.ui.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.ui.destinations.SignupScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
+import com.cmpt362.cinebon.viewmodels.ListViewModel
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -67,6 +68,7 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
     // I don't know if the above line is correct, but it's what I think it should be
 
     val userAuthViewModel = viewModel<UserAuthViewModel>()
+    val listViewModel = viewModel<ListViewModel>()
     val scrollState = rememberScrollState()
     var username by rememberSaveable { mutableStateOf("") }
     var fName by rememberSaveable { mutableStateOf("") }
@@ -184,12 +186,14 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                         if (!invalidPassword)
                             userAuthViewModel.signUp(email, password, fName, lName,username,
                                 defaultImage) {
-                                if (it != null)
+                                if (it != null) {
                                     error = true
-                                else
+                                } else {
+                                    listViewModel.createDefaultList()
                                     navigator.navigate(DashboardNavDestination) {
                                         popUpTo(SignupScreenDestination) { inclusive = true }
                                     }
+                                }
                             }
                     }),
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -223,12 +227,14 @@ fun SignupScreen(navigator: DestinationsNavigator, modifier: Modifier = Modifier
                             if (!invalidPassword)
                                 userAuthViewModel.signUp(email, password, fName, lName,
                                     username, defaultImage) {
-                                    if (it != null)
+                                    if (it != null) {
                                         error = true
-                                    else
+                                    } else {
+                                        listViewModel.createDefaultList()
                                         navigator.navigate(DashboardNavDestination) {
                                             popUpTo(SignupScreenDestination) { inclusive = true }
                                         }
+                                    }
                                 }
                         },
                         colors = ButtonDefaults.buttonColors

@@ -55,7 +55,7 @@ fun SettingsScreen(navigator: DestinationsNavigator) {
 
     val userInfo = userAuthViewModel.userFlow.collectAsStateWithLifecycle()
 
-    userAuthViewModel.getSignedInUser {}
+    userAuthViewModel.getSignedInUser()
 
     var username by rememberSaveable { mutableStateOf(userInfo.value?.username?: "") }
     var firstName by rememberSaveable { mutableStateOf(userInfo.value?.fname?: "") }

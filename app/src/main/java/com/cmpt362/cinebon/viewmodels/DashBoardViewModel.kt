@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import com.cmpt362.cinebon.service.ChatService
+import com.cmpt362.cinebon.service.NetworkService
 
 class DashBoardViewModel(private val app: Application) : AndroidViewModel(app) {
 
@@ -14,11 +14,11 @@ class DashBoardViewModel(private val app: Application) : AndroidViewModel(app) {
     // This prevents more start calls on recompositions in the same app instance
     // But does not prevent multiple start calls across multiple app launches
     // However, since the service is foreground and unbound, there's only 1 instance of it
-    fun ensureRunningChatService() {
+    fun ensureRunningNetworkService() {
         if (isRunning) return
 
         Log.d("DashBoardViewModel", "Starting chat service")
-        app.startForegroundService(Intent(app.applicationContext, ChatService::class.java))
+        app.startForegroundService(Intent(app.applicationContext, NetworkService::class.java))
         isRunning = true
     }
 }
