@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -159,21 +158,6 @@ fun SocialScreen(navigator: DestinationsNavigator) {
             //display list of all chat
             ChatList(navigator = navigator)
 
-            FloatingActionButton(//new chat button
-                onClick = { /*TODO*/ },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.End)
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.addchat_icon),
-                    contentDescription = "new chat",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(48.dp),
-                )
-            }
         }
     }
 
