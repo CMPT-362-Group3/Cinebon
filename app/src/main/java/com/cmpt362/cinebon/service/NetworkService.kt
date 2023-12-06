@@ -63,43 +63,55 @@ class NetworkService : Service() {
         serviceScope.launch { userRepository.updateCurrentUserData() }
     }
 
+    // Workers related to the user information part
     private fun startUserWorkers() {
+        // Attaches a listener that listens for changes to the firebase user document
         serviceScope.launch {
             userRepository.attachUserRefListener(userRefListener)
         }
 
+        // Starts a coroutine that listens for user changes and updates the friend requests
         serviceScope.launch {
             friendsRepository.startFriendRequestRefreshWorker()
         }
 
+        // Starts a coroutine that resolves the friends request objects into code-usable objects
         serviceScope.launch {
             friendsRepository.startFriendRequestResolverWorker()
         }
     }
 
+    // Workers related to the chat and messages parts
     private fun startChatWorkers() {
+        // Starts a coroutine that listens for user changes and updates the chat list
         serviceScope.launch {
             chatRepository.startChatRefreshWorker()
         }
 
+        // Starts a coroutine that listens for messages for each chat the user is part of
         serviceScope.launch {
             startMessagesRefreshWorker()
         }
 
+        // Starts a coroutine that resolves the chat objects into code-usable objects
         serviceScope.launch {
             chatRepository.attachChatResolverWorker()
         }
     }
 
+    // Workers related to the list section
     private fun startListWorker() {
+        // Starts a coroutine that listens for user changes and updates the movies lists list
         serviceScope.launch {
             listRepository.startListRefreshWorker()
         }
 
+        // Starts a coroutine that listens for subscribed list document changes and updates the movies lists list
         serviceScope.launch {
             startListUpdateListenerWorker()
         }
 
+        // Starts a coroutine that resolves the list objects into code-usable objects
         serviceScope.launch {
             listRepository.attachListResolverWorker()
         }
@@ -186,6 +198,7 @@ class NetworkService : Service() {
         }
     }
 
+    // This function creates a foreground notification that keeps the service alive
     private fun showForegroundNotification() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -217,6 +230,10 @@ class NetworkService : Service() {
         )
     }
 
+    // When the service is destroyed, we need to do some additional cleanup
+    // to ensure we don't leak memory and tasks.
+    // We cancel all the coroutines and cancel the foreground notification.
+    // All coroutines from the service have a dedicated scope, so we can cancel them all at once.
     override fun onDestroy() {
         Log.d("NetworkService", "Chat service destroyed")
 
