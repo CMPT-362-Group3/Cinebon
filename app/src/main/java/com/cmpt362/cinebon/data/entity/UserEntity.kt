@@ -8,7 +8,7 @@ class UserEntity {
     lateinit var fname: String
     lateinit var lname: String
     lateinit var email: String
-    lateinit var defaultList: DocumentReference
+    var defaultList: DocumentReference? = null
     var chats = mutableListOf<DocumentReference>()
     var movieList = mutableListOf<DocumentReference>()
     var friends = mutableListOf<DocumentReference>()

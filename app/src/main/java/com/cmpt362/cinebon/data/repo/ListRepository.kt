@@ -140,8 +140,8 @@ class ListRepository private constructor() {
     }
 
     // same thing but different argument
-    private suspend fun getListEntity(listRef: DocumentReference): ListEntity? {
-        return listRef.get().await().toObject<ListEntity>().apply { this?.listId = listRef.id }
+    private suspend fun getListEntity(listRef: DocumentReference?): ListEntity? {
+        return listRef?.get()?.await()?.toObject<ListEntity>().apply { this?.listId = listRef?.id.toString() }
     }
 
     // get resolved list of movies
