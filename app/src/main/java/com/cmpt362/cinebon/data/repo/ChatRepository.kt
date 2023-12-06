@@ -163,6 +163,7 @@ class ChatRepository private constructor() {
         return resolvedChats.value.find { chat -> chat.chatId == id }
     }
 
+    // sends a message to chat entity
     suspend fun sendMessage(chat: ResolvedChatEntity, text: String) {
         withContext(IO) {
             val message = PackagedMessageEntity(
@@ -177,6 +178,7 @@ class ChatRepository private constructor() {
         }
     }
 
+    // create chat with another user and their Id
     private suspend fun createChatWithUser(userId: String): ChatEntity {
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid!!
 
@@ -186,19 +188,21 @@ class ChatRepository private constructor() {
                 listOf(userRepo.getUserRef(currentUserId), userRepo.getUserRef(userId))
             )
         }
-        if (existingChat != null) {
+        if (existingChat != null) { // if exist
             return existingChat
-        } else {
+        } else { // if not exist
             val newChat = ChatEntity()
             newChat.users = mutableListOf(
                 userRepo.getUserRef(currentUserId),
                 userRepo.getUserRef(userId)
             )
 
+            // get chat reference from database
             val chatReference = database.collection(CHAT_COLLECTION)
                 .add(newChat)
                 .await()
 
+            // add chats to user's data
             userRepo.getUserRef(userId)
                 .update(CHAT_COLLECTION, FieldValue.arrayUnion(chatReference))
             userRepo.getUserRef(currentUserId)
@@ -209,6 +213,7 @@ class ChatRepository private constructor() {
         }
     }
 
+    // get chat that is already added
     private suspend fun getResolvedChat(chat: ChatEntity): ResolvedChatEntity {
 
         // For each chat, resolve the user references
@@ -235,6 +240,7 @@ class ChatRepository private constructor() {
         )
     }
 
+    // wrapper function
     suspend fun getResolvedChatByFriend(userId: String): ResolvedChatEntity {
         return getResolvedChat(createChatWithUser(userId))
     }

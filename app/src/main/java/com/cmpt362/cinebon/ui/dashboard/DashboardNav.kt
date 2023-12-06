@@ -1,5 +1,6 @@
 package com.cmpt362.cinebon.ui.dashboard
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,7 +42,11 @@ import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.AppLogo
 import com.cmpt362.cinebon.viewmodels.DashBoardViewModel
 import com.cmpt362.cinebon.viewmodels.MoviesSearchViewModel
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.animations.defaults.NestedNavGraphDefaultAnimations
+import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
+import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.NavGraph
 import com.ramcosta.composedestinations.annotation.RootNavGraph
@@ -52,12 +57,18 @@ val sections = listOf(
     DashboardNavItems.Movies, DashboardNavItems.Lists, DashboardNavItems.Socials
 )
 
+@OptIn(ExperimentalMaterialNavigationApi::class, ExperimentalAnimationApi::class)
 @RootNavGraph
 @Destination
 @Composable
 fun DashboardNav() {
 
     val navController = rememberNavController()
+    // Create a NavHostEngine that will be used to navigate between destinations
+    val animNavHostEngine = rememberAnimatedNavHostEngine(
+        rootDefaultAnimations = RootNavGraphDefaultAnimations.ACCOMPANIST_FADING,
+        defaultAnimationsForNestedNavGraph = mapOf(Pair(NavGraphs.dashboard, NestedNavGraphDefaultAnimations.ACCOMPANIST_FADING))
+    )
 
     // This creates a dashboard VM instance which starts the chat service
     val dashboardVM = viewModel<DashBoardViewModel>()
@@ -67,7 +78,11 @@ fun DashboardNav() {
         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
     ) {
         Scaffold(bottomBar = { BottomBar(navController = navController) }, topBar = { TopBar(navController) }) { innerPadding ->
-            DestinationsNavHost(navController = navController, navGraph = NavGraphs.dashboard, modifier = Modifier.padding(innerPadding))
+            DestinationsNavHost(
+                navController = navController,
+                navGraph = NavGraphs.dashboard,
+                engine = animNavHostEngine,
+                modifier = Modifier.padding(innerPadding))
         }
     }
 }

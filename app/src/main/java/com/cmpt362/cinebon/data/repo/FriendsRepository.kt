@@ -137,6 +137,7 @@ class FriendsRepository private constructor() {
         return null
     }
 
+    // refresh friend requests
     suspend fun startFriendRequestRefreshWorker() {
         userRepo.userInfo.collectLatest {
             Log.d("FriendsRepository", "Starting friend request refresh worker")
@@ -144,6 +145,7 @@ class FriendsRepository private constructor() {
         }
     }
 
+    // check to see if someone has added them as friend
     suspend fun startFriendRequestResolverWorker() {
         _requestList.collectLatest {
             Log.d("FriendsRepository", "Starting friend request resolver worker")
