@@ -8,7 +8,14 @@ import retrofit2.http.Headers
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+// An interface for the TMDB API, used with retrofit
+// Authentication is done in two ways:
+// 1. Using a header token, stored in the local.properties file
+// 2. Using an API key, given in the URL as a query parameter
+// These are provided by the TMDB account. Right now, the app uses the auth values from one of our team members' accounts.
 interface TMDBService {
+
+    // Define some universal API constants
     companion object {
         const val BASE_URL = "https://api.themoviedb.org/3/"
         const val IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
@@ -18,6 +25,7 @@ interface TMDBService {
         private const val QUERY_STRING = "query"
     }
 
+    // API endpoint for getting "Now playing" movies from TMDB
     @Headers(
         "accept: application/json",
         "Authorization: Bearer ${BuildConfig.TMDB_HEADER_TOKEN}"
@@ -25,6 +33,7 @@ interface TMDBService {
     @GET("movie/now_playing")
     suspend fun getNowPlayingMovies(): MoviesResult
 
+    // API endpoint for getting "Popular" movies from TMDB
     @Headers(
         "accept: application/json",
         "Authorization: Bearer ${BuildConfig.TMDB_HEADER_TOKEN}"
@@ -32,6 +41,7 @@ interface TMDBService {
     @GET("movie/popular")
     suspend fun getPopularMovies(): MoviesResult
 
+    // API endpoint for getting "Upcoming" movies from TMDB
     @Headers(
         "accept: application/json",
         "Authorization: Bearer ${BuildConfig.TMDB_HEADER_TOKEN}"
@@ -39,6 +49,7 @@ interface TMDBService {
     @GET("movie/upcoming")
     suspend fun getUpcomingMovies(): MoviesResult
 
+    // API endpoint for getting a movie by its ID
     @Headers(
         "accept: application/json",
         "Authorization: Bearer ${BuildConfig.TMDB_HEADER_TOKEN}"
@@ -46,6 +57,7 @@ interface TMDBService {
     @GET("movie/{movie_id}")
     suspend fun getMovieById(@Path("movie_id") id: Int): Movie
 
+    // API endpoint for searching movies by a query string
     @Headers(
         "accept: application/json",
         "Authorization: Bearer ${BuildConfig.TMDB_HEADER_TOKEN}"
@@ -59,8 +71,10 @@ interface TMDBService {
     ): MoviesResult
 }
 
+// Extension functions for the TMDB API, which takes a poster path string and returns the full image URL
 fun String.posterUrl() = "${TMDBService.IMAGE_BASE_URL}$this?api_key=${BuildConfig.TMDB_API_KEY}"
 
+// Extension function for the TMDB API, which takes a runtime in minutes and returns a string in the format "Xh Ym"
 fun Int.toRuntimeString(): String {
     val hours = this / 60
     val minutes = this % 60

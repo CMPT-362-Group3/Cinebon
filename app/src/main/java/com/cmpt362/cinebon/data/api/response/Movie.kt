@@ -2,6 +2,8 @@ package com.cmpt362.cinebon.data.api.response
 
 import com.google.gson.annotations.SerializedName
 
+// Object that represents a movie from the TMDB API
+// These fields are what's received in the API response JSON
 data class Movie(
     val adult: Boolean = false,
 
@@ -40,13 +42,10 @@ data class Movie(
     val voteCount: Int = 0,
 
     val runtime: Int = 0,
-
-    // TODO: Get rid of this and migrate this to firebase account
-    val bookmarked: Boolean = false,
 )
 
+// Dummy movie for previews and testing
 const val DUMMY_MOVIE_ID = -1
-
 val DummyMovie = Movie(
     adult = true,
     title = "Dummy Movie",
