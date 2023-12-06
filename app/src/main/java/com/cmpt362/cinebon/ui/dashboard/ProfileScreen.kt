@@ -95,7 +95,7 @@ fun ProfileScreen(navigator: DestinationsNavigator) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.profile_icon),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.profile_icon),
                     contentDescription = "profile picture",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier

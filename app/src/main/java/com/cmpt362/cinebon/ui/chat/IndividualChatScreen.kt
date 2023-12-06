@@ -1,7 +1,6 @@
 package com.cmpt362.cinebon.ui.chat
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -48,6 +45,7 @@ import com.cmpt362.cinebon.data.entity.ResolvedMessageEntity
 import com.cmpt362.cinebon.ui.common.Border
 import com.cmpt362.cinebon.ui.common.border
 import com.cmpt362.cinebon.ui.dashboard.DashboardNavGraph
+import com.cmpt362.cinebon.ui.destinations.FriendProfileScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.IndividualChatViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -60,117 +58,119 @@ fun ChatScreen(navigator: DestinationsNavigator, chatId: String) {
 
     val chatViewModel = viewModel<IndividualChatViewModel>(factory = IndividualChatViewModel.Factory(chatId))
 
-    val currentChat = chatViewModel.currentChat.collectAsStateWithLifecycle()
+    val currentChat by chatViewModel.currentChat.collectAsStateWithLifecycle()
     val lazyListState = rememberLazyListState()
     var newMessage by remember { mutableStateOf("") } //remember the value of the message written
 
-    LaunchedEffect(key1 = currentChat.value?.messages?.size) {
-        if ((currentChat.value?.messages?.size ?: 0) > 0) {
+    LaunchedEffect(key1 = currentChat?.messages?.size) {
+        if ((currentChat?.messages?.size ?: 0) > 0) {
             Log.d("ChatScreen", "Scrolling to bottom")
-            lazyListState.animateScrollToItem(currentChat.value!!.messages.size - 1)
+            lazyListState.animateScrollToItem(currentChat!!.messages.size - 1)
         }
     }
 
     SetStatusBarColor(statusBarColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
 
-    Scaffold(
-        topBar = {
-            Surface(color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically, modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    IconButton(onClick = { navigator.popBackStack() }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.back_icon),
-                            contentDescription = "back",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(24.dp),
-                        )
+    Scaffold(topBar = {
+        Surface(color = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                IconButton(onClick = { navigator.popBackStack() }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.back_icon),
+                        contentDescription = "back",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+                IconButton(onClick = {
+                    if ((currentChat?.others?.size ?: 0) > 0) {
+                        navigator.navigate(FriendProfileScreenDestination(currentChat!!.others.first().userId)) {
+                            // Make sure we don't circularly navigate back to the chat screen
+                            popUpTo(FriendProfileScreenDestination.route) {
+                                inclusive = true
+                            }
+                        }
                     }
-                    Image(
-                        painter = painterResource(id = R.drawable.profile_icon),
-                        contentDescription = null,
+                }) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.profile_icon),
+                        contentDescription = "Profile picture",
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
                     )
-                    Text(
-                        text = currentChat.value?.others?.joinToString { it.fname } ?: "Chat",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp, horizontal = 16.dp)
-                    )
                 }
-            }
-        },
-        bottomBar = {
-            Surface {
-                Row(
+                Text(text = currentChat?.others?.joinToString { it.fname } ?: "Chat",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
-                        .border(top = Border(1.dp, MaterialTheme.colorScheme.secondaryContainer))
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Input message
-                    TextField(
-                        value = newMessage,
-                        onValueChange = { newMessage = it },
-                        placeholder = { Text(text = "Send message") },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Default
-                        ),
-                        shape = MaterialTheme.shapes.extraLarge,
-                        colors = TextFieldDefaults.colors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        )
+                        .padding(vertical = 8.dp, horizontal = 16.dp))
+            }
+        }
+    }, bottomBar = {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .border(top = Border(1.dp, MaterialTheme.colorScheme.secondaryContainer))
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .padding(8.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Input message
+                TextField(value = newMessage,
+                    onValueChange = { newMessage = it },
+                    placeholder = { Text(text = "Send message") },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text, imeAction = ImeAction.Default
+                    ),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
+                )
 
-                    // Send button
-                    IconButton(
-                        onClick = {
-                            if (newMessage.isNotBlank()) {
-                                chatViewModel.sendMessage(newMessage)
-                                newMessage = ""
-                            }
-                        },
-                        Modifier
-                            .padding(start = 16.dp, end = 8.dp)
-                            .background(MaterialTheme.colorScheme.inverseOnSurface, shape = CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.send_icon),
-                            contentDescription = "Send",
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
+                // Send button
+                IconButton(
+                    onClick = {
+                        if (newMessage.isNotBlank()) {
+                            chatViewModel.sendMessage(newMessage)
+                            newMessage = ""
+                        }
+                    },
+                    Modifier
+                        .padding(start = 16.dp, end = 8.dp)
+                        .background(MaterialTheme.colorScheme.inverseOnSurface, shape = CircleShape)
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.send_icon),
+                        contentDescription = "Send",
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
         }
-    ) { innerPadding ->
+    }) { innerPadding ->
         // Display chat messages
         LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding),
+            modifier = Modifier.padding(innerPadding),
             state = lazyListState,
         ) {
-            items(currentChat.value?.messages ?: emptyList()) { message ->
+            items(currentChat?.messages ?: emptyList()) { message ->
                 MessageItem(message)
             }
         }
@@ -209,10 +209,7 @@ fun MessageItem(message: ResolvedMessageEntity) {
             .wrapContentWidth(align = alignment)
             .clip(
                 RoundedCornerShape(
-                    topStart = 48f,
-                    topEnd = 48f,
-                    bottomStart = if (message.isSelf) 48f else 0f,
-                    bottomEnd = if (message.isSelf) 0f else 48f
+                    topStart = 48f, topEnd = 48f, bottomStart = if (message.isSelf) 48f else 0f, bottomEnd = if (message.isSelf) 0f else 48f
                 )
             )
             .background(color = backgroundColor)
@@ -220,9 +217,7 @@ fun MessageItem(message: ResolvedMessageEntity) {
 
     ) {
         Text(
-            text = message.text,
-            color = contentColor,
-            modifier = Modifier.padding(8.dp)
+            text = message.text, color = contentColor, modifier = Modifier.padding(8.dp)
         )
     }
 }
