@@ -3,7 +3,7 @@ package com.cmpt362.cinebon.data.repo
 import android.util.Log
 import com.cmpt362.cinebon.data.entity.FriendRequest
 import com.cmpt362.cinebon.data.entity.ResolvedFriendRequest
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
@@ -35,28 +35,18 @@ class FriendsRepository private constructor() {
 
     private val requestsCollection: CollectionReference = database.collection(REQUESTS_COLLECTION)
     private val _requestList = MutableStateFlow<List<FriendRequest>>(emptyList())
-    val requestList: StateFlow<List<FriendRequest>>
-        get() = _requestList
 
     private val _resolvedRequestList = MutableStateFlow<List<ResolvedFriendRequest>>(emptyList())
     val resolvedRequestList: StateFlow<List<ResolvedFriendRequest>>
         get() = _resolvedRequestList
-
-    private val _requestSent = MutableStateFlow<Boolean>(false)
-    val requestSent: StateFlow<Boolean>
-        get() = _requestSent
-
-    private val _requestReceived = MutableStateFlow<Boolean>(false)
-    val requestReceived: StateFlow<Boolean>
-        get() = _requestReceived
 
     private suspend fun getResolvedRequestList() {
         withContext(IO) {
             val resolvedRequestList = mutableListOf<ResolvedFriendRequest>() // Create list of requests
 
             _requestList.value.forEach { request -> // For each request in user's requests
-                val sender = request.sender.get().await().toObject<User>() // Convert to Request object
-                val receiver = request.receiver.get().await().toObject<User>() // Convert to Request object
+                val sender = request.sender.get().await().toObject<UserEntity>() // Convert to Request object
+                val receiver = request.receiver.get().await().toObject<UserEntity>() // Convert to Request object
                 if (sender != null && receiver != null) {
                     resolvedRequestList.add(
                         ResolvedFriendRequest(
@@ -93,7 +83,7 @@ class FriendsRepository private constructor() {
         }
     }
 
-    suspend fun acceptRequest(friend: User) {
+    suspend fun acceptRequest(friend: UserEntity) {
         withContext(IO) {
             // Update the users' friends lists
             userRepo.addFriend(friend)
@@ -103,7 +93,7 @@ class FriendsRepository private constructor() {
         }
     }
 
-    suspend fun deleteRequest(friend: User) {
+    suspend fun deleteRequest(friend: UserEntity) {
         withContext(IO) {
             val requestRef = getRequestRef(friend)
 
@@ -121,7 +111,7 @@ class FriendsRepository private constructor() {
         }
     }
 
-    suspend fun createFriendRequest(receiver: User) {
+    suspend fun createFriendRequest(receiver: UserEntity) {
         withContext(IO) {
             val request = FriendRequest() // Create new request
             request.sender = userRepo.getUserRef(auth.currentUser!!.uid) // Set sender
@@ -135,7 +125,7 @@ class FriendsRepository private constructor() {
         }
     }
 
-    private fun getRequestRef(friend: User): DocumentReference? {
+    private fun getRequestRef(friend: UserEntity): DocumentReference? {
 
         // Try finding it in our resolved requests
         resolvedRequestList.value.forEach {
@@ -155,7 +145,7 @@ class FriendsRepository private constructor() {
     }
 
     suspend fun startFriendRequestResolverWorker() {
-        requestList.collectLatest {
+        _requestList.collectLatest {
             Log.d("FriendsRepository", "Starting friend request resolver worker")
             getResolvedRequestList()
         }

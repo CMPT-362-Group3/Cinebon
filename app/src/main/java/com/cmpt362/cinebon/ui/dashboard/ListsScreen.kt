@@ -31,7 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.cmpt362.cinebon.ui.destinations.IndividualListScreenDestination
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
 import com.cmpt362.cinebon.utils.SetStatusBarColor
@@ -134,7 +134,7 @@ fun ListItemPreview() {
     ListItem(
         list = ResolvedListEntity(
             listId = "some list id",
-            owner = User().apply {
+            owner = UserEntity().apply {
                 username = "some username"
             },
             name = "test list",

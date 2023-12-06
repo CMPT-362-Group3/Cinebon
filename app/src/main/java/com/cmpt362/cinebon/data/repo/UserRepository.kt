@@ -1,7 +1,7 @@
 package com.cmpt362.cinebon.data.repo
 
 import android.util.Log
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -41,15 +41,15 @@ class UserRepository private constructor() {
     val userCreatedResult: StateFlow<Result<Boolean>>
         get() = _userCreatedResult
 
-    private val _userInfo = MutableStateFlow<User?>(null)
-    val userInfo: StateFlow<User?>
+    private val _userInfo = MutableStateFlow<UserEntity?>(null)
+    val userInfo: StateFlow<UserEntity?>
         get() = _userInfo
 
-    private val _searchResults = MutableStateFlow<List<User>>(emptyList())
-    val searchResults: StateFlow<List<User>>
+    private val _searchResults = MutableStateFlow<List<UserEntity>>(emptyList())
+    val searchResults: StateFlow<List<UserEntity>>
         get() = _searchResults
 
-    suspend fun createUserData(user: User) {
+    suspend fun createUserData(user: UserEntity) {
         withContext(IO) {
             database.collection(USER_COLLECTION).document(user.userId)
                 .set(user)
@@ -79,12 +79,12 @@ class UserRepository private constructor() {
         _userInfo.value = getUserData(FirebaseAuth.getInstance().currentUser!!.uid)
     }
 
-    suspend fun getUserData(userId: String): User? {
+    suspend fun getUserData(userId: String): UserEntity? {
         val snapShot = getUserRef(userId).get().await()
 
         if (snapShot.exists()) {
 //            Log.d("UserRepository", "User data successfully retrieved")
-            return snapShot.toObject<User>()
+            return snapShot.toObject<UserEntity>()
         }
 
         Log.d("UserRepository", "Error getting user data")
@@ -92,7 +92,7 @@ class UserRepository private constructor() {
     }
 
     suspend fun updateUserData(
-        user: User, onResult: (Throwable?) -> Unit
+        user: UserEntity, onResult: (Throwable?) -> Unit
     ) {
         withContext(IO) {
             getUserRef(user.userId)
@@ -117,7 +117,7 @@ class UserRepository private constructor() {
         }
     }
 
-    suspend fun addFriend(friend: User) {
+    suspend fun addFriend(friend: UserEntity) {
         withContext(IO) {
             val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
             val friendRef = getUserRef(friend.userId)
@@ -132,7 +132,7 @@ class UserRepository private constructor() {
         }
     }
 
-    suspend fun removeFriend(friend: User) {
+    suspend fun removeFriend(friend: UserEntity) {
         withContext(IO) {
             val selfRef = getUserRef(FirebaseAuth.getInstance().currentUser!!.uid)
             val friendRef = getUserRef(friend.userId)
@@ -162,7 +162,7 @@ class UserRepository private constructor() {
                     .get()
                     .await()
 
-                val users = querySnapshot.documents.mapNotNull { it.toObject<User>() }
+                val users = querySnapshot.documents.mapNotNull { it.toObject<UserEntity>() }
 
                 _searchResults.value = users.filter { it.userId != auth.currentUser!!.uid }
                 Log.d("UserRepository", "$users")

@@ -6,9 +6,8 @@ import com.cmpt362.cinebon.data.entity.ChatEntity.Companion.CHAT_COLLECTION
 import com.cmpt362.cinebon.data.entity.PackagedMessageEntity
 import com.cmpt362.cinebon.data.entity.ResolvedChatEntity
 import com.cmpt362.cinebon.data.entity.messagePath
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
@@ -61,7 +60,7 @@ class ChatRepository private constructor() {
 
         // For each chat, resolve the user references
         chats.forEach { chat ->
-            val resolvedUsers = mutableListOf<User>()
+            val resolvedUsers = mutableListOf<UserEntity>()
             Log.d("ChatRepository", "Resolving chat ${chat.chatId}")
 
             // For each user in the chat, resolve the user data
@@ -115,7 +114,7 @@ class ChatRepository private constructor() {
     }
 
     // Sub-function to get chats from user object
-    private suspend fun updateUserChats(user: User?) {
+    private suspend fun updateUserChats(user: UserEntity?) {
         if (user == null) _userChats.value = emptyList()
 
         Log.d("UserRepository", "Getting user chats from user object")
@@ -213,7 +212,7 @@ class ChatRepository private constructor() {
     private suspend fun getResolvedChat(chat: ChatEntity): ResolvedChatEntity {
 
         // For each chat, resolve the user references
-        val resolvedUsers = mutableListOf<User>()
+        val resolvedUsers = mutableListOf<UserEntity>()
 
         // For each user in the chat, resolve the user data
         for (userRef in chat.users) {

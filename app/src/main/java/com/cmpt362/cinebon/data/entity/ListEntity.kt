@@ -1,7 +1,6 @@
 package com.cmpt362.cinebon.data.entity
 
 import com.cmpt362.cinebon.data.api.response.Movie
-import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Exclude
 
@@ -16,7 +15,7 @@ class ListEntity {
 
 data class ResolvedListEntity (
     val listId: String,
-    val owner: User,
+    val owner: UserEntity,
     val name: String,
     val movies: List<Movie>,
     val isSelf: Boolean

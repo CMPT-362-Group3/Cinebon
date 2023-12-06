@@ -1,8 +1,8 @@
-package com.cmpt362.cinebon.data.objects
+package com.cmpt362.cinebon.data.entity
 
 import com.google.firebase.firestore.DocumentReference
 
-class User {
+class UserEntity {
     lateinit var userId: String
     lateinit var username: String
     lateinit var fname: String

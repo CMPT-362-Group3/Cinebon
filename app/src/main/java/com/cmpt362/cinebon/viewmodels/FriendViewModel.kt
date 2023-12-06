@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cmpt362.cinebon.data.enums.FriendRequestStatus
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.cmpt362.cinebon.data.repo.FriendsRepository
 import com.cmpt362.cinebon.data.repo.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,13 +17,13 @@ class FriendViewModel(private val friendId: String) : ViewModel() {
     private val userRepository = UserRepository.getInstance()
     private val friendsRepository = FriendsRepository.getInstance()
 
-    private val _friendInfo = MutableStateFlow<User?>(null)
+    private val _friendInfo = MutableStateFlow<UserEntity?>(null)
 
     private val _requestStatus = MutableStateFlow(FriendRequestStatus.NONE)
     val requestStatus: StateFlow<FriendRequestStatus>
         get() = _requestStatus
 
-    val friendInfo: StateFlow<User?>
+    val friendInfo: StateFlow<UserEntity?>
         get() = _friendInfo
 
     init {
@@ -67,25 +67,25 @@ class FriendViewModel(private val friendId: String) : ViewModel() {
         }
     }
 
-    fun sendRequest(friend: User) {
+    fun sendRequest(friend: UserEntity) {
         viewModelScope.launch {
             friendsRepository.createFriendRequest(friend)
         }
     }
 
-    fun acceptRequest(friend: User) {
+    fun acceptRequest(friend: UserEntity) {
         viewModelScope.launch {
             friendsRepository.acceptRequest(friend)
         }
     }
 
-    fun rejectRequest(friend: User) {
+    fun rejectRequest(friend: UserEntity) {
         viewModelScope.launch {
             friendsRepository.deleteRequest(friend)
         }
     }
 
-    fun removeFriend(friend: User) {
+    fun removeFriend(friend: UserEntity) {
         viewModelScope.launch {
             userRepository.removeFriend(friend)
         }

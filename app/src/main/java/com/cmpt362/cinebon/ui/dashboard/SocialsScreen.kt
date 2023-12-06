@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.cmpt362.cinebon.ui.chat.ChatList
 import com.cmpt362.cinebon.ui.destinations.FriendProfileScreenDestination
 import com.cmpt362.cinebon.ui.destinations.ProfileScreenDestination
@@ -165,7 +165,7 @@ fun SocialScreen(navigator: DestinationsNavigator) {
 
 //UserList displays search results
 @Composable
-fun UserList(users: List<User>, onItemClick: (String) -> Unit) {
+fun UserList(users: List<UserEntity>, onItemClick: (String) -> Unit) {
     LazyColumn {
         items(users) { user ->
             UserListItem(user = user, onItemClick = { onItemClick(user.userId) })
@@ -175,7 +175,7 @@ fun UserList(users: List<User>, onItemClick: (String) -> Unit) {
 
 // UserListItem displays each user in the list
 @Composable
-fun UserListItem(user: User, onItemClick: (String) -> Unit) {
+fun UserListItem(user: UserEntity, onItemClick: (String) -> Unit) {
     Column(
         modifier = Modifier
             .padding(16.dp)

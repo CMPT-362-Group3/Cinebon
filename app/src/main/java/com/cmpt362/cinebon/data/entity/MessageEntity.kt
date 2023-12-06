@@ -1,6 +1,5 @@
 package com.cmpt362.cinebon.data.entity
 
-import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ServerTimestamp
@@ -20,7 +19,7 @@ class MessageEntity {
 }
 
 data class ResolvedMessageEntity(
-    val sender: User,
+    val sender: UserEntity,
 
     @ServerTimestamp
     val timestamp: Date,

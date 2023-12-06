@@ -4,7 +4,7 @@ import android.util.Log
 import com.cmpt362.cinebon.data.api.response.Movie
 import com.cmpt362.cinebon.data.entity.ListEntity
 import com.cmpt362.cinebon.data.entity.ResolvedListEntity
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -163,7 +163,7 @@ class ListRepository private constructor() {
         }
     }
 
-    private suspend fun updateUserLists(user: User?) {
+    private suspend fun updateUserLists(user: UserEntity?) {
         if (user == null) _userLists.value = emptyList()
 
         Log.d("ListRepository", "Getting user lists from user object")

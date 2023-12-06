@@ -1,10 +1,9 @@
 package com.cmpt362.cinebon.viewmodels
 
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cmpt362.cinebon.data.objects.User
+import com.cmpt362.cinebon.data.entity.UserEntity
 import com.cmpt362.cinebon.data.repo.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -16,7 +15,7 @@ import kotlinx.coroutines.launch
 interface AccountService {
     fun signUp(
         email: String, password: String, fName: String, lName: String, username: String,
-        profilePhoto: Bitmap, onResult: (Throwable?) -> Unit
+        onResult: (Throwable?) -> Unit
     )
 
     fun signIn(email: String, password: String, onResult: (Throwable?) -> Unit)
@@ -36,7 +35,7 @@ class UserAuthViewModel : ViewModel(), AccountService {
     private val userRepository: UserRepository = UserRepository.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private var signUpJob: Job? = null
-    val userFlow: StateFlow<User?>
+    val userFlow: StateFlow<UserEntity?>
         get() = userRepository.userInfo
 
     fun isSignedIn(): Boolean {
@@ -71,7 +70,7 @@ class UserAuthViewModel : ViewModel(), AccountService {
 
     override fun signUp(
         email: String, password: String, fName: String, lName: String,
-        username: String, profilePhoto: Bitmap, onResult: (Throwable?) -> Unit
+        username: String, onResult: (Throwable?) -> Unit
     ) {
         FirebaseAuth
             .getInstance()
@@ -85,7 +84,7 @@ class UserAuthViewModel : ViewModel(), AccountService {
                 if (user != null) {
                     // Create user data in Firestore
                     viewModelScope.launch {
-                        val newUser = User()
+                        val newUser = UserEntity()
                         newUser.userId = user.uid
                         newUser.email = email
                         newUser.fname = fName

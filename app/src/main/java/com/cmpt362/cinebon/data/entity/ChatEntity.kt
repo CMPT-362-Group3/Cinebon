@@ -1,6 +1,5 @@
 package com.cmpt362.cinebon.data.entity
 
-import com.cmpt362.cinebon.data.objects.User
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.Exclude
 
@@ -18,7 +17,7 @@ class ChatEntity {
 }
 
 data class ResolvedChatEntity(
-    val others: List<User>,
+    val others: List<UserEntity>,
     val chatId: String,
     val messages: List<ResolvedMessageEntity>
 )
