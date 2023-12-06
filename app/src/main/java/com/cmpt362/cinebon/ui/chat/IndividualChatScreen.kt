@@ -53,7 +53,6 @@ import com.cmpt362.cinebon.viewmodels.IndividualChatViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@OptIn(ExperimentalMaterial3Api::class)
 @DashboardNavGraph
 @Destination
 @Composable
