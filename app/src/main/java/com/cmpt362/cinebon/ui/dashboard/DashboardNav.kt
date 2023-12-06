@@ -38,8 +38,8 @@ import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.enums.DashboardNavItems
 import com.cmpt362.cinebon.ui.NavGraphs
 import com.cmpt362.cinebon.ui.appCurrentDestinationAsState
+import com.cmpt362.cinebon.ui.common.AppLogo
 import com.cmpt362.cinebon.ui.destinations.MovieInfoScreenDestination
-import com.cmpt362.cinebon.utils.AppLogo
 import com.cmpt362.cinebon.viewmodels.DashBoardViewModel
 import com.cmpt362.cinebon.viewmodels.MoviesSearchViewModel
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
@@ -82,7 +82,8 @@ fun DashboardNav() {
                 navController = navController,
                 navGraph = NavGraphs.dashboard,
                 engine = animNavHostEngine,
-                modifier = Modifier.padding(innerPadding))
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }

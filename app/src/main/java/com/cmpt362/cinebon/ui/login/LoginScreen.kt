@@ -41,12 +41,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.ui.common.AppLogo
 import com.cmpt362.cinebon.ui.destinations.DashboardNavDestination
 import com.cmpt362.cinebon.ui.destinations.ForgotPasswordScreenDestination
 import com.cmpt362.cinebon.ui.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.ui.destinations.SignupScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
-import com.cmpt362.cinebon.utils.AppLogo
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination

@@ -1,4 +1,4 @@
-package com.cmpt362.cinebon.utils
+package com.cmpt362.cinebon.ui.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable

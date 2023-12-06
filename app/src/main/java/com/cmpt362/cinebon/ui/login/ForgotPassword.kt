@@ -41,10 +41,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cmpt362.cinebon.R
+import com.cmpt362.cinebon.ui.common.AppLogo
 import com.cmpt362.cinebon.ui.destinations.ForgotPasswordScreenDestination
 import com.cmpt362.cinebon.ui.destinations.LoginScreenDestination
 import com.cmpt362.cinebon.ui.theme.CinebonTheme
-import com.cmpt362.cinebon.utils.AppLogo
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.viewmodels.UserAuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -114,7 +114,7 @@ fun ForgotPasswordScreen(navigator: DestinationsNavigator, modifier: Modifier = 
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
 
-                if(!resetEmailSent) {
+                if (!resetEmailSent) {
                     Button(
                         onClick = {
                             if (email != "") {
@@ -154,7 +154,7 @@ fun ForgotPasswordScreen(navigator: DestinationsNavigator, modifier: Modifier = 
                     }
                 }
 
-                if(!resetEmailSent) {
+                if (!resetEmailSent) {
                     Button(
                         onClick = {
                             navigator.navigate(LoginScreenDestination) {
