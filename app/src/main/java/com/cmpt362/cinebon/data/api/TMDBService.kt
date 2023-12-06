@@ -60,7 +60,6 @@ interface TMDBService {
 }
 
 fun String.posterUrl() = "${TMDBService.IMAGE_BASE_URL}$this?api_key=${BuildConfig.TMDB_API_KEY}"
-fun Boolean.toPGString() = if (this) "18+" else "Family Friendly"
 
 fun Int.toRuntimeString(): String {
     val hours = this / 60

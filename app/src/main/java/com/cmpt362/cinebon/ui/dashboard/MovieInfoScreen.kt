@@ -44,7 +44,6 @@ import coil.compose.AsyncImage
 import com.cmpt362.cinebon.R
 import com.cmpt362.cinebon.data.api.posterUrl
 import com.cmpt362.cinebon.data.api.response.Movie
-import com.cmpt362.cinebon.data.api.toPGString
 import com.cmpt362.cinebon.data.api.toRuntimeString
 import com.cmpt362.cinebon.utils.SetStatusBarColor
 import com.cmpt362.cinebon.utils.UNICODE_DOT
@@ -111,7 +110,7 @@ fun MovieInfoScreen(movieId: Int) {
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 2.dp)
             ) {
                 Text(
-                    "${movieInfo.value.releaseDate} $UNICODE_DOT ${movieInfo.value.runtime.toRuntimeString()} • ${movieInfo.value.originalLanguage}",
+                    "${movieInfo.value.releaseDate} $UNICODE_DOT ${movieInfo.value.originalLanguage}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White
                 )
@@ -121,14 +120,13 @@ fun MovieInfoScreen(movieId: Int) {
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Text(
-                        movieInfo.value.adult.toPGString(),
+                        movieInfo.value.runtime.toRuntimeString(),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
             }
-
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
